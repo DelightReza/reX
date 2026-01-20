@@ -198,6 +198,8 @@ public class ListItem {
   private int height;
 
   private Object data;
+  
+  private int color;
 
   public ListItem (int viewType) {
     this(viewType, 0, 0, 0, null, 0, false);
@@ -573,5 +575,14 @@ public class ListItem {
   public ListItem setContentStrings (@StringRes int... resIds) {
     this.stringResources = resIds;
     return this;
+  }
+
+  public ListItem setColor (int color) {
+    this.color = color;
+    return this;
+  }
+
+  public int getColor () {
+    return color;
   }
 }

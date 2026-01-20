@@ -733,6 +733,11 @@ public class UI {
       post(r);
     }
   }
+  
+  public static void runOnUIThread (Runnable r) {
+    execute(r);
+  }
+  
   public static void post (Runnable r) {
     getAppHandler().post(r);
   }

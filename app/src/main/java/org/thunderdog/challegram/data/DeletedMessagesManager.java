@@ -195,6 +195,26 @@ public class DeletedMessagesManager {
     public boolean isDeletedByMe(long id) { return deletedByMeMessageIds.contains(id); }
     public boolean isMessageDeleted(long id) { return deletedMessageIds.contains(id); }
     
+    public boolean isDeletedMessage(long chatId, long messageId) {
+        return deletedMessageIds.contains(messageId);
+    }
+    
+    public void deleteGhostMessage(long messageId) {
+        // Remove from cache and deleted set
+        messageCache.remove(messageId);
+        deletedMessageIds.remove(messageId);
+        deletedByMeMessageIds.remove(messageId);
+    }
+    
+    public void updateFile(File file) {
+        // This method could be used to update the storage file
+        // For now, we'll just trigger a re-initialization if needed
+        if (file != null && file.exists()) {
+            // Could reload data from file if needed
+            android.util.Log.d(TAG, "File update requested for: " + file.getAbsolutePath());
+        }
+    }
+    
     public void onMessagesDeleted(Object tdlib, long chatId, long[] messageIds) {
         for (long id : messageIds) {
             if (isDeletedByMe(id)) continue;
@@ -260,7 +280,7 @@ public class DeletedMessagesManager {
             String type = contentJson.optString("type", "");
             if ("text".equals(type)) {
                 String text = contentJson.optString("text", "");
-                message.content = new TdApi.MessageText(new TdApi.FormattedText(text, new TdApi.TextEntity[0]), null);
+                message.content = new TdApi.MessageText(new TdApi.FormattedText(text, new TdApi.TextEntity[0]), null, null);
             }
         }
         
@@ -297,7 +317,7 @@ public class DeletedMessagesManager {
                 
                 if (contentJson != null && "text".equals(contentJson.optString("type", ""))) {
                     String text = contentJson.optString("text", "");
-                    content = new TdApi.MessageText(new TdApi.FormattedText(text, new TdApi.TextEntity[0]), null);
+                    content = new TdApi.MessageText(new TdApi.FormattedText(text, new TdApi.TextEntity[0]), null, null);
                 }
                 
                 if (content != null) {
