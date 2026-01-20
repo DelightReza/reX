@@ -5666,4 +5666,43 @@
   <string name="RestrictedContent">Restricted Content</string>
   <string name="SensitiveContent">Sensitive Content</string>
 
+<!-- Ghost Mode & Kaimod -->
+    <string name="GhostSettings">Ghost Settings</string>
+    <string name="GhostMode">Ghost Mode</string>
+    <string name="GhostModeEnable">Enable Ghost Mode</string>
+    <string name="GhostModeDescription">Ghost Mode hides your read status and typing actions from others.</string>
+    <string name="GhostDontRead">Don\'t Read Messages</string>
+    <string name="GhostDontType">Don\'t Send «Typing»</string>
+    <string name="GhostHideOnline">Hide Online Status</string>
+    <string name="GhostReadOnInteract">Read on Interaction</string>
+    
+    <string name="DrawerSettings">Drawer Settings</string>
+    <string name="DrawerConfig">Drawer Configuration</string>
+    <string name="DrawerDesc">Select items to display in the side drawer.</string>
+    <string name="MenuItems">Menu Items</string>
+    <string name="KaimodHiddenToast">kaimod hidden from menu</string>
+    
+    <string name="DeletedMessages">Deleted Messages</string>
+    <string name="GhostSaveDeleted">Save Deleted Messages</string>
+    <string name="GhostSaveDeletedDesc">Deleted messages will be saved locally and marked as ghosts.</string>
+    
+    <string name="EditHistory">Edit History</string>
+    <string name="GhostSaveEditHistory">Save Message Edit History</string>
+    <string name="GhostSaveEditHistoryDesc">Old versions of messages will be saved when they are edited.</string>
+    <string name="EditHistoryEmpty">Edit history is empty</string>
+    <string name="EditVersionInfo">Version %1$d of %2$d</string>
+    
+    <string name="GhostClearHistory">Clear All History</string>
+    <string name="HistoryClearedToast">History cleared</string>
+    
+    <string name="ModDeveloper">Mod Developer</string>
+    <string name="ModContact">Contact the mod developer.</string>
+    
+    <string name="GhostToastEnabled">Ghost Mode Enabled 👻</string>
+    <string name="GhostToastDisabled">Ghost Mode Disabled</string>
+    <string name="GhostEnableFirst">Enable Ghost Mode first</string>
+    
+    <!-- Debugging extras -->
+    <string name="Debugging">Debugging</string>
+    <string name="FeatureToggles">Feature Toggles</string>
 </resources>

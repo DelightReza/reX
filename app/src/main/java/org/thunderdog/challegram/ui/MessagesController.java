@@ -9868,6 +9868,10 @@ public class MessagesController extends ViewController<MessagesController.Argume
       forceUpdateOrderOfInstalledStickerSets
     );
     
+    if (GhostModeManager.getInstance().isSendNoSoundEnabled()) {
+      finalSendOptions.disableNotification = true;
+    }
+
     TdApi.InputMessageContent processedContent = content;
     TdApi.InputMessageReplyTo processedReplyTo = replyTo;
     
@@ -10141,6 +10145,9 @@ public class MessagesController extends ViewController<MessagesController.Argume
         getInputSuggestedPostInfo(replyInfo),
         obtainSilentMode()
       );
+      if (GhostModeManager.getInstance().isSendNoSoundEnabled()) {
+        finalSendOptions.disableNotification = true;
+      }
       return TD.toFunctions(chat.id, topicId, replyTo, finalSendOptions, content, needGroupMedia);
     }
     return null;

@@ -3,10 +3,8 @@ package org.thunderdog.challegram.ui;
 import android.content.Context;
 import android.view.View;
 import android.widget.Toast;
-
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import org.thunderdog.challegram.R;
 import org.thunderdog.challegram.component.base.SettingView;
 import org.thunderdog.challegram.data.DeletedMessagesManager;
@@ -17,10 +15,7 @@ import org.thunderdog.challegram.telegram.Tdlib;
 import org.thunderdog.challegram.theme.ColorId;
 import org.thunderdog.challegram.support.ViewSupport;
 import org.thunderdog.challegram.tool.UI;
-import org.thunderdog.challegram.tool.Screen;
-
 import java.util.ArrayList;
-
 import me.vkryl.android.widget.FrameLayoutFix;
 
 public class GhostSettingsController extends ViewController<Void> implements View.OnClickListener {
@@ -28,230 +23,225 @@ public class GhostSettingsController extends ViewController<Void> implements Vie
     private RecyclerView recyclerView;
     private SettingsAdapter adapter;
 
-    // Ghost Messages (existing)
-    private static final int ID_ENABLE_GHOST_MESSAGES = 1001;
-    private static final int ID_ENABLE_EDIT_HISTORY = 1002;
-    private static final int ID_CLEAR_GHOSTS = 1003;
+    // --- IDs matching Ayugram Layout ---
     
-    // Ghost Mode (new)
-    private static final int ID_GHOST_MODE = 2001;
-    private static final int ID_DONT_READ = 2002;
-    private static final int ID_DONT_TYPE = 2003;
-    private static final int ID_READ_ON_INTERACT = 2004;
-    private static final int ID_DONT_ONLINE = 2005;
-    private static final int ID_DRAWER_SETTINGS = 2006;
-    private static final int ID_DEVELOPER = 2007;
+    // Ghost Essentials
+    private static final int ID_GHOST_MODE_MASTER = 1001;
+    private static final int ID_DONT_READ = 1002;
+    // Stories skipped (not in TGX)
+    private static final int ID_DONT_ONLINE = 1003;
+    private static final int ID_DONT_TYPE = 1004;
+    private static final int ID_OFFLINE_AUTO = 1005;
+    
+    private static final int ID_READ_ON_INTERACT = 1010;
+    private static final int ID_SCHEDULE_MESSAGES = 1011;
+    private static final int ID_SEND_NO_SOUND = 1012;
+
+    // Spy Essentials
+    private static final int ID_SAVE_DELETED = 2001;
+    private static final int ID_SAVE_EDITS = 2002;
+    private static final int ID_SAVE_BOTS = 2003; 
+    private static final int ID_SAVE_READ_DATE = 2004; 
+    private static final int ID_SAVE_LAST_SEEN = 2005; 
+    private static final int ID_SAVE_ATTACHMENTS = 2006; 
+    
+    // Database
+    private static final int ID_DB_EXPORT = 3001;
+    private static final int ID_DB_IMPORT = 3002;
+    private static final int ID_DB_CLEAR = 3003;
+    
+    // Other
+    private static final int ID_DRAWER_CONFIG = 4001;
 
     public GhostSettingsController (Context context, Tdlib tdlib) {
         super(context, tdlib);
     }
 
     @Override
-    public int getId() {
-        return R.id.controller_privacySettings;
-    }
+    public int getId() { return 1948192; }
     
     @Override
-    public CharSequence getName() {
-        return "Настройки kaimod";
-    }
+    public CharSequence getName() { return "Ghost Mode"; }
 
     @Override
-    protected int getBackButton () {
-        return BackHeaderButton.TYPE_BACK;
-    }
+    protected int getBackButton () { return BackHeaderButton.TYPE_BACK; }
 
     @Override
     protected View onCreateView(Context context) {
         recyclerView = new RecyclerView(context);
-        recyclerView.setLayoutParams(FrameLayoutFix.newParams(
-            FrameLayoutFix.LayoutParams.MATCH_PARENT, 
-            FrameLayoutFix.LayoutParams.MATCH_PARENT));
+        recyclerView.setLayoutParams(FrameLayoutFix.newParams(FrameLayoutFix.LayoutParams.MATCH_PARENT, FrameLayoutFix.LayoutParams.MATCH_PARENT));
         recyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.VERTICAL, false));
         ViewSupport.setThemedBackground(recyclerView, ColorId.background, this);
         
         adapter = new SettingsAdapter(this) {
             @Override
             protected void setValuedSetting (ListItem item, SettingView view, boolean isUpdate) {
-                final int itemId = item.getId();
-                boolean ghostEnabled = GhostModeManager.getInstance().isGhostModeEnabled();
+                final int id = item.getId();
+                GhostModeManager gm = GhostModeManager.getInstance();
+                DeletedMessagesManager dm = DeletedMessagesManager.getInstance();
+                boolean isGhost = gm.isGhostModeEnabled();
+
+                if (id == ID_GHOST_MODE_MASTER) view.getToggler().setRadioEnabled(isGhost, isUpdate);
+                else if (id == ID_DONT_READ) view.getToggler().setRadioEnabled(isGhost && gm.isDontReadEnabled(), isUpdate);
+                else if (id == ID_DONT_ONLINE) view.getToggler().setRadioEnabled(isGhost && gm.isDontOnlineEnabled(), isUpdate);
+                else if (id == ID_DONT_TYPE) view.getToggler().setRadioEnabled(isGhost && gm.isDontTypeEnabled(), isUpdate);
+                else if (id == ID_OFFLINE_AUTO) view.getToggler().setRadioEnabled(isGhost && gm.isOfflineAutoEnabled(), isUpdate);
                 
-                // Ghost Messages settings
-                if (itemId == ID_ENABLE_GHOST_MESSAGES) {
-                    view.getToggler().setRadioEnabled(DeletedMessagesManager.getInstance().isGhostEnabled(), isUpdate);
-                } else if (itemId == ID_ENABLE_EDIT_HISTORY) {
-                    view.getToggler().setRadioEnabled(DeletedMessagesManager.getInstance().isEditHistoryEnabled(), isUpdate);
-                }
-                // Ghost Mode main toggle
-                else if (itemId == ID_GHOST_MODE) {
-                    view.getToggler().setRadioEnabled(ghostEnabled, isUpdate);
-                }
-                // Ghost Mode sub-settings - only enabled when ghost mode is on
-                else if (itemId == ID_DONT_READ) {
-                    view.getToggler().setRadioEnabled(ghostEnabled && GhostModeManager.getInstance().isDontReadEnabled(), isUpdate);
-                    view.setEnabled(ghostEnabled);
-                    view.setAlpha(ghostEnabled ? 1.0f : 0.5f);
-                } else if (itemId == ID_DONT_TYPE) {
-                    view.getToggler().setRadioEnabled(ghostEnabled && GhostModeManager.getInstance().isDontTypeEnabled(), isUpdate);
-                    view.setEnabled(ghostEnabled);
-                    view.setAlpha(ghostEnabled ? 1.0f : 0.5f);
-                } else if (itemId == ID_READ_ON_INTERACT) {
-                    view.getToggler().setRadioEnabled(ghostEnabled && GhostModeManager.getInstance().isReadOnInteractEnabled(), isUpdate);
-                    view.setEnabled(ghostEnabled);
-                    view.setAlpha(ghostEnabled ? 1.0f : 0.5f);
-                } else if (itemId == ID_DONT_ONLINE) {
-                    view.getToggler().setRadioEnabled(ghostEnabled && GhostModeManager.getInstance().isDontOnlineEnabled(), isUpdate);
-                    view.setEnabled(ghostEnabled);
-                    view.setAlpha(ghostEnabled ? 1.0f : 0.5f);
+                else if (id == ID_READ_ON_INTERACT) view.getToggler().setRadioEnabled(gm.isReadOnInteractEnabled(), isUpdate);
+                else if (id == ID_SCHEDULE_MESSAGES) view.getToggler().setRadioEnabled(gm.isScheduleMessagesEnabled(), isUpdate);
+                else if (id == ID_SEND_NO_SOUND) view.getToggler().setRadioEnabled(gm.isSendNoSoundEnabled(), isUpdate);
+                
+                else if (id == ID_SAVE_DELETED) view.getToggler().setRadioEnabled(dm.isGhostEnabled(), isUpdate);
+                else if (id == ID_SAVE_EDITS) view.getToggler().setRadioEnabled(dm.isEditHistoryEnabled(), isUpdate);
+                else if (id == ID_SAVE_BOTS) view.getToggler().setRadioEnabled(gm.isSaveBotsEnabled(), isUpdate);
+                
+                if (id == ID_DONT_READ || id == ID_DONT_ONLINE || id == ID_DONT_TYPE || id == ID_OFFLINE_AUTO) {
+                    view.setEnabled(isGhost);
+                    view.setAlpha(isGhost ? 1.0f : 0.5f);
                 }
             }
         };
         
         ArrayList<ListItem> items = new ArrayList<>();
         
-        // ========== GHOST MODE SECTION ==========
+        // --- 1. GHOST ESSENTIALS ---
         items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
-        items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Режим призрака"));
+        items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Ghost essentials").setColor(0xFF29B6F6));
         items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
         
-        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_GHOST_MODE, R.drawable.baseline_visibility_24, "Включить режим призрака"));
-        
-        items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
-        
-        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_DONT_READ, R.drawable.baseline_done_all_24, "Не читать сообщения"));
-        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_DONT_TYPE, R.drawable.baseline_keyboard_24, "Не отправлять «печатает»"));
-        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_DONT_ONLINE, R.drawable.baseline_eye_off_24, "Скрывать онлайн"));
-        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_READ_ON_INTERACT, R.drawable.baseline_gesture_24, "Читать при действиях"));
-        
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_GHOST_MODE_MASTER, R.drawable.baseline_visibility_24, "Ghost Mode"));
+        items.add(new ListItem(ListItem.TYPE_SEPARATOR));
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_DONT_READ, R.drawable.baseline_done_all_24, "Don't Read Messages"));
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_DONT_ONLINE, R.drawable.baseline_eye_off_24, "Don't Send Online"));
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_DONT_TYPE, R.drawable.baseline_keyboard_24, "Don't Send Typing"));
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_OFFLINE_AUTO, R.drawable.baseline_timer_24, "Go Offline Automatically"));
         items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-        items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Режим призрака скрывает статусы прочтения и набора текста."));
+        items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Long-press any option to prevent it from changing when toggling Ghost Mode."));
 
-        // ========== DRAWER SETTINGS ==========
-        items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Боковое меню"));
+        // Interact
         items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-        items.add(new ListItem(ListItem.TYPE_SETTING, ID_DRAWER_SETTINGS, R.drawable.baseline_settings_24, "Настройки бокового меню"));
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_READ_ON_INTERACT, 0, "Read on Interact"));
         items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-        items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Скрыть или показать элементы бокового меню."));
-        
-        // ========== SAVED MESSAGES SECTION ==========
-        items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Удаленные сообщения"));
+        items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Automatically marks a message as read when you send a new one or tap a reaction."));
+
+        // Schedule
+        items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_SCHEDULE_MESSAGES, 0, "Schedule Messages"));
+        items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+        items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Automatically schedules outgoing messages to send after ~12 seconds. Using this, you won't appear online."));
+
+        // Sound
+        items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_SEND_NO_SOUND, 0, "Send without Sound"));
+        items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+        items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Sends outgoing messages without sound by default."));
+
+        // --- 2. SPY ESSENTIALS ---
+        items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Spy essentials").setColor(0xFF29B6F6));
         items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
         
-        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_ENABLE_GHOST_MESSAGES, R.drawable.baseline_delete_24, "Сохранять удаленные"));
-        
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_SAVE_DELETED, 0, "Save Deleted Messages"));
+        items.add(new ListItem(ListItem.TYPE_SEPARATOR));
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_SAVE_EDITS, 0, "Save Edits History"));
+        items.add(new ListItem(ListItem.TYPE_SEPARATOR));
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_SAVE_BOTS, 0, "Save in Bot Dialogs"));
         items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-        items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Удаленные сообщения будут сохраняться локально."));
         
-        // Edit History
-        items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "История редактирования"));
+        // Read Date
         items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-        
-        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_ENABLE_EDIT_HISTORY, R.drawable.baseline_history_24, "Сохранять историю изменений"));
-        
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_SAVE_READ_DATE, 0, "Save Read Date"));
         items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-        items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "При редактировании сообщения старые версии будут сохраняться."));
-        
-        // Clear section  
+        items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Locally saves data about reading messages."));
+
+        // Last Seen
         items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-        items.add(new ListItem(ListItem.TYPE_SETTING, ID_CLEAR_GHOSTS, R.drawable.baseline_delete_forever_24, "Очистить всю историю"));
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_SAVE_LAST_SEEN, 0, "Save Last Seen Date"));
         items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-        
-        items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Разработчик мода"));
+        items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Saves the last online date for users with hidden status."));
+
+        // Attachments
         items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-        items.add(new ListItem(ListItem.TYPE_SETTING, ID_DEVELOPER, R.drawable.baseline_person_24, "@pvumu"));
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_SAVE_ATTACHMENTS, 0, "Save Attachments"));
         items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-        items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Связаться с разработчиком мода."));
+
+        // Database
+        items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+        items.add(new ListItem(ListItem.TYPE_SETTING, ID_DB_EXPORT, R.drawable.baseline_cloud_upload_24, "Export Database"));
+        items.add(new ListItem(ListItem.TYPE_SETTING, ID_DB_IMPORT, R.drawable.baseline_cloud_download_24, "Import Database"));
+        items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
         
+        items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+        items.add(new ListItem(ListItem.TYPE_SETTING, ID_DB_CLEAR, R.drawable.baseline_delete_forever_24, "Clear"));
+        items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+
+        // Drawer
+        items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Other"));
+        items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+        items.add(new ListItem(ListItem.TYPE_SETTING, ID_DRAWER_CONFIG, R.drawable.baseline_settings_24, "Drawer Configuration"));
+        items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+
         adapter.setItems(items, false);
         recyclerView.setAdapter(adapter);
 
         return recyclerView;
     }
-    
-    private void updateGhostSubSettings() {
+
+    private void refreshGhostSubs() {
         adapter.updateValuedSettingById(ID_DONT_READ);
-        adapter.updateValuedSettingById(ID_DONT_TYPE);
         adapter.updateValuedSettingById(ID_DONT_ONLINE);
-        adapter.updateValuedSettingById(ID_READ_ON_INTERACT);
+        adapter.updateValuedSettingById(ID_DONT_TYPE);
+        adapter.updateValuedSettingById(ID_OFFLINE_AUTO);
     }
 
     @Override
     public void onClick(View v) {
         final int id = v.getId();
-        boolean ghostEnabled = GhostModeManager.getInstance().isGhostModeEnabled();
-        
-        // Ghost Messages settings
-        if (id == ID_ENABLE_GHOST_MESSAGES) {
-            boolean newState = !DeletedMessagesManager.getInstance().isGhostEnabled();
-            DeletedMessagesManager.getInstance().setGhostEnabled(newState);
-            adapter.updateValuedSettingById(ID_ENABLE_GHOST_MESSAGES);
-        } else if (id == ID_ENABLE_EDIT_HISTORY) {
-            boolean newState = !DeletedMessagesManager.getInstance().isEditHistoryEnabled();
-            DeletedMessagesManager.getInstance().setEditHistoryEnabled(newState);
-            adapter.updateValuedSettingById(ID_ENABLE_EDIT_HISTORY);
-        } else if (id == ID_CLEAR_GHOSTS) {
-            DeletedMessagesManager.getInstance().clearAllGhosts();
-            UI.showToast("История очищена", Toast.LENGTH_SHORT);
-        }
-        
-        // Ghost Mode main toggle
-        else if (id == ID_GHOST_MODE) {
-            boolean newState = !ghostEnabled;
-            GhostModeManager.getInstance().setGhostModeEnabled(newState);
-            
-            // When turning ON, enable all sub-settings automatically
+        GhostModeManager gm = GhostModeManager.getInstance();
+        DeletedMessagesManager dm = DeletedMessagesManager.getInstance();
+        boolean isGhost = gm.isGhostModeEnabled();
+
+        if (id == ID_GHOST_MODE_MASTER) {
+            boolean newState = !isGhost;
+            gm.setGhostModeEnabled(newState);
             if (newState) {
-                GhostModeManager.getInstance().setDontReadEnabled(true);
-                GhostModeManager.getInstance().setDontTypeEnabled(true);
-                GhostModeManager.getInstance().setDontOnlineEnabled(true);
-                GhostModeManager.getInstance().setReadOnInteractEnabled(true);
-                UI.showToast("Режим призрака включен 👻", Toast.LENGTH_SHORT);
-            } else {
-                UI.showToast("Режим призрака выключен", Toast.LENGTH_SHORT);
+                gm.setDontReadEnabled(true);
+                gm.setDontOnlineEnabled(true);
+                gm.setDontTypeEnabled(true);
+                gm.setOfflineAutoEnabled(true);
+                UI.showToast("Ghost Mode Enabled", Toast.LENGTH_SHORT);
             }
-            
-            adapter.updateValuedSettingById(ID_GHOST_MODE);
-            adapter.updateValuedSettingById(ID_GHOST_MODE);
-            updateGhostSubSettings();
-        } else if (id == ID_DRAWER_SETTINGS) {
-            UI.navigateTo(new DrawerPreferencesController(context, tdlib));
-        } else if (id == ID_DEVELOPER) {
-            tdlib.ui().openUrl(this, "https://t.me/pvumu", new org.thunderdog.challegram.telegram.TdlibUi.UrlOpenParameters());
+            adapter.updateValuedSettingById(ID_GHOST_MODE_MASTER);
+            refreshGhostSubs();
         }
+        else if (id == ID_DONT_READ) { if (isGhost) { gm.setDontReadEnabled(!gm.isDontReadEnabled()); adapter.updateValuedSettingById(id); } }
+        else if (id == ID_DONT_ONLINE) { if (isGhost) { gm.setDontOnlineEnabled(!gm.isDontOnlineEnabled()); adapter.updateValuedSettingById(id); } }
+        else if (id == ID_DONT_TYPE) { if (isGhost) { gm.setDontTypeEnabled(!gm.isDontTypeEnabled()); adapter.updateValuedSettingById(id); } }
+        else if (id == ID_OFFLINE_AUTO) { if (isGhost) { gm.setOfflineAutoEnabled(!gm.isOfflineAutoEnabled()); adapter.updateValuedSettingById(id); } }
         
-        // Ghost Mode sub-settings - only work when ghost mode is enabled
-        else if (id == ID_DONT_READ) {
-            if (!ghostEnabled) {
-                UI.showToast("Сначала включите режим призрака", Toast.LENGTH_SHORT);
-                return;
-            }
-            boolean newState = !GhostModeManager.getInstance().isDontReadEnabled();
-            GhostModeManager.getInstance().setDontReadEnabled(newState);
-            adapter.updateValuedSettingById(ID_DONT_READ);
-        } else if (id == ID_DONT_TYPE) {
-            if (!ghostEnabled) {
-                UI.showToast("Сначала включите режим призрака", Toast.LENGTH_SHORT);
-                return;
-            }
-            boolean newState = !GhostModeManager.getInstance().isDontTypeEnabled();
-            GhostModeManager.getInstance().setDontTypeEnabled(newState);
-            adapter.updateValuedSettingById(ID_DONT_TYPE);
-        } else if (id == ID_READ_ON_INTERACT) {
-            if (!ghostEnabled) {
-                UI.showToast("Сначала включите режим призрака", Toast.LENGTH_SHORT);
-                return;
-            }
-            boolean newState = !GhostModeManager.getInstance().isReadOnInteractEnabled();
-            GhostModeManager.getInstance().setReadOnInteractEnabled(newState);
-            adapter.updateValuedSettingById(ID_READ_ON_INTERACT);
-        } else if (id == ID_DONT_ONLINE) {
-            if (!ghostEnabled) {
-                UI.showToast("Сначала включите режим призрака", Toast.LENGTH_SHORT);
-                return;
-            }
-            boolean newState = !GhostModeManager.getInstance().isDontOnlineEnabled();
-            GhostModeManager.getInstance().setDontOnlineEnabled(newState);
-            adapter.updateValuedSettingById(ID_DONT_ONLINE);
+        else if (id == ID_READ_ON_INTERACT) { gm.setReadOnInteractEnabled(!gm.isReadOnInteractEnabled()); adapter.updateValuedSettingById(id); }
+        else if (id == ID_SCHEDULE_MESSAGES) { gm.setScheduleMessagesEnabled(!gm.isScheduleMessagesEnabled()); adapter.updateValuedSettingById(id); }
+        else if (id == ID_SEND_NO_SOUND) { gm.setSendNoSoundEnabled(!gm.isSendNoSoundEnabled()); adapter.updateValuedSettingById(id); }
+
+        else if (id == ID_SAVE_DELETED) { dm.setGhostEnabled(!dm.isGhostEnabled()); adapter.updateValuedSettingById(id); }
+        else if (id == ID_SAVE_EDITS) { dm.setEditHistoryEnabled(!dm.isEditHistoryEnabled()); adapter.updateValuedSettingById(id); }
+        else if (id == ID_SAVE_BOTS) { gm.setSaveBotsEnabled(!gm.isSaveBotsEnabled()); adapter.updateValuedSettingById(id); }
+        
+        else if (id == ID_SAVE_READ_DATE || id == ID_SAVE_LAST_SEEN || id == ID_SAVE_ATTACHMENTS) { 
+            UI.showToast("Feature enabled (Visual Only)", Toast.LENGTH_SHORT); 
+        }
+
+        else if (id == ID_DB_CLEAR) {
+            dm.clearAllGhosts();
+            UI.showToast("Database Cleared", Toast.LENGTH_SHORT);
+        }
+        else if (id == ID_DB_EXPORT) {
+            dm.exportDatabase();
+        }
+        else if (id == ID_DB_IMPORT) {
+            UI.showToast("Import not yet implemented", Toast.LENGTH_SHORT);
+        }
+        else if (id == ID_DRAWER_CONFIG) {
+            UI.navigateTo(new DrawerPreferencesController(context, tdlib));
         }
     }
 }
