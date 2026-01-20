@@ -8128,7 +8128,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   }
 
   public static TGMessage valueOf (MessagesManager context, TdApi.Message msg, TdApi.Chat chat, @Nullable ThreadInfo messageThread, @Nullable LongSparseArray<TdApi.ChatAdministrator> chatAdmins) {
-    return valueOf(context, msg, chat, messageThread, msg.senderId.getConstructor() == TdApi.MessageSenderUser.CONSTRUCTOR && chatAdmins != null ? chatAdmins.get(((TdApi.MessageSenderUser) msg.senderId).userId) : null);
+    return valueOf(context, msg, chat, messageThread, msg.senderId != null && msg.senderId.getConstructor() == TdApi.MessageSenderUser.CONSTRUCTOR && chatAdmins != null ? chatAdmins.get(((TdApi.MessageSenderUser) msg.senderId).userId) : null);
   }
 
   public static TGMessage valueOf (MessagesManager context, TdApi.Message msg, TdApi.Chat chat, @Nullable ThreadInfo messageThread, @Nullable TdApi.ChatAdministrator admin) {
