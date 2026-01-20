@@ -32,8 +32,7 @@ public class DrawerPreferencesController extends ViewController<Void> implements
     private static final int ID_PROXY = 20007;
     private static final int ID_HELP = 20008;
     private static final int ID_NIGHT_MODE = 20009;
-    private static final int ID_FEATURE_TOGGLES = 20010;
-    private static final int ID_DEBUG_LOGS = 20011;
+    private static final int ID_GHOST_MODE = 20010;
 
     public DrawerPreferencesController (Context context, Tdlib tdlib) {
         super(context, tdlib);
@@ -69,8 +68,7 @@ public class DrawerPreferencesController extends ViewController<Void> implements
                 else if (itemId == ID_PROXY) view.getToggler().setRadioEnabled(manager.isDrawerItemVisible(GhostModeManager.KEY_DRAWER_PROXY), isUpdate);
                 else if (itemId == ID_HELP) view.getToggler().setRadioEnabled(manager.isDrawerItemVisible(GhostModeManager.KEY_DRAWER_HELP), isUpdate);
                 else if (itemId == ID_NIGHT_MODE) view.getToggler().setRadioEnabled(manager.isDrawerItemVisible(GhostModeManager.KEY_DRAWER_NIGHT_MODE), isUpdate);
-                else if (itemId == ID_FEATURE_TOGGLES) view.getToggler().setRadioEnabled(manager.isDrawerItemVisible(GhostModeManager.KEY_DRAWER_FEATURE_TOGGLES), isUpdate);
-                else if (itemId == ID_DEBUG_LOGS) view.getToggler().setRadioEnabled(manager.isDrawerItemVisible(GhostModeManager.KEY_DRAWER_DEBUG_LOGS), isUpdate);
+                else if (itemId == ID_GHOST_MODE) view.getToggler().setRadioEnabled(manager.isDrawerItemVisible(GhostModeManager.KEY_DRAWER_GHOST_MODE), isUpdate);
             }
         };
         
@@ -88,15 +86,10 @@ public class DrawerPreferencesController extends ViewController<Void> implements
         items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_PROXY, R.drawable.baseline_security_24, R.string.Proxy));
         items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_HELP, R.drawable.baseline_help_24, R.string.Help));
         items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_NIGHT_MODE, R.drawable.baseline_brightness_2_24, R.string.NightMode));
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_GHOST_MODE, R.drawable.baseline_visibility_24, "Ghost Mode"));
 
         items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
         items.add(new ListItem(ListItem.TYPE_DESCRIPTION, R.string.DrawerDesc));
-        
-        items.add(new ListItem(ListItem.TYPE_HEADER, R.string.Debugging));
-        items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_FEATURE_TOGGLES, R.drawable.outline_toggle_on_24, R.string.FeatureToggles));
-        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_DEBUG_LOGS, R.drawable.baseline_bug_report_24, R.string.TdlibLogs));
-        items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
 
         adapter.setItems(items, false);
         recyclerView.setAdapter(adapter);
@@ -119,8 +112,7 @@ public class DrawerPreferencesController extends ViewController<Void> implements
         else if (id == ID_PROXY) key = GhostModeManager.KEY_DRAWER_PROXY;
         else if (id == ID_HELP) key = GhostModeManager.KEY_DRAWER_HELP;
         else if (id == ID_NIGHT_MODE) key = GhostModeManager.KEY_DRAWER_NIGHT_MODE;
-        else if (id == ID_FEATURE_TOGGLES) key = GhostModeManager.KEY_DRAWER_FEATURE_TOGGLES;
-        else if (id == ID_DEBUG_LOGS) key = GhostModeManager.KEY_DRAWER_DEBUG_LOGS;
+        else if (id == ID_GHOST_MODE) key = GhostModeManager.KEY_DRAWER_GHOST_MODE;
 
         if (key != null) {
             boolean currentState = manager.isDrawerItemVisible(key);
