@@ -211,7 +211,7 @@ public class DeletedMessagesManager {
         // For now, we'll just trigger a re-initialization if needed
         if (file != null && file.exists()) {
             // Could reload data from file if needed
-            android.util.Log.d(TAG, "File update requested for: " + file.getAbsolutePath());
+            android.util.Log.d(TAG, "File update requested for: " + file.getName());
         }
     }
     
