@@ -89,6 +89,9 @@ import org.thunderdog.challegram.voip.annotation.CallState;
 import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
+import org.thunderdog.challegram.data.DeletedMessagesManager;
+import org.thunderdog.challegram.data.GhostModeManager;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -201,12 +204,34 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
       case TdApi.Ok.CONSTRUCTOR:
         break;
       case TdApi.Message.CONSTRUCTOR:
-        updateNewMessage(new TdApi.UpdateNewMessage((TdApi.Message) object), false);
+        TdApi.Message msg = (TdApi.Message) object;
+        // Ghost Mode: Force read when interacting (sending message) - reliable hook for ALL message sends
+        if (msg.isOutgoing) {
+             if (GhostModeManager.getInstance().shouldReadOnInteract()) {
+                if (Log.isEnabled(Log.TAG_FCM)) {
+                  Log.i(Log.TAG_FCM, "[GHOST] Outgoing message processed in messageHandler, forcing read. chatId:%d id:%d", msg.chatId, msg.id);
+                }
+                forceReadMessages(msg.chatId, new long[0], new TdApi.MessageSourceOther());
+             }
+             // Ghost Mode: Force Offline after sending
+             if (GhostModeManager.getInstance().shouldHideOnline()) {
+                 android.util.Log.i("GHOST_MODE", "Outgoing message sent. Forcing SetOption('online', false).");
+                 client().send(new TdApi.SetOption("online", new TdApi.OptionValueBoolean(false)), null);
+             }
+        }
+        updateNewMessage(new TdApi.UpdateNewMessage(msg), false);
         break;
       case TdApi.Messages.CONSTRUCTOR:
         // FIXME send as a single update
         for (TdApi.Message message : ((TdApi.Messages) object).messages) {
           if (message != null) {
+            // Ghost Mode: Force read for batch messages (albums/forwards)
+            if (message.isOutgoing && GhostModeManager.getInstance().shouldReadOnInteract()) {
+               if (Log.isEnabled(Log.TAG_FCM)) {
+                 Log.i(Log.TAG_FCM, "[GHOST] Outgoing batch message processed, forcing read. chatId:%d id:%d", message.chatId, message.id);
+               }
+               forceReadMessages(message.chatId, new long[0], new TdApi.MessageSourceOther());
+            }
             updateNewMessage(new TdApi.UpdateNewMessage(message), false);
           }
         }
@@ -252,6 +277,21 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   private static final class ClientHolder implements Client.ResultHandler, Client.ExceptionHandler {
     private final Tdlib tdlib;
     private final Client client;
+    
+    // Ghost Mode Offline Loop
+    private final android.os.Handler offlineHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable offlineRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (GhostModeManager.getInstance().shouldHideOnline()) {
+                 // android.util.Log.v("GHOST_MODE", "Forcing offline loop...");
+                 if (client != null) {
+                     client.send(new TdApi.SetOption("online", new TdApi.OptionValueBoolean(false)), null);
+                 }
+            }
+            offlineHandler.postDelayed(this, 2000);
+        }
+    };
 
     private final TdlibResourceManager resources, updates;
     private boolean running = true;
@@ -277,12 +317,32 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
       this.tdlib = tdlib;
       this.client = Client.create(this, this, this);
       tdlib.updateParameters(client);
+      client.send(new TdApi.SetOption("language_pack_database_path", new TdApi.OptionValueString(new File(UI.getAppContext().getFilesDir(), "langpack").getPath())), tdlib.okHandler());
+      client.send(new TdApi.SetOption("localization_target", new TdApi.OptionValueString("android")), tdlib.okHandler());
+      client.send(new TdApi.SetOption("ignore_background_updates", new TdApi.OptionValueBoolean(false)), tdlib.okHandler());
+
+      // Initialize Managers EARLY
+      GhostModeManager.getInstance().init(UI.getAppContext());
+      DeletedMessagesManager.getInstance().init(UI.getAppContext());
+
+      // Start Ghost Mode Offline Loop
+      offlineHandler.postDelayed(offlineRunnable, 2000);
+
       if (Config.NEED_ONLINE) {
-        if (tdlib.isOnline) {
+        // Ghost Mode: Prevent detecting as Online
+        boolean shouldBeOnline = tdlib.isOnline;
+        if (GhostModeManager.getInstance().shouldHideOnline()) {
+            android.util.Log.i("GHOST_MODE", "Blocking SetOption('online', true) because Hide Online is enabled.");
+            shouldBeOnline = false;
+        } else {
+             android.util.Log.i("GHOST_MODE", "Allowing SetOption('online', true). GhostMode=" + GhostModeManager.getInstance().isGhostModeEnabled());
+        }
+        if (shouldBeOnline) {
           client.send(new TdApi.SetOption("online", new TdApi.OptionValueBoolean(true)), tdlib.okHandler());
         }
       }
       tdlib.context.modifyClient(tdlib, client);
+      
       this.resources = new TdlibResourceManager(tdlib, BuildConfig.TELEGRAM_RESOURCES_CHANNEL);
       this.updates = new TdlibResourceManager(tdlib, BuildConfig.TELEGRAM_UPDATES_CHANNEL);
       if (!tdlib.inRecoveryMode()) {
@@ -382,6 +442,24 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
       if (running) {
         long ms = SystemClock.uptimeMillis();
         if (object instanceof TdApi.Update) {
+          // Ghost Mode Hooks
+          int constructor = object.getConstructor();
+          if (constructor == TdApi.UpdateNewMessage.CONSTRUCTOR) {
+              TdApi.UpdateNewMessage update = (TdApi.UpdateNewMessage) object;
+              if (update.message != null) {
+                  org.thunderdog.challegram.data.DeletedMessagesManager.getInstance().cacheMessage(update.message);
+              }
+          } else if (constructor == TdApi.UpdateMessageContent.CONSTRUCTOR) {
+              TdApi.UpdateMessageContent update = (TdApi.UpdateMessageContent) object;
+              org.thunderdog.challegram.data.DeletedMessagesManager.getInstance().saveEditVersion(update.chatId, update.messageId, org.thunderdog.challegram.data.DeletedMessagesManager.getInstance().getCachedMessage(update.messageId) != null ? org.thunderdog.challegram.data.DeletedMessagesManager.getInstance().getCachedMessage(update.messageId).content : null);
+              org.thunderdog.challegram.data.DeletedMessagesManager.getInstance().updateMessageContent(update.chatId, update.messageId, update.newContent);
+          } else if (constructor == TdApi.UpdateDeleteMessages.CONSTRUCTOR) {
+              android.util.Log.e("ANTIDELETE", "UpdateDeleteMessages in listener - SKIPPED (processing in main handler)");
+          } else if (constructor == TdApi.UpdateFile.CONSTRUCTOR) {
+              TdApi.UpdateFile update = (TdApi.UpdateFile) object;
+              org.thunderdog.challegram.data.DeletedMessagesManager.getInstance().updateFile(update.file);
+          }
+
           tdlib.processUpdate(this, (TdApi.Update) object);
         } else {
           Log.e("Invalid update type: %s", object);
@@ -3889,7 +3967,10 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
         }
       }
       if (!hasPasscode(chat) && chat.lastMessage != null) {
-        client().send(new TdApi.ViewMessages(chatId, new long[] {chat.lastMessage.id}, source, true), okHandler(after));
+        // Ghost Mode: Block read receipts if enabled
+        if (!GhostModeManager.getInstance().shouldBlockReadReceipt()) {
+          client().send(new TdApi.ViewMessages(chatId, new long[] {chat.lastMessage.id}, source, true), okHandler(after));
+        }
       }
     }
   }
@@ -4705,15 +4786,106 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
     sendMessage(chatId, topicId, replyTo, options, inputMessageContent);
   }
 
+  private TdApi.InputMessageContent processDeletedReply(TdApi.InputMessageReplyTo replyTo, TdApi.InputMessageContent content) {
+    android.util.Log.e("ANTIDELETE", "processDeletedReply called, replyTo=" + (replyTo != null) + " content=" + (content != null));
+    if (replyTo == null || content == null) return content;
+    
+    android.util.Log.e("ANTIDELETE", "replyTo type: " + replyTo.getConstructor());
+    if (replyTo.getConstructor() != TdApi.InputMessageReplyToMessage.CONSTRUCTOR) return content;
+    
+    android.util.Log.e("ANTIDELETE", "content type: " + content.getConstructor());
+    if (!(content instanceof TdApi.InputMessageText)) return content;
+    
+    TdApi.InputMessageReplyToMessage replyToMessage = (TdApi.InputMessageReplyToMessage) replyTo;
+    long repliedMessageId = replyToMessage.messageId;
+    android.util.Log.e("ANTIDELETE", "Checking if message " + repliedMessageId + " is deleted");
+    
+    if (!DeletedMessagesManager.getInstance().isMessageDeleted(repliedMessageId)) {
+      android.util.Log.e("ANTIDELETE", "Message is NOT deleted, returning original content");
+      return content;
+    }
+    
+    android.util.Log.e("ANTIDELETE", "Message IS deleted! Getting text...");
+    String deletedText = DeletedMessagesManager.getInstance().getDeletedMessageText(repliedMessageId);
+    if (deletedText == null || deletedText.isEmpty()) {
+      android.util.Log.e("ANTIDELETE", "Deleted text is null or empty");
+      return content;
+    }
+    
+    android.util.Log.e("ANTIDELETE", "Creating quote with deleted text: " + deletedText);
+    TdApi.InputMessageText originalText = (TdApi.InputMessageText) content;
+    String userText = originalText.text != null && originalText.text.text != null ? originalText.text.text : "";
+    
+    String combinedText = deletedText + "\n" + userText;
+    
+    TdApi.TextEntity quoteEntity = new TdApi.TextEntity(
+      0,
+      deletedText.length(),
+      new TdApi.TextEntityTypeBlockQuote()
+    );
+    
+    TdApi.TextEntity[] entities;
+    if (originalText.text != null && originalText.text.entities != null && originalText.text.entities.length > 0) {
+      entities = new TdApi.TextEntity[originalText.text.entities.length + 1];
+      entities[0] = quoteEntity;
+      for (int i = 0; i < originalText.text.entities.length; i++) {
+        TdApi.TextEntity entity = originalText.text.entities[i];
+        entities[i + 1] = new TdApi.TextEntity(
+          entity.offset + deletedText.length() + 1,
+          entity.length,
+          entity.type
+        );
+      }
+    } else {
+      entities = new TdApi.TextEntity[] { quoteEntity };
+    }
+    
+    return new TdApi.InputMessageText(
+      new TdApi.FormattedText(combinedText, entities),
+      originalText.linkPreviewOptions,
+      originalText.clearDraft
+    );
+  }
+
   public void sendMessage (long chatId, @Nullable TdApi.MessageTopic topicId, @Nullable TdApi.InputMessageReplyTo replyTo, TdApi.MessageSendOptions options, TdApi.InputMessageContent inputMessageContent) {
     sendMessage(chatId, topicId, replyTo, options, inputMessageContent, null);
   }
 
   public void sendMessage (long chatId, @Nullable TdApi.MessageTopic topicId, @Nullable TdApi.InputMessageReplyTo replyTo, TdApi.MessageSendOptions options, TdApi.InputMessageContent inputMessageContent, @Nullable RunnableData<TdApi.Message> after) {
-    client().send(new TdApi.SendMessage(chatId, topicId, replyTo, options, null, inputMessageContent), after != null ? result -> {
+    // Ghost Mode: Force read when interacting (sending message)
+    if (GhostModeManager.getInstance().shouldReadOnInteract()) {
+       if (Log.isEnabled(Log.TAG_FCM)) {
+         Log.i(Log.TAG_FCM, "[GHOST] sendMessage interaction detected, forcing read. chatId:%d", chatId);
+       }
+       // Just call forceReadMessages - it will handle finding the correct message to read
+       forceReadMessages(chatId, new long[0], new TdApi.MessageSourceOther());
+    } else {
+       if (Log.isEnabled(Log.TAG_FCM)) {
+         Log.i(Log.TAG_FCM, "[GHOST] sendMessage interaction detected but readOnInteract is FALSE or GhostMode OFF. chatId:%d", chatId);
+       }
+    }
+    
+    TdApi.InputMessageContent processedContent = processDeletedReply(replyTo, inputMessageContent);
+    boolean wasConverted = processedContent != inputMessageContent;
+    
+    client().send(new TdApi.SendMessage(chatId, topicId, wasConverted ? null : replyTo, options, null, processedContent), after != null ? result -> {
       messageHandler.onResult(result);
       after.runWithData(result instanceof TdApi.Message ? (TdApi.Message) result : null);
     } : messageHandler());
+  }
+
+  /**
+   * Directly sets the chat as locally read in memory (updates TdApi.Chat) 
+   * and triggers UI notification.
+   */
+  public void setChatLocallyRead(long chatId) {
+    if (Log.isEnabled(Log.TAG_FCM)) {
+      Log.i(Log.TAG_FCM, "[GHOST] setChatLocallyRead chatId:%d", chatId);
+    }
+    // We do NOT modify chat.unreadCount directly anymore. 
+    // TGChat wrapper handles the offset subtraction for UI.
+    // We just notify UI to redraw the badge.
+    listeners().notifyChatReadLocally(chatId);
   }
 
   public void resendMessages (long chatId, long[] messageIds) {
@@ -5648,18 +5820,66 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   }
 
   public void deleteMessages (long chatId, long[] messageIds, boolean revoke) {
+    android.util.Log.e("ANTIDELETE", "deleteMessages called by user: " + java.util.Arrays.toString(messageIds));
+    org.thunderdog.challegram.data.DeletedMessagesManager.getInstance().markAsDeletedByMe(messageIds);
     client().send(new TdApi.DeleteMessages(chatId, messageIds, revoke), okHandler());
   }
 
   public void deleteMessagesIfOk (final long chatId, final long[] messageIds, boolean revoke) {
+    org.thunderdog.challegram.data.DeletedMessagesManager.getInstance().markAsDeletedByMe(messageIds);
     client().send(new TdApi.DeleteMessages(chatId, messageIds, revoke), okHandler());
   }
 
   public void readMessages (long chatId, long[] messageIds, TdApi.MessageSource source) {
+    // Ghost Mode: Block read receipts if enabled, but track locally
+    if (GhostModeManager.getInstance().shouldBlockReadReceipt()) {
+      if (Log.isEnabled(Log.TAG_FCM)) {
+        Log.i(Log.TAG_FCM, "[GHOST] Blocked read receipt for chatId:%d", chatId);
+      }
+      // Do NOT mark locally read here - let UI (TdlibMessageViewer) handle it when user enters chat
+      return; // Don't send ViewMessages
+    }
+    
     if (Log.isEnabled(Log.TAG_FCM)) {
       Log.i(Log.TAG_FCM, "Reading messages chatId:%d messageIds:%s", Log.generateSingleLineException(2), chatId, Arrays.toString(messageIds));
     }
     client().send(new TdApi.ViewMessages(chatId, messageIds, source, true), okHandler());
+  }
+
+  /**
+   * Force read messages - bypasses Ghost Mode (used for read-on-interact)
+   */
+  public void forceReadMessages (long chatId, long[] messageIds, TdApi.MessageSource source) {
+    if (Log.isEnabled(Log.TAG_FCM)) {
+      Log.i(Log.TAG_FCM, "[GHOST] Force reading messages chatId:%d messageIds:%s", chatId, Arrays.toString(messageIds));
+    }
+    GhostModeManager.getInstance().clearLocallyRead(chatId);
+    client().send(new TdApi.ViewMessages(chatId, messageIds, source, true), okHandler());
+    
+    // Also fetch latest chat history to find the last incoming message and read it using a background request
+    // Limit increased to 50 to find older unread messages if necessary
+    client().send(new TdApi.GetChatHistory(chatId, 0, 0, 50, false), result -> {
+      if (result instanceof TdApi.Messages) {
+        TdApi.Messages messages = (TdApi.Messages) result;
+        if (Log.isEnabled(Log.TAG_FCM)) {
+           Log.i(Log.TAG_FCM, "[GHOST] Fetched %d messages for history check", messages.messages.length);
+        }
+        for (TdApi.Message msg : messages.messages) {
+           if (!msg.isOutgoing) {
+              if (Log.isEnabled(Log.TAG_FCM)) {
+                 Log.i(Log.TAG_FCM, "[GHOST] Found incoming message to read: id=%d", msg.id);
+              }
+              // Found latest incoming message
+              client().send(new TdApi.ViewMessages(chatId, new long[]{msg.id}, new TdApi.MessageSourceOther(), true), okHandler());
+              break;
+           }
+        }
+      } else {
+         if (Log.isEnabled(Log.TAG_FCM)) {
+            Log.e(Log.TAG_FCM, "[GHOST] Failed to fetch history: %s", result);
+         }
+      }
+    });
   }
 
   // TDLib config
@@ -7377,11 +7597,14 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   }
 
   private void updateNewMessage (TdApi.UpdateNewMessage update, boolean isUpdate) {
-    if (update.message.sendingState instanceof TdApi.MessageSendingStatePending && update.message.content.getConstructor() != TdApi.MessageChatSetMessageAutoDeleteTime.CONSTRUCTOR) {
+    DeletedMessagesManager.getInstance().cacheMessage(update.message);
+    if (update.message.isOutgoing && update.message.sendingState instanceof TdApi.MessageSendingStatePending && update.message.content.getConstructor() != TdApi.MessageChatSetMessageAutoDeleteTime.CONSTRUCTOR) {
       addRemoveSendingMessage(update.message.chatId, update.message.id, true);
       if (isUpdate)
         return;
     }
+
+    DeletedMessagesManager.getInstance().cacheMessage(update.message);
 
     listeners.updateNewMessage(update);
 
@@ -7399,6 +7622,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   }
 
   private void updateMessageSendSucceeded (TdApi.UpdateMessageSendSucceeded update) {
+    DeletedMessagesManager.getInstance().updateMessageId(update.oldMessageId, update.message);
     synchronized (dataLock) {
       Settings.instance().updateScrollMessageId(accountId, update.message.chatId, update.oldMessageId, update.message.id);
     }
@@ -7440,6 +7664,17 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
 
   @TdlibThread
   private void updateMessageContent (TdApi.UpdateMessageContent update) {
+    // Save old content BEFORE updating cache (for edit history feature)
+    DeletedMessagesManager mgr = DeletedMessagesManager.getInstance();
+    if (mgr.isEditHistoryEnabled()) {
+      // Get old content from cache before it's overwritten
+      TdApi.Message cached = mgr.getCachedMessage(update.messageId);
+      if (cached != null && cached.content != null) {
+        mgr.saveEditVersion(update.chatId, update.messageId, cached.content);
+      }
+    }
+    // Now update the cache with new content
+    mgr.updateMessageContent(update.chatId, update.messageId, update.newContent);
     final TdApi.Chat chat;
     synchronized (dataLock) {
       chat = chats.get(update.chatId);
@@ -7548,10 +7783,28 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
       return;
     }
 
+    DeletedMessagesManager.getInstance().init(UI.getAppContext());
+    GhostModeManager.getInstance().init(UI.getAppContext());
+    
+    java.util.ArrayList<Long> messagesToSave = new java.util.ArrayList<>();
+    for (long msgId : update.messageIds) {
+      if (!DeletedMessagesManager.getInstance().isDeletedByMe(msgId)) {
+        messagesToSave.add(msgId);
+      }
+    }
+    
+    if (!messagesToSave.isEmpty()) {
+      long[] arr = new long[messagesToSave.size()];
+      for (int i = 0; i < messagesToSave.size(); i++) {
+        arr[i] = messagesToSave.get(i);
+      }
+      DeletedMessagesManager.getInstance().onMessagesDeleted(this, update.chatId, arr);
+    }
+
     Arrays.sort(update.messageIds);
 
     listeners.updateMessagesDeleted(update);
-
+    
     context.global().notifyUpdateMessagesDeleted(this, update);
   }
 
@@ -9664,7 +9917,9 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
 
       // Messages
       case TdApi.UpdateNewMessage.CONSTRUCTOR: {
-        updateNewMessage((TdApi.UpdateNewMessage) update, true);
+        TdApi.UpdateNewMessage newMessage = (TdApi.UpdateNewMessage) update;
+        DeletedMessagesManager.getInstance().cacheMessage(newMessage.message);
+        updateNewMessage(newMessage, true);
         break;
       }
       case TdApi.UpdateMessageSendSucceeded.CONSTRUCTOR: {
@@ -9900,7 +10155,12 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
         break;
       }
       case TdApi.UpdateChatLastMessage.CONSTRUCTOR: {
-        updateChatLastMessage((TdApi.UpdateChatLastMessage) update);
+        TdApi.UpdateChatLastMessage lastMsgUpdate = (TdApi.UpdateChatLastMessage) update;
+        TdApi.Message ghostMessage = DeletedMessagesManager.getInstance().getLastDeletedMessage(lastMsgUpdate.chatId);
+        if (ghostMessage != null && (lastMsgUpdate.lastMessage == null || ghostMessage.id > lastMsgUpdate.lastMessage.id)) {
+            lastMsgUpdate.lastMessage = ghostMessage;
+        }
+        updateChatLastMessage(lastMsgUpdate);
         break;
       }
       case TdApi.UpdateChatTitle.CONSTRUCTOR: {

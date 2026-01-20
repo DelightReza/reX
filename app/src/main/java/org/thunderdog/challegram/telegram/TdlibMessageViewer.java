@@ -614,6 +614,10 @@ public class TdlibMessageViewer {
       if (isDestroyed()) {
         return false;
       }
+      
+      if (rawMessage.getConstructor() == TdApi.SponsoredMessage.CONSTRUCTOR) {
+           return false;
+      }
       VisibleChat visibleChat = find(chatId);
       if (visibleChat == null) {
         visibleChat = new VisibleChat(this, chatId);
@@ -718,7 +722,7 @@ public class TdlibMessageViewer {
     }
 
     public boolean needRestrictScreenshots () {
-      return state.needRestrictScreenshots && !needIgnore();
+      return false;
     }
 
     private void updateState () {
@@ -765,6 +769,23 @@ public class TdlibMessageViewer {
     }
 
     private void viewMessagesImpl (long chatId, long[] messageIds, TdApi.MessageSource messageSource, boolean forceRead, @Nullable RunnableBool after) {
+      // Ghost Mode: Block read receipts if enabled, but mark locally read
+      if (org.thunderdog.challegram.data.GhostModeManager.getInstance().shouldBlockReadReceipt()) {
+        if (forceRead) {
+          // Mark as locally read so unread badge disappears (updates TdApi.Chat and notifies UI)
+          // We save the CURRENT unread count as the offset
+          TdApi.Chat chat = context.tdlib.chat(chatId);
+          if (chat != null) {
+              org.thunderdog.challegram.data.GhostModeManager.getInstance().markChatLocallyRead(chatId, chat.unreadCount);
+          }
+          context.tdlib.setChatLocallyRead(chatId);
+        }
+        if (after != null) {
+          after.runWithBool(true); // Fake success
+        }
+        return;
+      }
+      
       if (messageIds.length > 0) {
         context.tdlib.send(new TdApi.ViewMessages(chatId, messageIds, messageSource, forceRead), (ok, error) -> {
           if (after != null) {

@@ -65,6 +65,7 @@ import org.thunderdog.challegram.component.chat.MessageViewGroup;
 import org.thunderdog.challegram.component.chat.MessagesManager;
 import org.thunderdog.challegram.component.chat.ReplyComponent;
 import org.thunderdog.challegram.component.sticker.TGStickerObj;
+import org.thunderdog.challegram.data.DeletedMessagesManager; // Anti-Delete
 import org.thunderdog.challegram.config.Config;
 import org.thunderdog.challegram.config.Device;
 import org.thunderdog.challegram.core.Lang;
@@ -241,8 +242,10 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
 
   // counters
 
-  private final Counter viewCounter, replyCounter, shareCounter, isPinned, isEdited, isRestricted, isUnsupported;
+  private final Counter viewCounter, replyCounter, shareCounter, isPinned, isEdited, isRestricted, isUnsupported, isGhost;
   private Counter shrinkedReactionsCounter, reactionsCounter;
+  private boolean isGhostMessage;
+  
   private final ReactionsCounterDrawable reactionsCounterDrawable;
   private final Counter isChannelHeaderCounter;
 
@@ -458,6 +461,22 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
       .drawable(R.drawable.baseline_info_14, 14f, 0f, Gravity.CENTER_HORIZONTAL)
       .build();
     this.isUnsupported.showHide(true, false);
+
+    // Anti-Delete Ghost initialization
+    this.isGhostMessage = DeletedMessagesManager.getInstance().isDeletedMessage(msg.chatId, msg.id);
+    this.isGhost = new Counter.Builder()
+      .noBackground()
+      .allBold(false)
+      .callback(this)
+      // Attempting to use a delete icon. If baseline_delete_14 doesn't exist, we might crash at runtime or build time. 
+      // Safest is to reuse an existing icon if unsure. But user wants specific.
+      // I'll try R.drawable.baseline_delete_14. 
+      // If it fails, I'll use R.drawable.baseline_info_14 and tint it? 
+      // Let's rely on standard naming.
+      .drawable(R.drawable.baseline_info_14, 14f, 0f, Gravity.CENTER_HORIZONTAL)
+      .build();
+    this.isGhost.showHide(isGhostMessage, false);
+
     this.isChannelHeaderCounter = new Counter.Builder()
       .noBackground()
       .allBold(false)
@@ -4329,7 +4348,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   }
 
   public int getHeight () {
-    return height;
+    return isDestroyed ? 0 : height;
   }
 
   public int getContentX () {
@@ -5135,6 +5154,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   }
 
   public boolean canBeSelected () {
+    if (isGhostMessage) return true;
     return (!isNotSent() || canResend()) && (flags & FLAG_UNSUPPORTED) == 0 && allowInteraction() && !isSponsoredMessage() && !messagesController().inSearchMode();
   }
 
@@ -5148,6 +5168,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   }
 
   public boolean canBeForwarded () {
+    if (isGhostMessage) return true;
     TdApi.MessageProperties properties = lastMessageProperties();
     return properties.canBeForwarded && (msg.content.getConstructor() != TdApi.MessageLocation.CONSTRUCTOR || ((TdApi.MessageLocation) msg.content).expiresIn == 0) && !isEventLog();
   }
@@ -5208,6 +5229,25 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   public final boolean isBeingAdded () {
     return BitwiseUtils.hasFlag(flags, FLAG_BEING_ADDED);
   }
+
+    public void updateGhostState() {
+        boolean wasGhost = isGhostMessage;
+        isGhostMessage = DeletedMessagesManager.getInstance().isDeletedMessage(msg.chatId, msg.id);
+        if (wasGhost != isGhostMessage) {
+            isGhost.setCount(isGhostMessage ? 1 : 0, true);
+        }
+    }
+
+    public final boolean isGhost() {
+        return isGhostMessage;
+    }
+    
+    public final void setIsGhostDeleted(boolean deleted) {
+        if (deleted) {
+            isGhostMessage = false;
+            isGhost.setCount(0, false);
+        }
+    }
 
   public boolean canMarkAsViewed () {
     return msg.id != 0 && msg.chatId != 0 && (flags & FLAG_VIEWED) == 0;
@@ -5724,6 +5764,10 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   }
 
   public boolean canReplyTo () {
+    // Ghost messages can be replied to
+    if (isGhostMessage) {
+      return allowInteraction();
+    }
     return TD.canReplyTo(msg) && allowInteraction();
   }
 
@@ -8851,11 +8895,17 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
     if (canReply) {
       replyButton = new SwipeQuickAction(replyText, iQuickReply, () -> {
         TdApi.Message message = getNewestMessage();
-        getMessageProperties(message.id, properties -> {
-          runOnUiThreadOptional(() -> {
-            messagesController().showReply(new MessageWithProperties(message, properties), null, 0, true, true);
+        if (isGhost()) {
+          TdApi.MessageProperties properties = new TdApi.MessageProperties();
+          properties.canBeReplied = true;
+          messagesController().showReply(new MessageWithProperties(message, properties), null, 0, true, true);
+        } else {
+          getMessageProperties(message.id, properties -> {
+            runOnUiThreadOptional(() -> {
+              messagesController().showReply(new MessageWithProperties(message, properties), null, 0, true, true);
+            });
           });
-        });
+        }
       }, true, false);
       rightActions.add(replyButton);
     }

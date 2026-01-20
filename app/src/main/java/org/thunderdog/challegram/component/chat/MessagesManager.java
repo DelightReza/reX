@@ -38,6 +38,7 @@ import org.thunderdog.challegram.R;
 import org.thunderdog.challegram.config.Config;
 import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.data.TD;
+import org.thunderdog.challegram.data.DeletedMessagesManager;
 import org.thunderdog.challegram.data.TGMessage;
 import org.thunderdog.challegram.data.TGMessageBotInfo;
 import org.thunderdog.challegram.data.TGMessageVideo;
@@ -173,6 +174,8 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
   public int getKnownTotalMessageCount () {
     return loader.getKnownTotalMessageCount();
   }
+
+
 
   @Override
   public void onChatMemberStatusChange (long chatId, TdApi.ChatMember member) {
@@ -2238,6 +2241,12 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
             break;
           }
           case TGMessage.REMOVE_COMBINATION: {
+            // Anti-Delete Check
+            if (DeletedMessagesManager.getInstance().isDeletedMessage(chatId, messageId)) {
+                android.util.Log.i("ANTIDELETE", "Preventing removal of message " + messageId + " from UI (Combination)");
+                break; 
+            }
+
             if (controller.unselectMessage(messageId, item)) {
               selectedCount--;
               unselectedSomeMessages = true;
@@ -2252,6 +2261,12 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
             }
           }
           case TGMessage.REMOVE_COMPLETELY: {
+            // Anti-Delete Check
+            if (DeletedMessagesManager.getInstance().isDeletedMessage(chatId, messageId)) {
+                android.util.Log.i("ANTIDELETE", "Preventing removal of message " + messageId + " from UI (Complete)");
+                break;
+            }
+
             TGMessage removed = adapter.removeItem(index);
             if (controller.unselectMessage(messageId, removed)) {
               selectedCount--;
@@ -3555,6 +3570,22 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
     tdlib.ui().post(() -> {
       if (loader.getChatId() == chatId) {
         updateMessagesDeleted(chatId, messageIds);
+      }
+      // Ghost Message Update Logic
+      if (adapter != null) {
+          ArrayList<TGMessage> items = adapter.getItems();
+          if (items != null) {
+              boolean invalidated = false;
+              for (TGMessage msg : items) {
+                  if (msg.getChatId() == chatId && ArrayUtils.contains(messageIds, msg.getId())) {
+                      msg.updateGhostState();
+                      invalidated = true;
+                  }
+              }
+              if (invalidated) {
+                  adapter.invalidateAllMessages();
+              }
+          }
       }
     });
   }

@@ -176,6 +176,7 @@
   <item type="id" name="controller_main" />
   <item type="id" name="controller_call_list" />
   <item type="id" name="controller_call" />
+  <item type="id" name="btn_developer" />
   <item type="id" name="controller_people" />
   <item type="id" name="controller_settings" />
   <item type="id" name="controller_archiveSettings" />
@@ -245,6 +246,7 @@
   <item type="id" name="controller_chatLinks" />
   <item type="id" name="controller_chatLinkMembers" />
   <item type="id" name="controller_sponsoredMessagesInfo" />
+  <item type="id" name="controller_drawer_settings" />
   <item type="id" name="controller_featureToggles" />
   <item type="id" name="controller_chatFolders" />
   <item type="id" name="controller_chatFoldersFeature" />
@@ -1155,6 +1157,7 @@
   <item type="id" name="btn_messageUnfavoriteContent" />
   <item type="id" name="btn_messageStickerSet" />
   <item type="id" name="btn_messageEdit" />
+  <item type="id" name="btn_messageEditHistory" />
   <item type="id" name="btn_messageCall" />
   <item type="id" name="btn_messageShareCallLogs" />
   <item type="id" name="btn_messageRetractVote" />
@@ -1415,4 +1418,8 @@
   <item type="id" name="btn_playback_speed_1_2" />
   <item type="id" name="btn_playback_speed_1_5" />
   <item type="id" name="btn_playback_speed_2_0" />
+  
+  <!-- Ghost Messages -->
+  <item type="id" name="btn_messageDeleteGhost" />
+  
 </resources>

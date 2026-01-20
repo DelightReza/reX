@@ -827,6 +827,13 @@ public class TGChat implements TdlibStatusManager.HelperTarget, ContentPreview.R
     } else if (getSource() != null) {
       return 0;
     } else {
+      // Ghost Mode: Subtract offset (locally read messages) from real unread count
+      if (chat != null) {
+         int offset = GhostModeManager.getInstance().getChatUnreadOffset(chat.id);
+         if (offset > 0) {
+             return Math.max(0, chat.unreadCount - offset);
+         }
+      }
       return chat.unreadCount > 0 ? chat.unreadCount : chat.isMarkedAsUnread ? Tdlib.CHAT_MARKED_AS_UNREAD : 0;
     }
   }
@@ -1378,6 +1385,9 @@ public class TGChat implements TdlibStatusManager.HelperTarget, ContentPreview.R
 
     TdApi.Message msg = chat.lastMessage;
     if (msg != null) {
+      if (DeletedMessagesManager.getInstance().isDeletedMessage(msg.chatId, msg.id)) {
+        addIcon(R.drawable.baseline_info_14);
+      }
       flags |= FLAG_MESSAGE;
       // No need to check tdlib.chatRestrictionReason, because it's already handled above
       ContentPreview preview = ContentPreview.getChatListPreview(tdlib, msg.chatId, msg, false);

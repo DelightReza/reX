@@ -136,6 +136,8 @@ import org.thunderdog.challegram.data.InlineResultCommand;
 import org.thunderdog.challegram.data.InlineResultCommon;
 import org.thunderdog.challegram.data.InlineResultSticker;
 import org.thunderdog.challegram.data.TD;
+import org.thunderdog.challegram.data.DeletedMessagesManager;
+import org.thunderdog.challegram.data.GhostModeManager;
 import org.thunderdog.challegram.data.TGAudio;
 import org.thunderdog.challegram.data.TGBotStart;
 import org.thunderdog.challegram.data.TGMessage;
@@ -3853,16 +3855,43 @@ public class MessagesController extends ViewController<MessagesController.Argume
         return;
       }
       if (selectedMessageIds != null && selectedMessageIds.size() > 0) {
-        final int size = selectedMessageIds.size();
-        final MessageWithProperties[] messages = new MessageWithProperties[size];
-        for (int i = 0; i < size; i++) {
-          long messageId = selectedMessageIds.keyAt(i);
-          TGMessage m = selectedMessageIds.valueAt(i);
-          TdApi.Message message = m.getMessage(messageId);
-          TdApi.MessageProperties properties = m.lastMessageProperties(messageId);
-          messages[i] = new MessageWithProperties(message, properties);
+        // Check if any selected message is a ghost
+        boolean hasGhost = false;
+        for (int i = 0; i < selectedMessageIds.size(); i++) {
+          if (selectedMessageIds.valueAt(i).isGhost()) {
+            hasGhost = true;
+            break;
+          }
         }
-        tdlib.ui().showDeleteOptions(this, messages, () -> finishSelectMode(-1));
+        
+        if (hasGhost) {
+          // Delete ghost messages from local DB
+          for (int i = 0; i < selectedMessageIds.size(); i++) {
+            long messageId = selectedMessageIds.keyAt(i);
+            TGMessage m = selectedMessageIds.valueAt(i);
+            if (m.isGhost()) {
+              org.thunderdog.challegram.data.DeletedMessagesManager.getInstance().deleteGhostMessage(messageId);
+              m.setIsGhostDeleted(true);
+              m.onDestroy();
+            }
+          }
+          finishSelectMode(-1);
+          // Refresh list to hide destroyed messages
+          if (manager != null) {
+              manager.getAdapter().notifyDataSetChanged();
+          }
+        } else {
+          final int size = selectedMessageIds.size();
+          final MessageWithProperties[] messages = new MessageWithProperties[size];
+          for (int i = 0; i < size; i++) {
+            long messageId = selectedMessageIds.keyAt(i);
+            TGMessage m = selectedMessageIds.valueAt(i);
+            TdApi.Message message = m.getMessage(messageId);
+            TdApi.MessageProperties properties = m.lastMessageProperties(messageId);
+            messages[i] = new MessageWithProperties(message, properties);
+          }
+          tdlib.ui().showDeleteOptions(this, messages, () -> finishSelectMode(-1));
+        }
       }
     } else if (id == R.id.menu_btn_retry) {
       if (selectedMessageIds != null && selectedMessageIds.size() > 0) {
@@ -5155,6 +5184,10 @@ public class MessagesController extends ViewController<MessagesController.Argume
     }
     if (selectedMessageIds.size() == 1) {
       MessageWithProperties m = getSingleSelectedMessage();
+      // Ghost messages can always be copied
+      if (selectedMessageIds.valueAt(0).isGhost()) {
+        return TD.canCopyText(m.message);
+      }
       return m.message.canBeSaved && TD.canCopyText(m.message);
     }
     for (int i = 0; i < selectedMessageIds.size(); i++) {
@@ -5176,6 +5209,10 @@ public class MessagesController extends ViewController<MessagesController.Argume
       for (int i = 0; i < size; i++) {
         long messageId = selectedMessageIds.keyAt(i);
         TGMessage m = selectedMessageIds.valueAt(i);
+        // Ghost messages can always be deleted from local DB
+        if (m.isGhost()) {
+          continue;
+        }
         TdApi.Message msg = m.getMessage(messageId);
         TdApi.MessageProperties properties = m.lastMessageProperties(messageId);
         if (msg == null || (!properties.canBeDeletedForAllUsers && !properties.canBeDeletedOnlyForSelf)) {
@@ -5283,6 +5320,10 @@ public class MessagesController extends ViewController<MessagesController.Argume
       for (int i = 0; i < size; i++) {
         long messageId = selectedMessageIds.keyAt(i);
         TGMessage m = selectedMessageIds.valueAt(i);
+        // Ghost messages can always be forwarded
+        if (m.isGhost()) {
+          continue;
+        }
         TdApi.Message msg = m.getMessage(messageId);
         if (msg == null || !m.lastMessageProperties(messageId).canBeForwarded) {
           return false;
@@ -5675,6 +5716,14 @@ public class MessagesController extends ViewController<MessagesController.Argume
         cancelSheduledKeyboardOpeningAndHideAllKeyboards();
         tdlib.ui().showDeleteOptions(this, selectedMessage.getAllMessagesAndProperties(), null);
         return true;
+      } else if (id == R.id.btn_messageDeleteGhost) {
+        cancelSheduledKeyboardOpeningAndHideAllKeyboards();
+        long messageId = selectedMessage.getId();
+        org.thunderdog.challegram.data.DeletedMessagesManager.getInstance().deleteGhostMessage(messageId);
+        selectedMessage.setIsGhostDeleted(true);
+        selectedMessage.requestLayout();
+        closeSelectMode();
+        return true;
       } else if (id == R.id.btn_messageReport) {
         cancelSheduledKeyboardOpeningAndHideAllKeyboards();
         if (selectedMessage.isSponsoredMessage()) {
@@ -5763,10 +5812,13 @@ public class MessagesController extends ViewController<MessagesController.Argume
         sendDice(itemView, ((TdApi.MessageDice) selectedMessage.getMessage().content).emoji);
         return true;
       } else if (id == R.id.btn_copyTranslation || id == R.id.btn_messageCopy) {
+        // MOD: Bypass restriction
+        /*
         if (!selectedMessage.canBeSaved()) {
           context().tooltipManager().builder(itemView).show(tdlib, R.string.ChannelNoCopy).hideDelayed();
           return false;
         }
+        */
         TdApi.Message message = null;
         if (selectedMessage instanceof TGMessageMedia) {
           long messageId = ((TGMessageMedia) selectedMessage).getCaptionMessageId();
@@ -5791,6 +5843,28 @@ public class MessagesController extends ViewController<MessagesController.Argume
         TdApi.Message editingMessage = message;
         TdApi.MessageProperties properties = selectedMessage.lastMessageProperties(editingMessage.id);
         editMessage(new MessageWithProperties(editingMessage, properties));
+        return true;
+      } else if (id == R.id.btn_messageEditHistory) {
+        cancelSheduledKeyboardOpeningAndHideAllKeyboards();
+        // Get edit history for this message
+        java.util.List<DeletedMessagesManager.EditHistoryEntry> history = 
+            DeletedMessagesManager.getInstance().getEditHistory(
+                selectedMessage.getChatId(), 
+                selectedMessage.getId()
+            );
+        
+        if (history.isEmpty()) {
+          UI.showToast("История изменений пуста", Toast.LENGTH_SHORT);
+        } else {
+          // Navigate to EditHistoryController with beautiful message bubbles
+          EditHistoryController controller = new EditHistoryController(context, tdlib);
+          controller.setArguments(new EditHistoryController.Args(
+              selectedMessage.getChatId(),
+              selectedMessage.getId(),
+              selectedMessage.getMessage()
+          ));
+          navigateTo(controller);
+        }
         return true;
       } else if (id == R.id.btn_messageShare) {
         cancelSheduledKeyboardOpeningAndHideAllKeyboards();
@@ -5833,10 +5907,13 @@ public class MessagesController extends ViewController<MessagesController.Argume
         TdlibManager.instance().player().addToPlayList(selectedMessage.getMessage());
         return true;
       } else if (id == R.id.btn_downloadFile) {
+        // MOD: Bypass restriction
+        /*
         if (!selectedMessage.canBeSaved()) {
           context().tooltipManager().builder(itemView).show(tdlib, R.string.ChannelNoSave).hideDelayed();
           return false;
         }
+        */
         TdApi.File file = TD.getFile(selectedMessage);
         if (file != null && !file.local.isDownloadingActive && !file.local.isDownloadingCompleted) {
           tdlib.files().downloadFile(file);
@@ -9790,7 +9867,34 @@ public class MessagesController extends ViewController<MessagesController.Argume
       obtainSilentMode(),
       forceUpdateOrderOfInstalledStickerSets
     );
-    List<TdApi.Function<?>> functions = (List<TdApi.Function<?>>) (List<?>) TD.sendMessageText(chatId, topicId, replyTo, finalSendOptions, content, tdlib.maxMessageTextLength());
+    
+    TdApi.InputMessageContent processedContent = content;
+    TdApi.InputMessageReplyTo processedReplyTo = replyTo;
+    
+    if (replyTo != null && replyTo.getConstructor() == TdApi.InputMessageReplyToMessage.CONSTRUCTOR &&
+        content instanceof TdApi.InputMessageText) {
+      TdApi.InputMessageReplyToMessage replyToMessage = (TdApi.InputMessageReplyToMessage) replyTo;
+      if (org.thunderdog.challegram.data.DeletedMessagesManager.getInstance().isMessageDeleted(replyToMessage.messageId)) {
+        String deletedText = org.thunderdog.challegram.data.DeletedMessagesManager.getInstance().getDeletedMessageText(replyToMessage.messageId);
+        if (deletedText != null && !deletedText.isEmpty()) {
+          TdApi.InputMessageText originalText = (TdApi.InputMessageText) content;
+          String userText = originalText.text != null && originalText.text.text != null ? originalText.text.text : "";
+          String combinedText = deletedText + "\n" + userText;
+          
+          TdApi.TextEntity quoteEntity = new TdApi.TextEntity(0, deletedText.length(), new TdApi.TextEntityTypeBlockQuote());
+          TdApi.TextEntity[] entities = new TdApi.TextEntity[] { quoteEntity };
+          
+          processedContent = new TdApi.InputMessageText(
+            new TdApi.FormattedText(combinedText, entities),
+            originalText.linkPreviewOptions,
+            originalText.clearDraft
+          );
+          processedReplyTo = null;
+        }
+      }
+    }
+    
+    List<TdApi.Function<?>> functions = (List<TdApi.Function<?>>) (List<?>) TD.sendMessageText(chatId, topicId, processedReplyTo, finalSendOptions, processedContent, tdlib.maxMessageTextLength());
 
     if (showSlowModeRestriction(sendButton != null ? sendButton : inputView, finalSendOptions)) {
       return;
@@ -10529,6 +10633,10 @@ public class MessagesController extends ViewController<MessagesController.Argume
   public void setChatAction (@TdApi.ChatAction.Constructors int action, boolean set, boolean force) {
     if (chat == null) {
       return;
+    }
+    // Ghost Mode: Block typing indicators if enabled
+    if (GhostModeManager.getInstance().shouldBlockTyping()) {
+      return; // Don't send typing status
     }
     if (actions == null) {
       actions = new SparseIntArray(5);

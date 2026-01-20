@@ -18,6 +18,7 @@ import androidx.annotation.UiThread;
 import org.drinkless.tdlib.Client;
 import org.drinkless.tdlib.TdApi;
 import org.thunderdog.challegram.Log;
+import org.thunderdog.challegram.data.DeletedMessagesManager;
 import org.thunderdog.challegram.data.TD;
 
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ public final class MessageListManager extends ListManager<TdApi.Message> impleme
     subscribeToUpdates();
     loadTotalCount(null);
     addChangeListener(maxMessageIdListener);
+    android.util.Log.e("ANTIDELETE", "Created MessageListManager: " + Integer.toHexString(System.identityHashCode(this)));
   }
 
   @Override
@@ -252,6 +254,26 @@ public final class MessageListManager extends ListManager<TdApi.Message> impleme
       default:
         throw new UnsupportedOperationException(response.toString());
     }
+
+    // Inject Ghost Messages (Anti-Delete)
+    List<TdApi.Message> ghosts = DeletedMessagesManager.getInstance().getDeletedMessages(chatId);
+    if (!ghosts.isEmpty()) {
+        android.util.Log.e("ANTIDELETE", "Injecting " + ghosts.size() + " ghost messages into chat " + chatId);
+        if (messages.isEmpty()) {
+             messages = new ArrayList<>(ghosts);
+        } else {
+             List<TdApi.Message> merged = new ArrayList<>(messages);
+             merged.addAll(ghosts);
+             messages = merged;
+        }
+        Collections.sort(messages, this);
+        totalCount += ghosts.size();
+    } else {
+         android.util.Log.e("ANTIDELETE", "No ghost messages found for chat " + chatId);
+    }
+
+
+
     if (!hasFilter() && messages.isEmpty()) {
       if (reverse) {
         onlyLocalReverseEndReached = true;
@@ -475,13 +497,29 @@ public final class MessageListManager extends ListManager<TdApi.Message> impleme
   public void onMessagesDeleted (long chatId, long[] messageIds) {
     if (this.chatId == chatId) {
       runOnUiThreadIfReady(() -> {
+        String hash = Integer.toHexString(System.identityHashCode(this));
+        android.util.Log.e("ANTIDELETE", "[" + hash + "] Checking deletion for chat " + chatId);
+        android.util.Log.e("ANTIDELETE", "[" + hash + "] Items count: " + items.size());
+        if (!items.isEmpty()) {
+             android.util.Log.e("ANTIDELETE", "First item ID: " + items.get(0).id);
+             android.util.Log.e("ANTIDELETE", "Last item ID: " + items.get(items.size()-1).id);
+        }
+
         int removedCount = 0;
         for (long messageId : messageIds) {
           int index = indexOfMessage(messageId);
           if (index != -1) {
-            TdApi.Message message = items.remove(index);
-            onItemRemoved(message, index);
-            removedCount++;
+            TdApi.Message message = items.get(index);
+            android.util.Log.e("ANTIDELETE", "FOUND & SAVING: " + message.id);
+            DeletedMessagesManager.getInstance().saveMessage(chatId, message);
+
+            // GHOST: Keep it!
+            // TdApi.Message message = items.remove(index);
+            // onItemRemoved(message, index);
+            // removedCount++;
+          } else {
+             android.util.Log.e("ANTIDELETE", "NOT FOUND: " + messageId);
+             // Dump IDs around this ID?
           }
         }
         changeTotalCount(-removedCount);

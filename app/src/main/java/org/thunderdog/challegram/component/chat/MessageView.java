@@ -426,7 +426,21 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
 
   @Override
   public void onDraw (Canvas c) {
+    int saveCount = 0;
+    if (msg != null && msg.isGhost()) {
+        // Apply 50% opacity to ghost messages
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            saveCount = c.saveLayerAlpha(0f, 0f, getWidth(), getHeight(), 128);
+        } else {
+            saveCount = c.saveLayerAlpha(0f, 0f, getWidth(), getHeight(), 128, Canvas.ALL_SAVE_FLAG);
+        }
+    }
+    
     msg.draw(this, c, avatarReceiver, replyReceiver, replyTextMediaReceiver, previewReceiver, contentReceiver, gifReceiver, complexReceiver);
+    
+    if (saveCount > 0) {
+        c.restoreToCount(saveCount);
+    }
   }
 
   public AvatarReceiver getAvatarReceiver () {
@@ -629,6 +643,35 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
     int messageCount = msg.getMessageCount();
     boolean isSent = !msg.isNotSent();
     Object tag = null;
+
+    // Ghost Messages (Deleted)
+    if (msg.isGhost()) {
+      // Reply
+      if (m.canWriteMessagesOrWaitingForReply()) {
+        ids.append(R.id.btn_messageReply);
+        strings.append(R.string.Reply);
+        icons.append(R.drawable.baseline_reply_24);
+      }
+
+      // Copy
+      if (TD.canCopyText(msg.getMessage())) {
+        ids.append(R.id.btn_messageCopy);
+        strings.append(R.string.Copy);
+        icons.append(R.drawable.baseline_content_copy_24);
+      }
+
+      // Forward
+      ids.append(R.id.btn_messageShare);
+      strings.append(R.string.Share);
+      icons.append(R.drawable.baseline_forward_24);
+
+      // Delete (Local)
+      ids.append(R.id.btn_messageDelete);
+      strings.append(R.string.Delete);
+      icons.append(R.drawable.baseline_delete_24);
+
+      return null;
+    }
 
     // Promotion
 
@@ -872,6 +915,13 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
       ids.append(R.id.btn_messageEdit);
       strings.append(R.string.edit);
       icons.append(R.drawable.baseline_edit_24);
+    }
+
+    // Edit History - show only for edited messages
+    if (!isMore && isSent && newestMessage.editDate > 0) {
+      ids.append(R.id.btn_messageEditHistory);
+      strings.append("История");
+      icons.append(R.drawable.baseline_history_24);
     }
 
     // Copy, select
