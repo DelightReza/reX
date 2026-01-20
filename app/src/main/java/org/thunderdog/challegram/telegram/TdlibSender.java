@@ -45,16 +45,16 @@ public class TdlibSender {
   private AvatarPlaceholder.Metadata placeholderMetadata;
   private final int flags;
 
-  public TdlibSender (Tdlib tdlib, long inChatId, TdApi.MessageSender sender) {
+  public TdlibSender (Tdlib tdlib, long inChatId, @Nullable TdApi.MessageSender sender) {
     this(tdlib, inChatId, sender, null, false);
   }
 
-  public TdlibSender (Tdlib tdlib, long inChatId, @NonNull TdApi.MessageSender sender, @Nullable MessagesManager manager, boolean isDemo) {
+  public TdlibSender (Tdlib tdlib, long inChatId, @Nullable TdApi.MessageSender sender, @Nullable MessagesManager manager, boolean isDemo) {
     this.tdlib = tdlib;
     this.inChatId = inChatId;
     this.sender = sender;
     this.sponsoredMessage = null;
-    this.flags = setSender(sender, manager, isDemo);
+    this.flags = sender != null ? setSender(sender, manager, isDemo) : 0;
   }
 
   private int setSender (@NonNull TdApi.MessageSender sender, @Nullable MessagesManager manager, boolean isDemo) {
@@ -192,6 +192,9 @@ public class TdlibSender {
   }
 
   public ImageFile getAvatar () {
+    if (sender == null) {
+      return null;
+    }
     switch (sender.getConstructor()) {
       case TdApi.MessageSenderChat.CONSTRUCTOR:
         return tdlib.chatAvatar(((TdApi.MessageSenderChat) sender).chatId);

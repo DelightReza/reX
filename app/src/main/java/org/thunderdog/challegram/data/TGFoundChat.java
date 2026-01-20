@@ -66,6 +66,12 @@ public class TGFoundChat {
   public TGFoundChat (Tdlib tdlib, TdApi.MessageSender sender, boolean isGlobal) {
     this.tdlib = tdlib;
     this.chatList = null;
+    if (sender == null) {
+      this.chatId = 0;
+      this.userId = 0;
+      setTitleImpl("", null);  // Initialize title to avoid null
+      return;
+    }
     switch (sender.getConstructor()) {
       case TdApi.MessageSenderUser.CONSTRUCTOR: {
         TdApi.MessageSenderUser user = (TdApi.MessageSenderUser) sender;
