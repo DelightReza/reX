@@ -3577,6 +3577,9 @@ public class ShareController extends TelegramViewController<ShareController.Args
     } else {
       switch (mode) {
         case MODE_MESSAGES: {
+          if (args.messages[0].senderId == null) {
+            return; // Skip if senderId is null
+          }
           final String name;
           boolean isUser;
           switch (args.messages[0].senderId.getConstructor()) {

@@ -4125,6 +4125,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
     return message != null && message.chatId != 0 && message.forwardInfo != null &&
       Td.hasMessageSource(message.forwardInfo) &&
       message.forwardInfo.source.chatId != message.chatId &&
+      message.senderId != null &&
       message.senderId.getConstructor() == TdApi.MessageSenderChat.CONSTRUCTOR &&
       ((TdApi.MessageSenderChat) message.senderId).chatId == message.forwardInfo.source.chatId &&
       isSupergroup(message.chatId) && isChannel(message.forwardInfo.source.chatId);

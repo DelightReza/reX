@@ -93,7 +93,7 @@ public class TGMessageLocation extends TGMessage implements LiveLocationManager.
     super(context, msg);
     this.point = point;
     this.venue = null;
-    if (livePeriod != 0) {
+    if (livePeriod != 0 && msg.senderId != null) {
       switch (msg.senderId.getConstructor()) {
         case TdApi.MessageSenderUser.CONSTRUCTOR: {
           long userId = ((TdApi.MessageSenderUser) msg.senderId).userId;
