@@ -69,6 +69,7 @@ public class TGFoundChat {
     if (sender == null) {
       this.chatId = 0;
       this.userId = 0;
+      setTitleImpl("", null);  // Initialize title to avoid null
       return;
     }
     switch (sender.getConstructor()) {

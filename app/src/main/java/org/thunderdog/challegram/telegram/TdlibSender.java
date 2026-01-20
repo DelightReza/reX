@@ -45,7 +45,7 @@ public class TdlibSender {
   private AvatarPlaceholder.Metadata placeholderMetadata;
   private final int flags;
 
-  public TdlibSender (Tdlib tdlib, long inChatId, TdApi.MessageSender sender) {
+  public TdlibSender (Tdlib tdlib, long inChatId, @Nullable TdApi.MessageSender sender) {
     this(tdlib, inChatId, sender, null, false);
   }
 
