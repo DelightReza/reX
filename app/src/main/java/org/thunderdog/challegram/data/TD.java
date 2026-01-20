@@ -767,6 +767,9 @@ public class TD {
   }
 
   public static String makeSenderKey (TdApi.MessageSender sender) {
+    if (sender == null) {
+      return "null";
+    }
     switch (sender.getConstructor()) {
       case TdApi.MessageSenderUser.CONSTRUCTOR:
         return "user_" + ((TdApi.MessageSenderUser) sender).userId;

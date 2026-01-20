@@ -3196,6 +3196,9 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   }
 
   public TdlibAccentColor senderAccentColor (TdApi.MessageSender sender) {
+    if (sender == null) {
+      return TdlibAccentColor.DEFAULT;
+    }
     switch (sender.getConstructor()) {
       case TdApi.MessageSenderUser.CONSTRUCTOR: {
         TdApi.MessageSenderUser user = (TdApi.MessageSenderUser) sender;
@@ -3872,6 +3875,9 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   }
 
   public String senderName (TdApi.MessageSender sender, boolean shorten) {
+    if (sender == null) {
+      return "";
+    }
     switch (sender.getConstructor()) {
       case TdApi.MessageSenderChat.CONSTRUCTOR: {
         long chatId = ((TdApi.MessageSenderChat) sender).chatId;
@@ -3926,6 +3932,9 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   }
 
   public String senderUsername (TdApi.MessageSender sender) {
+    if (sender == null) {
+      return null;
+    }
     switch (sender.getConstructor()) {
       case TdApi.MessageSenderChat.CONSTRUCTOR: {
         return chatUsername(((TdApi.MessageSenderChat) sender).chatId);

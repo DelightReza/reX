@@ -182,6 +182,9 @@ public class SettingsBlockedController extends RecyclerViewController<TdApi.Bloc
   }
 
   private static TGUser parseSender (Tdlib tdlib, TdApi.MessageSender sender, ArrayList<TGUser> senders) {
+    if (sender == null) {
+      return null;
+    }
     TGUser parsedUser;
     switch (sender.getConstructor()) {
       case TdApi.MessageSenderChat.CONSTRUCTOR: {
