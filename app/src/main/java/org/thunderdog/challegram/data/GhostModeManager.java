@@ -93,7 +93,9 @@ public class GhostModeManager {
     public static final String KEY_DRAWER_HELP = "drawer_help";
     public static final String KEY_DRAWER_NIGHT_MODE = "drawer_night_mode";
     public static final String KEY_DRAWER_GHOST_MODE = "drawer_ghost_mode";
-
+    public static final String KEY_DRAWER_FEATURE_TOGGLES = "drawer_feature_toggles";
+    public static final String KEY_DRAWER_DEBUG_LOGS = "drawer_debug_logs";
+  
     public boolean isDrawerItemVisible(String key) {
         if (prefs == null) return true;
         return prefs.getBoolean(key, true);
