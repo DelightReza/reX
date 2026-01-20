@@ -457,7 +457,8 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
               android.util.Log.e("ANTIDELETE", "UpdateDeleteMessages in listener - SKIPPED (processing in main handler)");
           } else if (constructor == TdApi.UpdateFile.CONSTRUCTOR) {
               TdApi.UpdateFile update = (TdApi.UpdateFile) object;
-              org.thunderdog.challegram.data.DeletedMessagesManager.getInstance().updateFile(update.file);
+              java.io.File localFile = new java.io.File(update.file.local.path);
+              org.thunderdog.challegram.data.DeletedMessagesManager.getInstance().updateFile(localFile);
           }
 
           tdlib.processUpdate(this, (TdApi.Update) object);
