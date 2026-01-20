@@ -119,7 +119,9 @@ public class DeletedMessagesManager {
                     File f = new File(msgDir, System.currentTimeMillis() + ".json");
                     writeJson(f, messageId, chatId, content);
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                android.util.Log.e(TAG, "Failed to save to disk: " + e.getMessage(), e);
+            }
         }).start();
     }
 
@@ -129,9 +131,10 @@ public class DeletedMessagesManager {
         json.put("chatId", chatId);
         json.put("timestamp", System.currentTimeMillis());
         json.put("content", serializeContent(content));
-        FileWriter w = new FileWriter(file);
-        w.write(json.toString());
-        w.close();
+        
+        try (FileWriter w = new FileWriter(file)) {
+            w.write(json.toString());
+        }
     }
 
     public void exportDatabase() {
@@ -167,20 +170,23 @@ public class DeletedMessagesManager {
                 zipOut.closeEntry();
             }
             File[] children = fileToZip.listFiles();
-            for (File childFile : children) {
-                zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
+            if (children != null) {
+                for (File childFile : children) {
+                    zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
+                }
             }
             return;
         }
-        FileInputStream fis = new FileInputStream(fileToZip);
-        ZipEntry zipEntry = new ZipEntry(fileName);
-        zipOut.putNextEntry(zipEntry);
-        byte[] bytes = new byte[1024];
-        int length;
-        while ((length = fis.read(bytes)) >= 0) {
-            zipOut.write(bytes, 0, length);
+        
+        try (FileInputStream fis = new FileInputStream(fileToZip)) {
+            ZipEntry zipEntry = new ZipEntry(fileName);
+            zipOut.putNextEntry(zipEntry);
+            byte[] bytes = new byte[1024];
+            int length;
+            while ((length = fis.read(bytes)) >= 0) {
+                zipOut.write(bytes, 0, length);
+            }
         }
-        fis.close();
     }
 
     // ... (Keep existing getters, serializers, deserialize, markDeletedByMe, isMessageDeleted, etc.)
@@ -229,13 +235,13 @@ public class DeletedMessagesManager {
     }
     
     private TdApi.Message loadMessageFromFile(File file) throws Exception {
-        BufferedReader reader = new BufferedReader(new FileReader(file));
         StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            sb.append(line);
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
         }
-        reader.close();
         
         JSONObject json = (JSONObject) new JSONTokener(sb.toString()).nextValue();
         long messageId = json.getLong("id");
@@ -277,13 +283,13 @@ public class DeletedMessagesManager {
         for (File file : files) {
             try {
                 long timestamp = Long.parseLong(file.getName().replace(".json", ""));
-                BufferedReader reader = new BufferedReader(new FileReader(file));
                 StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
+                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line);
+                    }
                 }
-                reader.close();
                 
                 JSONObject json = (JSONObject) new JSONTokener(sb.toString()).nextValue();
                 JSONObject contentJson = json.optJSONObject("content");
@@ -297,8 +303,12 @@ public class DeletedMessagesManager {
                 if (content != null) {
                     result.add(new EditHistoryEntry(timestamp, content));
                 }
-            } catch (Exception e) {
-                android.util.Log.e(TAG, "Failed to load edit history from " + file.getName(), e);
+            } catch (NumberFormatException e) {
+                android.util.Log.e(TAG, "Invalid timestamp in filename: " + file.getName(), e);
+            } catch (org.json.JSONException e) {
+                android.util.Log.e(TAG, "Failed to parse JSON from " + file.getName(), e);
+            } catch (java.io.IOException e) {
+                android.util.Log.e(TAG, "Failed to read file: " + file.getName(), e);
             }
         }
         
@@ -355,8 +365,13 @@ public class DeletedMessagesManager {
     private JSONObject serializeContent(TdApi.MessageContent c) {
         JSONObject o = new JSONObject();
         try {
-            if (c instanceof TdApi.MessageText) { o.put("type", "text"); o.put("text", ((TdApi.MessageText)c).text.text); }
-        } catch(Exception e) {}
+            if (c instanceof TdApi.MessageText) { 
+                o.put("type", "text"); 
+                o.put("text", ((TdApi.MessageText)c).text.text); 
+            }
+        } catch(org.json.JSONException e) {
+            android.util.Log.e(TAG, "Failed to serialize message content", e);
+        }
         return o;
     }
 }
