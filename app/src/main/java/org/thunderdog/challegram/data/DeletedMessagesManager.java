@@ -2,7 +2,6 @@ package org.thunderdog.challegram.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 import android.util.LruCache;
 import android.widget.Toast;
 
@@ -19,10 +18,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -192,9 +189,113 @@ public class DeletedMessagesManager {
         }
     }
     
+    public List<TdApi.Message> getDeletedMessages(long chatId) {
+        List<TdApi.Message> result = new ArrayList<>();
+        if (savedMessagesDir == null || !savedMessagesDir.exists()) return result;
+        
+        File chatDir = new File(savedMessagesDir, String.valueOf(chatId));
+        if (!chatDir.exists() || !chatDir.isDirectory()) return result;
+        
+        File[] files = chatDir.listFiles((dir, name) -> name.endsWith(".json"));
+        if (files == null) return result;
+        
+        for (File file : files) {
+            try {
+                TdApi.Message msg = loadMessageFromFile(file);
+                if (msg != null) {
+                    result.add(msg);
+                }
+            } catch (Exception e) {
+                android.util.Log.e(TAG, "Failed to load deleted message from " + file.getName(), e);
+            }
+        }
+        
+        // Sort by message ID descending
+        result.sort((a, b) -> Long.compare(b.id, a.id));
+        return result;
+    }
+    
+    public TdApi.Message getLastDeletedMessage(long chatId) {
+        List<TdApi.Message> messages = getDeletedMessages(chatId);
+        return messages.isEmpty() ? null : messages.get(0);
+    }
+    
+    private TdApi.Message loadMessageFromFile(File file) throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line);
+        }
+        reader.close();
+        
+        JSONObject json = (JSONObject) new JSONTokener(sb.toString()).nextValue();
+        long messageId = json.getLong("id");
+        long chatId = json.getLong("chatId");
+        long timestamp = json.optLong("timestamp", System.currentTimeMillis());
+        
+        TdApi.Message message = new TdApi.Message();
+        message.id = messageId;
+        message.chatId = chatId;
+        message.date = (int)(timestamp / 1000);
+        message.isOutgoing = false;
+        
+        // Deserialize content
+        JSONObject contentJson = json.optJSONObject("content");
+        if (contentJson != null) {
+            String type = contentJson.optString("type", "");
+            if ("text".equals(type)) {
+                String text = contentJson.optString("text", "");
+                message.content = new TdApi.MessageText(new TdApi.FormattedText(text, new TdApi.TextEntity[0]), null);
+            }
+        }
+        
+        return message;
+    }
+    
     public List<EditHistoryEntry> getEditHistory(long chatId, long messageId) {
-        // ... (Use previous implementation)
-        return new ArrayList<>();
+        List<EditHistoryEntry> result = new ArrayList<>();
+        if (editHistoryDir == null || !editHistoryDir.exists()) return result;
+        
+        File chatDir = new File(editHistoryDir, String.valueOf(chatId));
+        if (!chatDir.exists() || !chatDir.isDirectory()) return result;
+        
+        File msgDir = new File(chatDir, String.valueOf(messageId));
+        if (!msgDir.exists() || !msgDir.isDirectory()) return result;
+        
+        File[] files = msgDir.listFiles((dir, name) -> name.endsWith(".json"));
+        if (files == null) return result;
+        
+        for (File file : files) {
+            try {
+                long timestamp = Long.parseLong(file.getName().replace(".json", ""));
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+                reader.close();
+                
+                JSONObject json = (JSONObject) new JSONTokener(sb.toString()).nextValue();
+                JSONObject contentJson = json.optJSONObject("content");
+                TdApi.MessageContent content = null;
+                
+                if (contentJson != null && "text".equals(contentJson.optString("type", ""))) {
+                    String text = contentJson.optString("text", "");
+                    content = new TdApi.MessageText(new TdApi.FormattedText(text, new TdApi.TextEntity[0]), null);
+                }
+                
+                if (content != null) {
+                    result.add(new EditHistoryEntry(timestamp, content));
+                }
+            } catch (Exception e) {
+                android.util.Log.e(TAG, "Failed to load edit history from " + file.getName(), e);
+            }
+        }
+        
+        result.sort((a, b) -> Long.compare(b.timestamp, a.timestamp));
+        return result;
     }
     
     public String getDeletedMessageText(long messageId) {
@@ -204,7 +305,36 @@ public class DeletedMessagesManager {
     }
     
     public void clearAllGhosts() {
-        // Recursive delete logic
+        new Thread(() -> {
+            try {
+                if (savedMessagesDir != null && savedMessagesDir.exists()) {
+                    deleteRecursive(savedMessagesDir);
+                    savedMessagesDir.mkdirs();
+                }
+                if (editHistoryDir != null && editHistoryDir.exists()) {
+                    deleteRecursive(editHistoryDir);
+                    editHistoryDir.mkdirs();
+                }
+                deletedMessageIds.clear();
+                messageCache.evictAll();
+                UI.runOnUIThread(() -> UI.showToast("All deleted messages cleared", Toast.LENGTH_SHORT));
+            } catch (Exception e) {
+                android.util.Log.e(TAG, "Failed to clear ghosts", e);
+                UI.runOnUIThread(() -> UI.showToast("Failed to clear: " + e.getMessage(), Toast.LENGTH_SHORT));
+            }
+        }).start();
+    }
+    
+    private void deleteRecursive(File file) {
+        if (file.isDirectory()) {
+            File[] children = file.listFiles();
+            if (children != null) {
+                for (File child : children) {
+                    deleteRecursive(child);
+                }
+            }
+        }
+        file.delete();
     }
     
     public static class EditHistoryEntry {
