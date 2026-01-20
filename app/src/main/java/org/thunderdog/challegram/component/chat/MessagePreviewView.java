@@ -200,12 +200,12 @@ public class MessagePreviewView extends BaseView implements AttachDelegate, Dest
     }
 
     public boolean relatedToChat (long chatId) {
-      return this.message.senderId.getConstructor() == TdApi.MessageSenderChat.CONSTRUCTOR &&
+      return this.message.senderId != null && this.message.senderId.getConstructor() == TdApi.MessageSenderChat.CONSTRUCTOR &&
         ((TdApi.MessageSenderChat) this.message.senderId).chatId == chatId;
     }
 
     public boolean relatedToUser (long userId) {
-      return this.message.senderId.getConstructor() == TdApi.MessageSenderUser.CONSTRUCTOR &&
+      return this.message.senderId != null && this.message.senderId.getConstructor() == TdApi.MessageSenderUser.CONSTRUCTOR &&
         ((TdApi.MessageSenderUser) this.message.senderId).userId == userId;
     }
 
@@ -738,28 +738,32 @@ public class MessagePreviewView extends BaseView implements AttachDelegate, Dest
   // Listeners
 
   public void subscribeToUpdates (TdApi.Message message) {
-    switch (message.senderId.getConstructor()) {
-      case TdApi.MessageSenderChat.CONSTRUCTOR: {
-        tdlib.listeners().subscribeToChatUpdates(((TdApi.MessageSenderChat) message.senderId).chatId, this);
-        break;
-      }
-      case TdApi.MessageSenderUser.CONSTRUCTOR: {
-        tdlib.cache().addUserDataListener(((TdApi.MessageSenderUser) message.senderId).userId, this);
-        break;
+    if (message.senderId != null) {
+      switch (message.senderId.getConstructor()) {
+        case TdApi.MessageSenderChat.CONSTRUCTOR: {
+          tdlib.listeners().subscribeToChatUpdates(((TdApi.MessageSenderChat) message.senderId).chatId, this);
+          break;
+        }
+        case TdApi.MessageSenderUser.CONSTRUCTOR: {
+          tdlib.cache().addUserDataListener(((TdApi.MessageSenderUser) message.senderId).userId, this);
+          break;
+        }
       }
     }
     tdlib.listeners().subscribeToMessageUpdates(message.chatId, this);
   }
 
   public void unsubscribeFromUpdates (TdApi.Message message) {
-    switch (message.senderId.getConstructor()) {
-      case TdApi.MessageSenderChat.CONSTRUCTOR: {
-        tdlib.listeners().unsubscribeFromChatUpdates(((TdApi.MessageSenderChat) message.senderId).chatId, this);
-        break;
-      }
-      case TdApi.MessageSenderUser.CONSTRUCTOR: {
-        tdlib.cache().removeUserDataListener(((TdApi.MessageSenderUser) message.senderId).userId, this);
-        break;
+    if (message.senderId != null) {
+      switch (message.senderId.getConstructor()) {
+        case TdApi.MessageSenderChat.CONSTRUCTOR: {
+          tdlib.listeners().unsubscribeFromChatUpdates(((TdApi.MessageSenderChat) message.senderId).chatId, this);
+          break;
+        }
+        case TdApi.MessageSenderUser.CONSTRUCTOR: {
+          tdlib.cache().removeUserDataListener(((TdApi.MessageSenderUser) message.senderId).userId, this);
+          break;
+        }
       }
     }
     tdlib.listeners().unsubscribeFromMessageUpdates(message.chatId, this);

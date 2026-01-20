@@ -1144,10 +1144,10 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
               icons.append(R.drawable.baseline_block_24);
               switch (restrictMode) {
                 case TD.RESTRICT_MODE_EDIT:
-                  strings.append(msg.getMessage().senderId.getConstructor() == TdApi.MessageSenderChat.CONSTRUCTOR ? (msg.tdlib().isChannel(Td.getSenderId(msg.getMessage().senderId)) ? R.string.EditChannelRestrictions : R.string.EditGroupRestrictions) : R.string.EditUserRestrictions);
+                  strings.append(msg.getMessage().senderId != null && msg.getMessage().senderId.getConstructor() == TdApi.MessageSenderChat.CONSTRUCTOR ? (msg.tdlib().isChannel(Td.getSenderId(msg.getMessage().senderId)) ? R.string.EditChannelRestrictions : R.string.EditGroupRestrictions) : R.string.EditUserRestrictions);
                   break;
                 case TD.RESTRICT_MODE_NEW:
-                  strings.append(msg.getMessage().senderId.getConstructor() == TdApi.MessageSenderChat.CONSTRUCTOR ? (msg.tdlib().isChannel(Td.getSenderId(msg.getMessage().senderId)) ? R.string.BanChannel : R.string.BanChat) : R.string.RestrictUser);
+                  strings.append(msg.getMessage().senderId != null && msg.getMessage().senderId.getConstructor() == TdApi.MessageSenderChat.CONSTRUCTOR ? (msg.tdlib().isChannel(Td.getSenderId(msg.getMessage().senderId)) ? R.string.BanChannel : R.string.BanChat) : R.string.RestrictUser);
                   break;
                 case TD.RESTRICT_MODE_VIEW:
                   strings.append(R.string.ViewRestrictions);
@@ -1183,7 +1183,7 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
                   strings.append(
                     sender.status.getConstructor() == TdApi.ChatMemberStatusRestricted.CONSTRUCTOR ? R.string.RemoveRestrictions :
                       msg.tdlib().cache().senderBot(msg.getMessage().senderId) ? R.string.UnbanMemberBot :
-                        msg.getMessage().senderId.getConstructor() == TdApi.MessageSenderChat.CONSTRUCTOR ? (msg.tdlib().isChannel(Td.getSenderId(msg.getMessage().senderId)) ? R.string.UnbanMemberChannel : R.string.UnbanMemberGroup) :
+                        msg.getMessage().senderId != null && msg.getMessage().senderId.getConstructor() == TdApi.MessageSenderChat.CONSTRUCTOR ? (msg.tdlib().isChannel(Td.getSenderId(msg.getMessage().senderId)) ? R.string.UnbanMemberChannel : R.string.UnbanMemberGroup) :
                           R.string.UnbanMember
                   );
                   ids.append(R.id.btn_messageUnblockMember);
@@ -1208,7 +1208,7 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
           icon = R.drawable.baseline_group_24;
         } else if (msg.isOutgoing()) {
           strings.append(R.string.ViewMessagesFromYou);
-        } else if (msg.getMessage().senderId.getConstructor() == TdApi.MessageSenderChat.CONSTRUCTOR) {
+        } else if (msg.getMessage().senderId != null && msg.getMessage().senderId.getConstructor() == TdApi.MessageSenderChat.CONSTRUCTOR) {
           strings.append(Lang.getString(R.string.ViewMessagesFromChat, msg.getSender().getNameShort()));
           icon = msg.tdlib().isChannel(Td.getSenderId(msg.getMessage().senderId)) ? R.drawable.baseline_bullhorn_24 : R.drawable.baseline_group_24;
         } else {

@@ -49,9 +49,6 @@ public class GhostSettingsController extends ViewController<Void> implements Vie
     private static final int ID_DB_EXPORT = 3001;
     private static final int ID_DB_IMPORT = 3002;
     private static final int ID_DB_CLEAR = 3003;
-    
-    // Other
-    private static final int ID_DRAWER_CONFIG = 4001;
 
     public GhostSettingsController (Context context, Tdlib tdlib) {
         super(context, tdlib);
@@ -174,12 +171,6 @@ public class GhostSettingsController extends ViewController<Void> implements Vie
         items.add(new ListItem(ListItem.TYPE_SETTING, ID_DB_CLEAR, R.drawable.baseline_delete_forever_24, "Clear"));
         items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
 
-        // Drawer
-        items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Other"));
-        items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-        items.add(new ListItem(ListItem.TYPE_SETTING, ID_DRAWER_CONFIG, R.drawable.baseline_settings_24, "Drawer Configuration"));
-        items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-
         adapter.setItems(items, false);
         recyclerView.setAdapter(adapter);
 
@@ -239,9 +230,6 @@ public class GhostSettingsController extends ViewController<Void> implements Vie
         }
         else if (id == ID_DB_IMPORT) {
             UI.showToast("Import not yet implemented", Toast.LENGTH_SHORT);
-        }
-        else if (id == ID_DRAWER_CONFIG) {
-            UI.navigateTo(new DrawerPreferencesController(context, tdlib));
         }
     }
 }

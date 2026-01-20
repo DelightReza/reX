@@ -1018,7 +1018,7 @@ public class ReplyComponent implements Client.ResultHandler, Destroyable {
       handleOrigin(msg.forwardInfo.origin);
     } else if (msg.importInfo != null) {
       handleOrigin(new TdApi.MessageOriginHiddenUser(msg.importInfo.senderName));
-    } else {
+    } else if (msg.senderId != null) {
       switch (msg.senderId.getConstructor()) {
         case TdApi.MessageSenderUser.CONSTRUCTOR: {
           handleOrigin(new TdApi.MessageOriginUser(((TdApi.MessageSenderUser) msg.senderId).userId));
