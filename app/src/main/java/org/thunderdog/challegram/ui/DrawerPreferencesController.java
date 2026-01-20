@@ -27,7 +27,7 @@ public class DrawerPreferencesController extends ViewController<Void> implements
     private static final int ID_CALLS = 20002;
     private static final int ID_SAVED_MESSAGES = 20003;
     private static final int ID_SETTINGS = 20004;
-    private static final int ID_KAIMOD = 20005;
+    private static final int ID_REX = 20005;
     private static final int ID_INVITE = 20006;
     private static final int ID_PROXY = 20007;
     private static final int ID_HELP = 20008;
@@ -64,7 +64,7 @@ public class DrawerPreferencesController extends ViewController<Void> implements
                 else if (itemId == ID_CALLS) view.getToggler().setRadioEnabled(manager.isDrawerItemVisible(GhostModeManager.KEY_DRAWER_CALLS), isUpdate);
                 else if (itemId == ID_SAVED_MESSAGES) view.getToggler().setRadioEnabled(manager.isDrawerItemVisible(GhostModeManager.KEY_DRAWER_SAVED_MESSAGES), isUpdate);
                 else if (itemId == ID_SETTINGS) view.getToggler().setRadioEnabled(manager.isDrawerItemVisible(GhostModeManager.KEY_DRAWER_SETTINGS), isUpdate);
-                else if (itemId == ID_KAIMOD) view.getToggler().setRadioEnabled(manager.isDrawerItemVisible(GhostModeManager.KEY_DRAWER_KAIMOD), isUpdate);
+                else if (itemId == ID_REX) view.getToggler().setRadioEnabled(manager.isDrawerItemVisible(GhostModeManager.KEY_DRAWER_REX), isUpdate);
                 else if (itemId == ID_INVITE) view.getToggler().setRadioEnabled(manager.isDrawerItemVisible(GhostModeManager.KEY_DRAWER_INVITE), isUpdate);
                 else if (itemId == ID_PROXY) view.getToggler().setRadioEnabled(manager.isDrawerItemVisible(GhostModeManager.KEY_DRAWER_PROXY), isUpdate);
                 else if (itemId == ID_HELP) view.getToggler().setRadioEnabled(manager.isDrawerItemVisible(GhostModeManager.KEY_DRAWER_HELP), isUpdate);
@@ -83,7 +83,7 @@ public class DrawerPreferencesController extends ViewController<Void> implements
         items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_CALLS, R.drawable.baseline_call_24, R.string.Calls));
         items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_SAVED_MESSAGES, R.drawable.baseline_bookmark_24, R.string.SavedMessages));
         items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_SETTINGS, R.drawable.baseline_settings_24, R.string.Settings));
-        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_KAIMOD, R.drawable.baseline_bug_report_24, "kaimod")); 
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_REX, R.drawable.baseline_bug_report_24, "reX")); 
         items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_INVITE, R.drawable.baseline_person_add_24, R.string.InviteFriends));
         items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_PROXY, R.drawable.baseline_security_24, R.string.Proxy));
         items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, ID_HELP, R.drawable.baseline_help_24, R.string.Help));
@@ -114,7 +114,7 @@ public class DrawerPreferencesController extends ViewController<Void> implements
         else if (id == ID_CALLS) key = GhostModeManager.KEY_DRAWER_CALLS;
         else if (id == ID_SAVED_MESSAGES) key = GhostModeManager.KEY_DRAWER_SAVED_MESSAGES;
         else if (id == ID_SETTINGS) key = GhostModeManager.KEY_DRAWER_SETTINGS;
-        else if (id == ID_KAIMOD) key = GhostModeManager.KEY_DRAWER_KAIMOD;
+        else if (id == ID_REX) key = GhostModeManager.KEY_DRAWER_REX;
         else if (id == ID_INVITE) key = GhostModeManager.KEY_DRAWER_INVITE;
         else if (id == ID_PROXY) key = GhostModeManager.KEY_DRAWER_PROXY;
         else if (id == ID_HELP) key = GhostModeManager.KEY_DRAWER_HELP;
@@ -126,8 +126,8 @@ public class DrawerPreferencesController extends ViewController<Void> implements
             boolean currentState = manager.isDrawerItemVisible(key);
             manager.setDrawerItemVisible(key, !currentState);
             adapter.updateValuedSettingById(id);
-            if (id == ID_KAIMOD && currentState) {
-                UI.showToast(R.string.KaimodHiddenToast, Toast.LENGTH_SHORT);
+            if (id == ID_REX && currentState) {
+                UI.showToast(R.string.ReXHiddenToast, Toast.LENGTH_SHORT);
             }
         }
     }

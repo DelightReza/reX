@@ -87,7 +87,7 @@ public class GhostModeManager {
     public static final String KEY_DRAWER_CALLS = "drawer_calls";
     public static final String KEY_DRAWER_SAVED_MESSAGES = "drawer_saved_messages";
     public static final String KEY_DRAWER_SETTINGS = "drawer_settings";
-    public static final String KEY_DRAWER_KAIMOD = "drawer_kaimod";
+    public static final String KEY_DRAWER_REX = "drawer_rex";
     public static final String KEY_DRAWER_INVITE = "drawer_invite";
     public static final String KEY_DRAWER_PROXY = "drawer_proxy";
     public static final String KEY_DRAWER_HELP = "drawer_help";
