@@ -2,7 +2,6 @@ package org.thunderdog.challegram.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 import android.util.LruCache;
 import android.widget.Toast;
 
@@ -19,10 +18,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -75,6 +72,14 @@ public class DeletedMessagesManager {
         TdApi.Message cached = messageCache.get(messageId);
         if (cached != null) cached.content = content;
     }
+    
+    public void updateMessageId(long oldMessageId, TdApi.Message newMessage) {
+        TdApi.Message cached = messageCache.get(oldMessageId);
+        if (cached != null) {
+            messageCache.remove(oldMessageId);
+            messageCache.put(newMessage.id, newMessage);
+        }
+    }
 
     public void saveEditVersion(long chatId, long messageId, TdApi.MessageContent oldContent) {
         if (!isEditHistoryEnabled() || oldContent == null) return;
@@ -114,7 +119,9 @@ public class DeletedMessagesManager {
                     File f = new File(msgDir, System.currentTimeMillis() + ".json");
                     writeJson(f, messageId, chatId, content);
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                android.util.Log.e(TAG, "Failed to save to disk: " + e.getMessage(), e);
+            }
         }).start();
     }
 
@@ -124,9 +131,10 @@ public class DeletedMessagesManager {
         json.put("chatId", chatId);
         json.put("timestamp", System.currentTimeMillis());
         json.put("content", serializeContent(content));
-        FileWriter w = new FileWriter(file);
-        w.write(json.toString());
-        w.close();
+        
+        try (FileWriter w = new FileWriter(file)) {
+            w.write(json.toString());
+        }
     }
 
     public void exportDatabase() {
@@ -162,20 +170,23 @@ public class DeletedMessagesManager {
                 zipOut.closeEntry();
             }
             File[] children = fileToZip.listFiles();
-            for (File childFile : children) {
-                zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
+            if (children != null) {
+                for (File childFile : children) {
+                    zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
+                }
             }
             return;
         }
-        FileInputStream fis = new FileInputStream(fileToZip);
-        ZipEntry zipEntry = new ZipEntry(fileName);
-        zipOut.putNextEntry(zipEntry);
-        byte[] bytes = new byte[1024];
-        int length;
-        while ((length = fis.read(bytes)) >= 0) {
-            zipOut.write(bytes, 0, length);
+        
+        try (FileInputStream fis = new FileInputStream(fileToZip)) {
+            ZipEntry zipEntry = new ZipEntry(fileName);
+            zipOut.putNextEntry(zipEntry);
+            byte[] bytes = new byte[1024];
+            int length;
+            while ((length = fis.read(bytes)) >= 0) {
+                zipOut.write(bytes, 0, length);
+            }
         }
-        fis.close();
     }
 
     // ... (Keep existing getters, serializers, deserialize, markDeletedByMe, isMessageDeleted, etc.)
@@ -192,9 +203,117 @@ public class DeletedMessagesManager {
         }
     }
     
+    public List<TdApi.Message> getDeletedMessages(long chatId) {
+        List<TdApi.Message> result = new ArrayList<>();
+        if (savedMessagesDir == null || !savedMessagesDir.exists()) return result;
+        
+        File chatDir = new File(savedMessagesDir, String.valueOf(chatId));
+        if (!chatDir.exists() || !chatDir.isDirectory()) return result;
+        
+        File[] files = chatDir.listFiles((dir, name) -> name.endsWith(".json"));
+        if (files == null) return result;
+        
+        for (File file : files) {
+            try {
+                TdApi.Message msg = loadMessageFromFile(file);
+                if (msg != null) {
+                    result.add(msg);
+                }
+            } catch (Exception e) {
+                android.util.Log.e(TAG, "Failed to load deleted message from " + file.getName(), e);
+            }
+        }
+        
+        // Sort by message ID descending
+        result.sort((a, b) -> Long.compare(b.id, a.id));
+        return result;
+    }
+    
+    public TdApi.Message getLastDeletedMessage(long chatId) {
+        List<TdApi.Message> messages = getDeletedMessages(chatId);
+        return messages.isEmpty() ? null : messages.get(0);
+    }
+    
+    private TdApi.Message loadMessageFromFile(File file) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+        }
+        
+        JSONObject json = (JSONObject) new JSONTokener(sb.toString()).nextValue();
+        long messageId = json.getLong("id");
+        long chatId = json.getLong("chatId");
+        long timestamp = json.optLong("timestamp", System.currentTimeMillis());
+        
+        TdApi.Message message = new TdApi.Message();
+        message.id = messageId;
+        message.chatId = chatId;
+        message.date = (int)(timestamp / 1000);
+        message.isOutgoing = false;
+        
+        // Deserialize content
+        JSONObject contentJson = json.optJSONObject("content");
+        if (contentJson != null) {
+            String type = contentJson.optString("type", "");
+            if ("text".equals(type)) {
+                String text = contentJson.optString("text", "");
+                message.content = new TdApi.MessageText(new TdApi.FormattedText(text, new TdApi.TextEntity[0]), null);
+            }
+        }
+        
+        return message;
+    }
+    
     public List<EditHistoryEntry> getEditHistory(long chatId, long messageId) {
-        // ... (Use previous implementation)
-        return new ArrayList<>();
+        List<EditHistoryEntry> result = new ArrayList<>();
+        if (editHistoryDir == null || !editHistoryDir.exists()) return result;
+        
+        File chatDir = new File(editHistoryDir, String.valueOf(chatId));
+        if (!chatDir.exists() || !chatDir.isDirectory()) return result;
+        
+        File msgDir = new File(chatDir, String.valueOf(messageId));
+        if (!msgDir.exists() || !msgDir.isDirectory()) return result;
+        
+        File[] files = msgDir.listFiles((dir, name) -> name.endsWith(".json"));
+        if (files == null) return result;
+        
+        for (File file : files) {
+            try {
+                long timestamp = Long.parseLong(file.getName().replace(".json", ""));
+                StringBuilder sb = new StringBuilder();
+                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line);
+                    }
+                }
+                
+                JSONObject json = (JSONObject) new JSONTokener(sb.toString()).nextValue();
+                JSONObject contentJson = json.optJSONObject("content");
+                TdApi.MessageContent content = null;
+                
+                if (contentJson != null && "text".equals(contentJson.optString("type", ""))) {
+                    String text = contentJson.optString("text", "");
+                    content = new TdApi.MessageText(new TdApi.FormattedText(text, new TdApi.TextEntity[0]), null);
+                }
+                
+                if (content != null) {
+                    result.add(new EditHistoryEntry(timestamp, content));
+                }
+            } catch (NumberFormatException e) {
+                android.util.Log.e(TAG, "Invalid timestamp in filename: " + file.getName(), e);
+            } catch (org.json.JSONException e) {
+                android.util.Log.e(TAG, "Failed to parse JSON from " + file.getName(), e);
+            } catch (java.io.IOException e) {
+                android.util.Log.e(TAG, "Failed to read file: " + file.getName(), e);
+            }
+        }
+        
+        result.sort((a, b) -> Long.compare(b.timestamp, a.timestamp));
+        return result;
     }
     
     public String getDeletedMessageText(long messageId) {
@@ -204,7 +323,36 @@ public class DeletedMessagesManager {
     }
     
     public void clearAllGhosts() {
-        // Recursive delete logic
+        new Thread(() -> {
+            try {
+                if (savedMessagesDir != null && savedMessagesDir.exists()) {
+                    deleteRecursive(savedMessagesDir);
+                    savedMessagesDir.mkdirs();
+                }
+                if (editHistoryDir != null && editHistoryDir.exists()) {
+                    deleteRecursive(editHistoryDir);
+                    editHistoryDir.mkdirs();
+                }
+                deletedMessageIds.clear();
+                messageCache.evictAll();
+                UI.runOnUIThread(() -> UI.showToast("All deleted messages cleared", Toast.LENGTH_SHORT));
+            } catch (Exception e) {
+                android.util.Log.e(TAG, "Failed to clear ghosts", e);
+                UI.runOnUIThread(() -> UI.showToast("Failed to clear: " + e.getMessage(), Toast.LENGTH_SHORT));
+            }
+        }).start();
+    }
+    
+    private void deleteRecursive(File file) {
+        if (file.isDirectory()) {
+            File[] children = file.listFiles();
+            if (children != null) {
+                for (File child : children) {
+                    deleteRecursive(child);
+                }
+            }
+        }
+        file.delete();
     }
     
     public static class EditHistoryEntry {
@@ -217,8 +365,13 @@ public class DeletedMessagesManager {
     private JSONObject serializeContent(TdApi.MessageContent c) {
         JSONObject o = new JSONObject();
         try {
-            if (c instanceof TdApi.MessageText) { o.put("type", "text"); o.put("text", ((TdApi.MessageText)c).text.text); }
-        } catch(Exception e) {}
+            if (c instanceof TdApi.MessageText) { 
+                o.put("type", "text"); 
+                o.put("text", ((TdApi.MessageText)c).text.text); 
+            }
+        } catch(org.json.JSONException e) {
+            android.util.Log.e(TAG, "Failed to serialize message content", e);
+        }
         return o;
     }
 }
