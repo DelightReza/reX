@@ -500,6 +500,7 @@
   <item type="id" name="btn_stickerSettings" />
   <item type="id" name="btn_themeSettings" />
   <item type="id" name="btn_tweakSettings" />
+  <item type="id" name="btn_rex" />
   <item type="id" name="btn_faq" />
   <item type="id" name="btn_privacyPolicy" />
   <item type="id" name="btn_build" />

@@ -39,6 +39,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.drinkless.tdlib.TdApi;
 import org.thunderdog.challegram.BaseActivity;
 import org.thunderdog.challegram.ui.GhostSettingsController;
+import org.thunderdog.challegram.ui.ReXSettingsController;
 import org.thunderdog.challegram.data.GhostModeManager;
 import org.thunderdog.challegram.BuildConfig;
 import org.thunderdog.challegram.R;
@@ -98,7 +99,8 @@ import tgx.td.ChatId;
 
 public class DrawerController extends ViewController<Void> implements View.OnClickListener, Settings.ProxyChangeListener, GlobalAccountListener, GlobalCountersListener, BaseView.CustomControllerProvider, BaseView.ActionListProvider, View.OnLongClickListener, TdlibSettingsManager.NotificationProblemListener, TdlibOptionListener, SessionListener, GlobalTokenStateListener, SystemBackEventListener {
   private int currentWidth, shadowWidth;
-  private static final int ID_BTN_KAIMOD = 199000;
+  private static final int ID_BTN_REX = 199000;
+  private static final int ID_BTN_GHOST_MODE_TOGGLE = 199001;
 
   private boolean isVisible;
   private boolean isAnimating;
@@ -554,10 +556,13 @@ public class DrawerController extends ViewController<Void> implements View.OnCli
         items.add(new ListItem(ListItem.TYPE_DRAWER_ITEM, R.id.btn_tdlib_clearLogs, R.drawable.baseline_bug_report_24, "Clear TDLib logs", false));
         items.add(new ListItem(ListItem.TYPE_DRAWER_ITEM, R.id.btn_tdlib_shareLogs, R.drawable.baseline_bug_report_24, "Send TDLib log", false));
       }
-      if (ghostMode.isDrawerItemVisible(GhostModeManager.KEY_DRAWER_KAIMOD)) {
+      if (ghostMode.isDrawerItemVisible(GhostModeManager.KEY_DRAWER_REX)) {
           items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
-          items.add(new ListItem(ListItem.TYPE_DRAWER_ITEM, ID_BTN_KAIMOD, R.drawable.baseline_bug_report_24, "kaimod"));
+          items.add(new ListItem(ListItem.TYPE_DRAWER_ITEM, ID_BTN_REX, R.drawable.baseline_bug_report_24, "reX"));
       }
+      // Add Ghost Mode toggle to drawer
+      items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+      items.add(new ListItem(ListItem.TYPE_DRAWER_ITEM, ID_BTN_GHOST_MODE_TOGGLE, R.drawable.baseline_visibility_24, "Ghost Mode"));
       return items;
   }
 
@@ -927,13 +932,39 @@ public class DrawerController extends ViewController<Void> implements View.OnCli
       context().currentTdlib().settings().toggleChatStyle();
     } else if (viewId == R.id.btn_featureToggles) {
       UI.navigateTo(new FeatureToggles.Controller(context, context.currentTdlib()));
-    } else if (viewId == ID_BTN_KAIMOD) {
-        GhostSettingsController controller = new GhostSettingsController(context, context.currentTdlib());
+    } else if (viewId == ID_BTN_REX) {
+        // Navigate to new reX settings controller
+        ReXSettingsController controller = new ReXSettingsController(context, context.currentTdlib());
         UI.navigateTo(controller);
+    } else if (viewId == ID_BTN_GHOST_MODE_TOGGLE) {
+        // Toggle Ghost Mode directly from drawer
+        GhostModeManager gm = GhostModeManager.getInstance();
+        boolean newState = !gm.isGhostModeEnabled();
+        gm.setGhostModeEnabled(newState);
+        if (newState) {
+            gm.setDontReadEnabled(true);
+            gm.setDontOnlineEnabled(true);
+            gm.setDontTypeEnabled(true);
+            gm.setOfflineAutoEnabled(true);
+            UI.showToast("Ghost Mode Enabled 👻", Toast.LENGTH_SHORT);
+        } else {
+            UI.showToast("Ghost Mode Disabled", Toast.LENGTH_SHORT);
+        }
+        // Update the drawer item to reflect the new state
+        updateDrawerItem(ID_BTN_GHOST_MODE_TOGGLE);
     }
   }
 
   private String shareTextOnClose;
+
+  private void updateDrawerItem(int itemId) {
+    if (adapter != null) {
+      int position = adapter.indexOfViewById(itemId);
+      if (position != -1) {
+        adapter.notifyItemChanged(position);
+      }
+    }
+  }
 
   private void shareText (String text) {
     if (factor != 0f) {

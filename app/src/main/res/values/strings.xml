@@ -5666,7 +5666,7 @@
   <string name="RestrictedContent">Restricted Content</string>
   <string name="SensitiveContent">Sensitive Content</string>
 
-<!-- Ghost Mode & Kaimod -->
+<!-- Ghost Mode & reX -->
     <string name="GhostSettings">Ghost Settings</string>
     <string name="GhostMode">Ghost Mode</string>
     <string name="GhostModeEnable">Enable Ghost Mode</string>
@@ -5680,7 +5680,10 @@
     <string name="DrawerConfig">Drawer Configuration</string>
     <string name="DrawerDesc">Select items to display in the side drawer.</string>
     <string name="MenuItems">Menu Items</string>
-    <string name="KaimodHiddenToast">kaimod hidden from menu</string>
+    <string name="ReXHiddenToast">reX hidden from menu</string>
+    <string name="ReXSettings">reX</string>
+    <string name="ReXCustomisation">Customisation</string>
+    <string name="SpyBoth">Spy</string>
     
     <string name="DeletedMessages">Deleted Messages</string>
     <string name="GhostSaveDeleted">Save Deleted Messages</string>
