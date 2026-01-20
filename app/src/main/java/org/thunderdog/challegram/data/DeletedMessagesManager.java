@@ -72,6 +72,14 @@ public class DeletedMessagesManager {
         TdApi.Message cached = messageCache.get(messageId);
         if (cached != null) cached.content = content;
     }
+    
+    public void updateMessageId(long oldMessageId, TdApi.Message newMessage) {
+        TdApi.Message cached = messageCache.get(oldMessageId);
+        if (cached != null) {
+            messageCache.remove(oldMessageId);
+            messageCache.put(newMessage.id, newMessage);
+        }
+    }
 
     public void saveEditVersion(long chatId, long messageId, TdApi.MessageContent oldContent) {
         if (!isEditHistoryEnabled() || oldContent == null) return;
