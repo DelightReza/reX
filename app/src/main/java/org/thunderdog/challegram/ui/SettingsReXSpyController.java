@@ -47,71 +47,6 @@ public class SettingsReXSpyController extends RecyclerViewController<Void> imple
   }
 
   @Override
-  protected void onCreateView (Context context, CustomRecyclerView recyclerView) {
-    ArrayList<ListItem> items = new ArrayList<>();
-    
-    // Spy essentials header
-    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.ReXSpyEssentials));
-    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    
-    // Save Deleted Messages
-    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveDeletedMessages, 0, R.string.ReXSaveDeletedMessages));
-    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
-    
-    // Save Edits History
-    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveEditsHistory, 0, R.string.ReXSaveEditsHistory));
-    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    
-    // Save in Bot Dialogs
-    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveInBotDialogs, 0, R.string.ReXSaveInBotDialogs));
-    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    
-    // Save Read Date
-    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveReadDate, 0, R.string.ReXSaveReadDate));
-    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.ReXSaveReadDateDesc));
-    
-    // Save Last Seen Date
-    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveLastSeenDate, 0, R.string.ReXSaveLastSeenDate));
-    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.ReXSaveLastSeenDateDesc));
-    
-    // Save Attachments
-    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    ListItem attachItem = new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveAttachments, 0, R.string.ReXSaveAttachments);
-    attachItem.setString(Lang.getString(R.string.ReXConfigureChatsAndLimits));
-    items.add(attachItem);
-    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
-    
-    // Attachments Folder link
-    ListItem folderItem = new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexAttachmentsFolder, 0, R.string.ReXAttachmentsFolder);
-    folderItem.setString(Lang.getString(R.string.ReXSavedAttachments));
-    items.add(folderItem);
-    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    
-    // Max folder size header and slider
-    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.ReXMaxFolderSize));
-    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    items.add(new ListItem(ListItem.TYPE_SLIDER, R.id.slider_rexMaxFolderSize, 0, 0));
-    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.ReXMaxFolderSizeDesc));
-    
-    // Database action buttons
-    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexExportDatabase, R.drawable.baseline_upload_24, R.string.ReXExportDatabase));
-    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexImportDatabase, R.drawable.baseline_download_24, R.string.ReXImportDatabase));
-    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexClearDatabase, R.drawable.baseline_delete_24, R.string.ReXClearDatabase));
-    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-
-    adapter.setItems(items, false);
-  }
-
-  @Override
   public void onClick (View v) {
     int viewId = v.getId();
     if (viewId == R.id.btn_rexSaveDeletedMessages) {
@@ -223,9 +158,9 @@ public class SettingsReXSpyController extends RecyclerViewController<Void> imple
     
     // Database action buttons
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexExportDatabase, R.drawable.baseline_upload_24, R.string.ReXExportDatabase));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexExportDatabase, R.drawable.baseline_import_export_24, R.string.ReXExportDatabase));
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexImportDatabase, R.drawable.baseline_download_24, R.string.ReXImportDatabase));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexImportDatabase, R.drawable.baseline_import_export_24, R.string.ReXImportDatabase));
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
     items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexClearDatabase, R.drawable.baseline_delete_24, R.string.ReXClearDatabase));
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));

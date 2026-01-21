@@ -109,6 +109,29 @@ public class SettingsReXGhostController extends RecyclerViewController<Void> imp
 
   @Override
   protected void onCreateView (Context context, CustomRecyclerView recyclerView) {
+    adapter = new SettingsAdapter(this) {
+      @Override
+      public void setValuedSetting (ListItem item, SettingView v, boolean isUpdate) {
+        final int itemId = item.getId();
+        if (itemId == R.id.btn_rexGhostMasterToggle) {
+          v.getToggler().setRadioEnabled(Settings.instance().getReXGhostModeMaster(), isUpdate);
+        } else if (itemId == R.id.btn_rexDontReadMessages) {
+          v.getToggler().setRadioEnabled(Settings.instance().getReXDontReadMessages(), isUpdate);
+        } else if (itemId == R.id.btn_rexDontReadStories) {
+          v.getToggler().setRadioEnabled(Settings.instance().getReXDontReadStories(), isUpdate);
+        } else if (itemId == R.id.btn_rexDontSendOnline) {
+          v.getToggler().setRadioEnabled(Settings.instance().getReXDontSendOnline(), isUpdate);
+        } else if (itemId == R.id.btn_rexDontSendTyping) {
+          v.getToggler().setRadioEnabled(Settings.instance().getReXDontSendTyping(), isUpdate);
+        } else if (itemId == R.id.btn_rexGoOfflineAutomatically) {
+          v.getToggler().setRadioEnabled(Settings.instance().getReXGoOfflineAutomatically(), isUpdate);
+        } else if (itemId == R.id.btn_rexReadOnInteract) {
+          v.getToggler().setRadioEnabled(Settings.instance().getReXReadOnInteract(), isUpdate);
+        } else if (itemId == R.id.btn_rexScheduleMessages) {
+          v.getToggler().setRadioEnabled(Settings.instance().getReXScheduleMessages(), isUpdate);
+        }
+      }
+    };
     rebuildList();
   }
 
@@ -166,38 +189,6 @@ public class SettingsReXGhostController extends RecyclerViewController<Void> imp
     //   Settings.instance().setReXStoryGhostModeAlert(newValue);
     //   adapter.updateValuedSettingById(R.id.btn_rexStoryGhostModeAlert);
     // }
-  }
-
-  @Override
-  protected void onCreateView (Context context, CustomRecyclerView recyclerView) {
-    adapter = new SettingsAdapter(this) {
-      @Override
-      public void setValuedSetting (ListItem item, SettingView v, boolean isUpdate) {
-        final int itemId = item.getId();
-        if (itemId == R.id.btn_rexGhostMasterToggle) {
-          v.getToggler().setRadioEnabled(Settings.instance().getReXGhostModeMaster(), isUpdate);
-        } else if (itemId == R.id.btn_rexDontReadMessages) {
-          v.getToggler().setRadioEnabled(Settings.instance().getReXDontReadMessages(), isUpdate);
-        } else if (itemId == R.id.btn_rexDontReadStories) {
-          v.getToggler().setRadioEnabled(Settings.instance().getReXDontReadStories(), isUpdate);
-        } else if (itemId == R.id.btn_rexDontSendOnline) {
-          v.getToggler().setRadioEnabled(Settings.instance().getReXDontSendOnline(), isUpdate);
-        } else if (itemId == R.id.btn_rexDontSendTyping) {
-          v.getToggler().setRadioEnabled(Settings.instance().getReXDontSendTyping(), isUpdate);
-        } else if (itemId == R.id.btn_rexGoOfflineAutomatically) {
-          v.getToggler().setRadioEnabled(Settings.instance().getReXGoOfflineAutomatically(), isUpdate);
-        } else if (itemId == R.id.btn_rexReadOnInteract) {
-          v.getToggler().setRadioEnabled(Settings.instance().getReXReadOnInteract(), isUpdate);
-        } else if (itemId == R.id.btn_rexScheduleMessages) {
-          v.getToggler().setRadioEnabled(Settings.instance().getReXScheduleMessages(), isUpdate);
-        }
-        // Story Ghost Mode Alert - Hidden until TGX has story features
-        // else if (itemId == R.id.btn_rexStoryGhostModeAlert) {
-        //   v.getToggler().setRadioEnabled(Settings.instance().getReXStoryGhostModeAlert(), isUpdate);
-        // }
-      }
-    };
-    rebuildList();
   }
 
   @Override

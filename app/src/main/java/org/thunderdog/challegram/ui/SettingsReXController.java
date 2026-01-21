@@ -52,7 +52,7 @@ public class SettingsReXController extends RecyclerViewController<Void> implemen
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
     
     // Ghost Mode
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexGhostMode, R.drawable.baseline_visibility_off_24, R.string.ReXGhostMode));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexGhostMode, R.drawable.baseline_ghost_24, R.string.ReXGhostMode));
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
     
     // Spy
@@ -60,7 +60,7 @@ public class SettingsReXController extends RecyclerViewController<Void> implemen
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
     
     // Filters
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexFilters, R.drawable.baseline_filter_list_24, R.string.ReXFilters));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexFilters, R.drawable.baseline_tune_24, R.string.ReXFilters));
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
     
     // Customization
