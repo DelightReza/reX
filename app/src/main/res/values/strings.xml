@@ -1497,6 +1497,8 @@
   <string name="ReXExportDatabase">Export Database</string>
   <string name="ReXImportDatabase">Import Database</string>
   <string name="ReXClearDatabase">Clear</string>
+  <string name="ReXClearDatabaseConfirm">Clear Database?</string>
+  <string name="ReXClearDatabaseConfirmDesc">This will permanently delete all saved deleted messages and edit history. This action cannot be undone.</string>
   
   <!-- Filters -->
   <string name="ReXFiltersDesc">Filter and organize content</string>
