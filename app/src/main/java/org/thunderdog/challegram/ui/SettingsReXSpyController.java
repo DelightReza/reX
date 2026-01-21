@@ -105,6 +105,7 @@ public class SettingsReXSpyController extends RecyclerViewController<Void> imple
         }
       }
     };
+    recyclerView.setAdapter(adapter);
     
     ArrayList<ListItem> items = new ArrayList<>();
     

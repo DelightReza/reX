@@ -44,6 +44,7 @@ public class SettingsReXController extends RecyclerViewController<Void> implemen
   @Override
   protected void onCreateView (Context context, CustomRecyclerView recyclerView) {
     adapter = new SettingsAdapter(this);
+    recyclerView.setAdapter(adapter);
     
     ArrayList<ListItem> items = new ArrayList<>();
     

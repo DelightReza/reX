@@ -132,6 +132,7 @@ public class SettingsReXGhostController extends RecyclerViewController<Void> imp
         }
       }
     };
+    recyclerView.setAdapter(adapter);
     rebuildList();
   }
 

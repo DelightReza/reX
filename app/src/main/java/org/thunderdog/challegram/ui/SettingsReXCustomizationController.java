@@ -43,6 +43,7 @@ public class SettingsReXCustomizationController extends RecyclerViewController<V
   @Override
   protected void onCreateView (Context context, CustomRecyclerView recyclerView) {
     adapter = new SettingsAdapter(this);
+    recyclerView.setAdapter(adapter);
     
     ArrayList<ListItem> items = new ArrayList<>();
     
