@@ -24,6 +24,8 @@ import java.util.ArrayList;
 
 public class SettingsReXSpyController extends RecyclerViewController<Void> implements View.OnClickListener {
 
+  private SettingsAdapter adapter;
+
   public SettingsReXSpyController (Context context, Tdlib tdlib) {
     super(context, tdlib);
   }
@@ -49,8 +51,6 @@ public class SettingsReXSpyController extends RecyclerViewController<Void> imple
 
     adapter.setItems(items, false);
   }
-
-  private SettingsAdapter adapter;
 
   @Override
   public void onClick (View v) {

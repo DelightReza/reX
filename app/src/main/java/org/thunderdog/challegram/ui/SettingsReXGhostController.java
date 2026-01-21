@@ -28,6 +28,8 @@ import java.util.ArrayList;
 
 public class SettingsReXGhostController extends RecyclerViewController<Void> implements View.OnClickListener, ViewController.SettingsIntDelegate {
 
+  private SettingsAdapter adapter;
+
   public SettingsReXGhostController (Context context, Tdlib tdlib) {
     super(context, tdlib);
   }
@@ -60,8 +62,6 @@ public class SettingsReXGhostController extends RecyclerViewController<Void> imp
 
     adapter.setItems(items, false);
   }
-
-  private SettingsAdapter adapter;
 
   @Override
   public void onClick (View v) {
