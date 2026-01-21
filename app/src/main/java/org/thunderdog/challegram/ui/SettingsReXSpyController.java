@@ -83,13 +83,8 @@ public class SettingsReXSpyController extends RecyclerViewController<Void> imple
         })
       );
     } else if (viewId == R.id.btn_rexImportDatabase) {
-      org.thunderdog.challegram.core.SpyModeManager.instance().importDatabase(
-        context,
-        "", // TODO: Implement file picker
-        (success, message) -> UI.post(() -> {
-          UI.showToast(message, Toast.LENGTH_SHORT);
-        })
-      );
+      // TODO: Implement file picker for import
+      UI.showToast("Import feature requires file picker implementation", Toast.LENGTH_SHORT);
     } else if (viewId == R.id.btn_rexClearDatabase) {
       showConfirm(
         Lang.getString(R.string.ReXClearDatabaseConfirm),

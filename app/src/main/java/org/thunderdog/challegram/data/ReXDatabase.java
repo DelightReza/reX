@@ -40,6 +40,10 @@ public abstract class ReXDatabase extends RoomDatabase {
             ReXDatabase.class,
             DATABASE_NAME
           )
+          // TODO: Implement proper migration strategy for production
+          // Currently using fallbackToDestructiveMigration() which will
+          // delete all data on schema changes. For production, implement
+          // Migration classes to preserve user data across updates.
           .fallbackToDestructiveMigration()
           .build();
         }

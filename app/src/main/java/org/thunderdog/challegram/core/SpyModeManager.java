@@ -33,6 +33,7 @@ import java.util.concurrent.Executors;
  */
 public class SpyModeManager {
   private static final String TAG = "SpyMode";
+  private static final String OLD_CONTENT_UNAVAILABLE = "[Old content unavailable]";
   
   private static volatile SpyModeManager instance;
   private final ExecutorService executor;
@@ -64,6 +65,8 @@ public class SpyModeManager {
   
   /**
    * Called when a message is about to be deleted
+   * Note: Due to async nature and potential race conditions, we attempt to save
+   * the message immediately. If the message is already gone from TDLib, it won't be saved.
    */
   public void onMessageDeleted(@NonNull Tdlib tdlib, long chatId, long messageId) {
     if (!settings.getReXSaveDeletedMessages()) {
@@ -123,7 +126,7 @@ public class SpyModeManager {
     tdlib.client().send(new TdApi.GetMessage(chatId, messageId), result -> {
       if (result.getConstructor() == TdApi.Message.CONSTRUCTOR) {
         TdApi.Message message = (TdApi.Message) result;
-        saveMessageToDatabase(tdlib, message, false, true, "[Old content unavailable]");
+        saveMessageToDatabase(tdlib, message, false, true, OLD_CONTENT_UNAVAILABLE);
       }
     });
   }
@@ -174,8 +177,10 @@ public class SpyModeManager {
         );
         
         dao.insert(rexMessage);
-        Log.i(TAG, "Saved message: chatId=%d, msgId=%d, deleted=%b, edited=%b",
-          message.chatId, message.id, isDeleted, isEdited);
+        if (Log.needMeasureLaunchSpeed()) {
+          Log.i(TAG, "Saved message: chatId=%d, msgId=%d, deleted=%b, edited=%b",
+            message.chatId, message.id, isDeleted, isEdited);
+        }
         
       } catch (Exception e) {
         Log.e(TAG, "Error saving message to database", e);
