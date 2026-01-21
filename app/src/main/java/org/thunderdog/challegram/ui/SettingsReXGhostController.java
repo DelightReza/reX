@@ -169,8 +169,7 @@ public class SettingsReXGhostController extends RecyclerViewController<Void> imp
   }
 
   @Override
-  protected void onAttachToRecyclerView (CustomRecyclerView recyclerView) {
-    super.onAttachToRecyclerView(recyclerView);
+  protected void onCreateView (Context context, CustomRecyclerView recyclerView) {
     adapter = new SettingsAdapter(this) {
       @Override
       public void setValuedSetting (ListItem item, SettingView v, boolean isUpdate) {
@@ -198,6 +197,7 @@ public class SettingsReXGhostController extends RecyclerViewController<Void> imp
         // }
       }
     };
+    rebuildList();
   }
 
   @Override

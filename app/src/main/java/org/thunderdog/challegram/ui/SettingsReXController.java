@@ -43,6 +43,8 @@ public class SettingsReXController extends RecyclerViewController<Void> implemen
 
   @Override
   protected void onCreateView (Context context, CustomRecyclerView recyclerView) {
+    adapter = new SettingsAdapter(this);
+    
     ArrayList<ListItem> items = new ArrayList<>();
     
     // Categories header
@@ -81,11 +83,5 @@ public class SettingsReXController extends RecyclerViewController<Void> implemen
     } else if (viewId == R.id.btn_rexCustomization) {
       navigateTo(new SettingsReXCustomizationController(context, tdlib));
     }
-  }
-
-  @Override
-  protected void onAttachToRecyclerView (CustomRecyclerView recyclerView) {
-    super.onAttachToRecyclerView(recyclerView);
-    adapter = new SettingsAdapter(this);
   }
 }

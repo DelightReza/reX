@@ -42,6 +42,8 @@ public class SettingsReXCustomizationController extends RecyclerViewController<V
 
   @Override
   protected void onCreateView (Context context, CustomRecyclerView recyclerView) {
+    adapter = new SettingsAdapter(this);
+    
     ArrayList<ListItem> items = new ArrayList<>();
     
     items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.ReXCustomization));
@@ -55,11 +57,5 @@ public class SettingsReXCustomizationController extends RecyclerViewController<V
   @Override
   public void onClick (View v) {
     // Future implementation for customization features
-  }
-
-  @Override
-  protected void onAttachToRecyclerView (CustomRecyclerView recyclerView) {
-    super.onAttachToRecyclerView(recyclerView);
-    adapter = new SettingsAdapter(this);
   }
 }

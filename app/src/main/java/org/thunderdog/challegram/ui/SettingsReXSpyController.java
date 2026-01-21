@@ -25,11 +25,10 @@ import org.thunderdog.challegram.telegram.Tdlib;
 import org.thunderdog.challegram.tool.UI;
 import org.thunderdog.challegram.unsorted.Settings;
 import org.thunderdog.challegram.v.CustomRecyclerView;
-import org.thunderdog.challegram.widget.SliderWrapView;
 
 import java.util.ArrayList;
 
-public class SettingsReXSpyController extends RecyclerViewController<Void> implements View.OnClickListener, ViewController.SettingsIntDelegate, SliderWrapView.RealTimeChangeListener {
+public class SettingsReXSpyController extends RecyclerViewController<Void> implements View.OnClickListener, ViewController.SettingsIntDelegate {
 
   private SettingsAdapter adapter;
 
@@ -151,14 +150,7 @@ public class SettingsReXSpyController extends RecyclerViewController<Void> imple
   }
 
   @Override
-  public void onSliderValueChanged (View view, float factor) {
-    int sizeIndex = Math.round(factor * 5); // 0-5 for 6 options
-    Settings.instance().setReXMaxFolderSize(sizeIndex);
-  }
-
-  @Override
-  protected void onAttachToRecyclerView (CustomRecyclerView recyclerView) {
-    super.onAttachToRecyclerView(recyclerView);
+  protected void onCreateView (Context context, CustomRecyclerView recyclerView) {
     adapter = new SettingsAdapter(this) {
       @Override
       public void setValuedSetting (ListItem item, SettingView v, boolean isUpdate) {
@@ -175,14 +167,70 @@ public class SettingsReXSpyController extends RecyclerViewController<Void> imple
           v.getToggler().setRadioEnabled(Settings.instance().getReXSaveLastSeenDate(), isUpdate);
         } else if (itemId == R.id.btn_rexSaveAttachments) {
           v.getToggler().setRadioEnabled(Settings.instance().getReXSaveAttachments(), isUpdate);
-        } else if (itemId == R.id.slider_rexMaxFolderSize) {
-          String[] sizeOptions = {"300 MB", "1 GB", "2 GB", "5 GB", "16 GB", "No limit"};
-          int currentIndex = Settings.instance().getReXMaxFolderSize();
-          float factor = currentIndex / 5.0f;
-          v.setSliderInfo(factor, sizeOptions[currentIndex]);
         }
       }
     };
+    
+    ArrayList<ListItem> items = new ArrayList<>();
+    
+    // Spy essentials header
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.ReXSpyEssentials));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    
+    // Save Deleted Messages
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveDeletedMessages, 0, R.string.ReXSaveDeletedMessages));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    
+    // Save Edits History
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveEditsHistory, 0, R.string.ReXSaveEditsHistory));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+    
+    // Save in Bot Dialogs
+    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveInBotDialogs, 0, R.string.ReXSaveInBotDialogs));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+    
+    // Save Read Date
+    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveReadDate, 0, R.string.ReXSaveReadDate));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.ReXSaveReadDateDesc));
+    
+    // Save Last Seen Date
+    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveLastSeenDate, 0, R.string.ReXSaveLastSeenDate));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.ReXSaveLastSeenDateDesc));
+    
+    // Save Attachments
+    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    ListItem attachItem = new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveAttachments, 0, R.string.ReXSaveAttachments);
+    attachItem.setString(Lang.getString(R.string.ReXConfigureChatsAndLimits));
+    items.add(attachItem);
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    
+    // Attachments Folder link
+    ListItem folderItem = new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexAttachmentsFolder, 0, R.string.ReXAttachmentsFolder);
+    folderItem.setString(Lang.getString(R.string.ReXSavedAttachments));
+    items.add(folderItem);
+    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+    
+    // Max folder size header and description (slider removed for now - requires more complex integration)
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.ReXMaxFolderSize));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.ReXMaxFolderSizeDesc));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+    
+    // Database action buttons
+    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexExportDatabase, R.drawable.baseline_upload_24, R.string.ReXExportDatabase));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexImportDatabase, R.drawable.baseline_download_24, R.string.ReXImportDatabase));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexClearDatabase, R.drawable.baseline_delete_24, R.string.ReXClearDatabase));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+
+    adapter.setItems(items, false);
   }
 
   @Override
