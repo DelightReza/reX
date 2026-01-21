@@ -169,6 +169,10 @@ public class SettingsReXGhostController extends RecyclerViewController<Void> imp
       Settings.instance().setReXGoOfflineAutomatically(newValue);
       adapter.updateValuedSettingById(R.id.btn_rexGoOfflineAutomatically);
       rebuildList();
+      // Trigger Ghost Mode action if enabled
+      if (newValue) {
+        org.thunderdog.challegram.core.GhostModeManager.instance().applyAutomaticActions(tdlib);
+      }
     } else if (viewId == R.id.btn_rexReadOnInteract) {
       boolean newValue = !Settings.instance().getReXReadOnInteract();
       Settings.instance().setReXReadOnInteract(newValue);

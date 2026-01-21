@@ -76,11 +76,37 @@ public class SettingsReXSpyController extends RecyclerViewController<Void> imple
     } else if (viewId == R.id.btn_rexAttachmentsFolder) {
       UI.showToast("Attachments folder feature coming soon", Toast.LENGTH_SHORT);
     } else if (viewId == R.id.btn_rexExportDatabase) {
-      UI.showToast("Export database feature coming soon", Toast.LENGTH_SHORT);
+      org.thunderdog.challegram.core.SpyModeManager.instance().exportDatabase(
+        context,
+        (success, message) -> UI.post(() -> {
+          UI.showToast(message, Toast.LENGTH_SHORT);
+        })
+      );
     } else if (viewId == R.id.btn_rexImportDatabase) {
-      UI.showToast("Import database feature coming soon", Toast.LENGTH_SHORT);
+      org.thunderdog.challegram.core.SpyModeManager.instance().importDatabase(
+        context,
+        "", // TODO: Implement file picker
+        (success, message) -> UI.post(() -> {
+          UI.showToast(message, Toast.LENGTH_SHORT);
+        })
+      );
     } else if (viewId == R.id.btn_rexClearDatabase) {
-      UI.showToast("Clear database feature coming soon", Toast.LENGTH_SHORT);
+      showConfirm(
+        Lang.getString(R.string.ReXClearDatabaseConfirm),
+        Lang.getString(R.string.ReXClearDatabaseConfirmDesc),
+        () -> {
+          org.thunderdog.challegram.core.SpyModeManager.instance().clearDatabase(
+            tdlib.id(),
+            success -> UI.post(() -> {
+              if (success) {
+                UI.showToast("Database cleared", Toast.LENGTH_SHORT);
+              } else {
+                UI.showToast("Failed to clear database", Toast.LENGTH_SHORT);
+              }
+            })
+          );
+        }
+      );
     }
   }
 

@@ -8,6 +8,7 @@ import java.util.*
 plugins {
   id(libs.plugins.android.application.get().pluginId)
   alias(libs.plugins.kotlin.android)
+  alias(libs.plugins.kotlin.ksp)
   id("tgx-config")
   id("tgx-module")
 }
@@ -521,6 +522,8 @@ dependencies {
     libs.androidx.exifinterface.latest
   )
   implementation(libs.androidx.biometric)
+  implementation(libs.androidx.room.runtime)
+  ksp(libs.androidx.room.compiler)
   implementation(libs.androidx.palette)
   implementation(libs.androidx.collection)
   implementation(libs.androidx.interpolator)

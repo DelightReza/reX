@@ -1700,6 +1700,15 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   }
 
   private static <T extends TdApi.Object> void send (Client client, TdApi.Function<T> function, Client.ResultHandler handler) {
+    // Check if Ghost Mode should block this request
+    if (org.thunderdog.challegram.core.GhostModeManager.instance().shouldBlockRequest(function)) {
+      // Silently block the request by sending a fake success response
+      if (handler != null) {
+        handler.onResult(new TdApi.Ok());
+      }
+      return;
+    }
+    
     client.send(function, handler);
   }
 
@@ -7447,6 +7456,11 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
         return;
       }
     }
+    
+    // Save old content before updating (Spy Mode)
+    org.thunderdog.challegram.core.SpyModeManager.instance().onMessageEdited(
+      this, update.chatId, update.messageId, update.oldContent
+    );
 
     listeners.updateMessageContent(update);
     context.global().notifyUpdateMessageContent(this, update);
@@ -7549,6 +7563,13 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
     }
 
     Arrays.sort(update.messageIds);
+    
+    // Save messages before they're deleted (Spy Mode)
+    for (long messageId : update.messageIds) {
+      org.thunderdog.challegram.core.SpyModeManager.instance().onMessageDeleted(
+        this, update.chatId, messageId
+      );
+    }
 
     listeners.updateMessagesDeleted(update);
 
