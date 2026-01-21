@@ -217,6 +217,10 @@ public class Settings {
   private static final String KEY_REACTION_AVATARS_MODE = "settings_reaction_avatars";
   private static final String KEY_AUTO_UPDATE_MODE = "settings_auto_update";
   private static final String KEY_INCOGNITO = "settings_incognito";
+  private static final String KEY_REX_HIDE_READ_STATUS = "settings_rex_hide_read_status";
+  private static final String KEY_REX_HIDE_TYPING = "settings_rex_hide_typing";
+  private static final String KEY_REX_HIDE_ONLINE_STATUS = "settings_rex_hide_online_status";
+  private static final String KEY_REX_HIDE_RECORDING = "settings_rex_hide_recording";
   private static final String KEY_NIGHT_MODE = "settings_night_mode";
   private static final String KEY_VIDEO_LIMIT = "settings_video_limit";
   private static final String KEY_EARPIECE_MODE = "settings_earpiece_mode";
@@ -2986,6 +2990,39 @@ public class Settings {
     } else {
       putInt(KEY_INCOGNITO, incognitoMode);
     }
+  }
+
+  // reX Ghost Mode Settings
+  public boolean getReXHideReadStatus () {
+    return getBoolean(KEY_REX_HIDE_READ_STATUS, false);
+  }
+
+  public void setReXHideReadStatus (boolean hideReadStatus) {
+    putBoolean(KEY_REX_HIDE_READ_STATUS, hideReadStatus);
+  }
+
+  public boolean getReXHideTyping () {
+    return getBoolean(KEY_REX_HIDE_TYPING, false);
+  }
+
+  public void setReXHideTyping (boolean hideTyping) {
+    putBoolean(KEY_REX_HIDE_TYPING, hideTyping);
+  }
+
+  public boolean getReXHideOnlineStatus () {
+    return getBoolean(KEY_REX_HIDE_ONLINE_STATUS, false);
+  }
+
+  public void setReXHideOnlineStatus (boolean hideOnlineStatus) {
+    putBoolean(KEY_REX_HIDE_ONLINE_STATUS, hideOnlineStatus);
+  }
+
+  public boolean getReXHideRecording () {
+    return getBoolean(KEY_REX_HIDE_RECORDING, false);
+  }
+
+  public void setReXHideRecording (boolean hideRecording) {
+    putBoolean(KEY_REX_HIDE_RECORDING, hideRecording);
   }
 
   public interface VideoModePreferenceListener {

@@ -232,6 +232,9 @@
 
   <item type="id" name="controller_chatSettings" />
   <item type="id" name="controller_privacySettings" />
+  <item type="id" name="controller_rexSettings" />
+  <item type="id" name="controller_rexGhostMode" />
+  <item type="id" name="controller_rexSpyCustomization" />
   <item type="id" name="controller_sessions" />
   <item type="id" name="controller_websites" />
   <item type="id" name="controller_instantView" />
@@ -498,6 +501,13 @@
   <item type="id" name="btn_stickerSettings" />
   <item type="id" name="btn_themeSettings" />
   <item type="id" name="btn_tweakSettings" />
+  <item type="id" name="btn_rexSettings" />
+  <item type="id" name="btn_rexGhostMode" />
+  <item type="id" name="btn_rexSpyCustomization" />
+  <item type="id" name="btn_rexHideReadStatus" />
+  <item type="id" name="btn_rexHideTyping" />
+  <item type="id" name="btn_rexHideOnlineStatus" />
+  <item type="id" name="btn_rexHideRecording" />
   <item type="id" name="btn_faq" />
   <item type="id" name="btn_privacyPolicy" />
   <item type="id" name="btn_build" />
