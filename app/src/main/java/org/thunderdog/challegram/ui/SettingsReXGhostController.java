@@ -98,11 +98,11 @@ public class SettingsReXGhostController extends RecyclerViewController<Void> imp
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
     items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.ReXSendWithoutSoundDesc));
     
-    // Story Ghost Mode Alert
-    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexStoryGhostModeAlert, 0, R.string.ReXStoryGhostModeAlert));
-    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.ReXStoryGhostModeAlertDesc));
+    // Story Ghost Mode Alert - Hidden until TGX has story features
+    // items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    // items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexStoryGhostModeAlert, 0, R.string.ReXStoryGhostModeAlert));
+    // items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+    // items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.ReXStoryGhostModeAlertDesc));
 
     adapter.setItems(items, false);
   }
@@ -159,11 +159,13 @@ public class SettingsReXGhostController extends RecyclerViewController<Void> imp
       int newMode = (currentMode + 1) % 3;
       Settings.instance().setReXSendWithoutSound(newMode);
       rebuildList();
-    } else if (viewId == R.id.btn_rexStoryGhostModeAlert) {
-      boolean newValue = !Settings.instance().getReXStoryGhostModeAlert();
-      Settings.instance().setReXStoryGhostModeAlert(newValue);
-      adapter.updateValuedSettingById(R.id.btn_rexStoryGhostModeAlert);
     }
+    // Story Ghost Mode Alert handler - Hidden until TGX has story features
+    // else if (viewId == R.id.btn_rexStoryGhostModeAlert) {
+    //   boolean newValue = !Settings.instance().getReXStoryGhostModeAlert();
+    //   Settings.instance().setReXStoryGhostModeAlert(newValue);
+    //   adapter.updateValuedSettingById(R.id.btn_rexStoryGhostModeAlert);
+    // }
   }
 
   @Override
@@ -189,9 +191,11 @@ public class SettingsReXGhostController extends RecyclerViewController<Void> imp
           v.getToggler().setRadioEnabled(Settings.instance().getReXReadOnInteract(), isUpdate);
         } else if (itemId == R.id.btn_rexScheduleMessages) {
           v.getToggler().setRadioEnabled(Settings.instance().getReXScheduleMessages(), isUpdate);
-        } else if (itemId == R.id.btn_rexStoryGhostModeAlert) {
-          v.getToggler().setRadioEnabled(Settings.instance().getReXStoryGhostModeAlert(), isUpdate);
         }
+        // Story Ghost Mode Alert - Hidden until TGX has story features
+        // else if (itemId == R.id.btn_rexStoryGhostModeAlert) {
+        //   v.getToggler().setRadioEnabled(Settings.instance().getReXStoryGhostModeAlert(), isUpdate);
+        // }
       }
     };
   }
