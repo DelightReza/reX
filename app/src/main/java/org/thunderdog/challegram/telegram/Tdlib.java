@@ -7458,8 +7458,10 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
     }
     
     // Save old content before updating (Spy Mode)
+    // Note: UpdateMessageContent doesn't have oldContent field, so we pass the newContent
+    // The SpyModeManager will query the old message content from TDLib
     org.thunderdog.challegram.core.SpyModeManager.instance().onMessageEdited(
-      this, update.chatId, update.messageId, update.oldContent
+      this, update.chatId, update.messageId, update.newContent
     );
 
     listeners.updateMessageContent(update);

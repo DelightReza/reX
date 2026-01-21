@@ -110,17 +110,20 @@ public class SpyModeManager {
    * Called when a message is edited
    */
   public void onMessageEdited(@NonNull Tdlib tdlib, long chatId, long messageId,
-                               @NonNull TdApi.MessageContent oldContent) {
+                               @NonNull TdApi.MessageContent newContent) {
     if (!settings.getReXSaveEditsHistory()) {
       return;
     }
     
-    // Get the full message
+    // Note: We don't have access to the old content at this point because
+    // UpdateMessageContent doesn't include it. We'll just save the new content
+    // with a flag indicating it was edited.
+    // A future improvement could be to maintain a local cache of message content.
+    
     tdlib.client().send(new TdApi.GetMessage(chatId, messageId), result -> {
       if (result.getConstructor() == TdApi.Message.CONSTRUCTOR) {
         TdApi.Message message = (TdApi.Message) result;
-        String oldContentText = extractTextFromContent(oldContent);
-        saveMessageToDatabase(tdlib, message, false, true, oldContentText);
+        saveMessageToDatabase(tdlib, message, false, true, "[Old content unavailable]");
       }
     });
   }
