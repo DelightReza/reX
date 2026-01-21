@@ -45,13 +45,26 @@ public class SettingsReXController extends RecyclerViewController<Void> implemen
   protected void onCreateView (Context context, CustomRecyclerView recyclerView) {
     ArrayList<ListItem> items = new ArrayList<>();
     
-    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.ReXSettings));
+    // Categories header
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.ReXCategories));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexGhostMode, R.drawable.baseline_visibility_off_24, R.string.ReXGhostMode).setTextColorId(ColorId.textNeutral));
+    
+    // Ghost Mode
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexGhostMode, R.drawable.baseline_visibility_off_24, R.string.ReXGhostMode));
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexSpyCustomization, R.drawable.baseline_extension_24, R.string.ReXSpyCustomization).setTextColorId(ColorId.textNeutral));
+    
+    // Spy
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexSpy, R.drawable.baseline_extension_24, R.string.ReXSpy));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    
+    // Filters
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexFilters, R.drawable.baseline_filter_list_24, R.string.ReXFilters));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    
+    // Customization
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexCustomization, R.drawable.baseline_palette_24, R.string.ReXCustomization));
+    
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.ReXSettingsDesc));
 
     adapter.setItems(items, false);
   }
@@ -61,8 +74,12 @@ public class SettingsReXController extends RecyclerViewController<Void> implemen
     int viewId = v.getId();
     if (viewId == R.id.btn_rexGhostMode) {
       navigateTo(new SettingsReXGhostController(context, tdlib));
-    } else if (viewId == R.id.btn_rexSpyCustomization) {
+    } else if (viewId == R.id.btn_rexSpy) {
       navigateTo(new SettingsReXSpyController(context, tdlib));
+    } else if (viewId == R.id.btn_rexFilters) {
+      navigateTo(new SettingsReXFiltersController(context, tdlib));
+    } else if (viewId == R.id.btn_rexCustomization) {
+      navigateTo(new SettingsReXCustomizationController(context, tdlib));
     }
   }
 

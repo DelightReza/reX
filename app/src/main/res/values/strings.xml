@@ -1445,10 +1445,66 @@
   <string name="ThemeSettings">Themes and Chats</string>
   <string name="Tweaks">Interface Options</string>
   <string name="TweakSettings">Interface</string>
+  
+  <!-- reX Settings -->
   <string name="ReXSettings">reX</string>
-  <string name="ReXSettingsDesc">Ghost Mode and Spy Customization</string>
+  <string name="ReXCategories">Categories</string>
+  <string name="ReXLinks">Links</string>
+  
+  <!-- Main Categories -->
   <string name="ReXGhostMode">Ghost Mode</string>
+  <string name="ReXSpy">Spy</string>
+  <string name="ReXFilters">Filters</string>
+  <string name="ReXCustomization">Customization</string>
+  
+  <!-- Ghost Mode -->
+  <string name="ReXGhostEssentials">Ghost essentials</string>
   <string name="ReXGhostModeDesc">Hide your online activity</string>
+  <string name="ReXDontReadMessages">Don\'t Read Messages</string>
+  <string name="ReXDontReadStories">Don\'t Read Stories</string>
+  <string name="ReXDontSendOnline">Don\'t Send Online</string>
+  <string name="ReXDontSendTyping">Don\'t Send Typing</string>
+  <string name="ReXGoOfflineAutomatically">Go Offline Automatically</string>
+  <string name="ReXGhostModeLongPressDesc">Long-press any option to prevent it from changing when toggling Ghost Mode.</string>
+  <string name="ReXReadOnInteract">Read on Interact</string>
+  <string name="ReXReadOnInteractDesc">Automatically marks a message as read when you send a new one or tap a reaction.</string>
+  <string name="ReXScheduleMessages">Schedule Messages</string>
+  <string name="ReXScheduleMessagesDesc">Automatically schedules outgoing messages to send after ~12 seconds (longer for media). Using this feature, you won\'t appear online. Avoid using on unreliable networks.</string>
+  <string name="ReXSendWithoutSound">Send without Sound</string>
+  <string name="ReXSendWithoutSoundDesc">Sends outgoing messages without sound by default.</string>
+  <string name="ReXStoryGhostModeAlert">Story Ghost Mode Alert</string>
+  <string name="ReXStoryGhostModeAlertDesc">Displays an alert before opening a story, suggesting you enable Ghost Mode.</string>
+  <string name="ReXSendWithoutSoundNever">Never</string>
+  <string name="ReXSendWithoutSoundAlways">Always</string>
+  <string name="ReXSendWithoutSoundPMs">Private Messages Only</string>
+  
+  <!-- Spy Mode -->
+  <string name="ReXSpyEssentials">Spy essentials</string>
+  <string name="ReXSpyDesc">Save and track message changes</string>
+  <string name="ReXSaveDeletedMessages">Save Deleted Messages</string>
+  <string name="ReXSaveEditsHistory">Save Edits History</string>
+  <string name="ReXSaveInBotDialogs">Save in Bot Dialogs</string>
+  <string name="ReXSaveReadDate">Save Read Date</string>
+  <string name="ReXSaveReadDateDesc">Locally saves data about reading messages. This will be shown if Telegram does not provide a read date.</string>
+  <string name="ReXSaveLastSeenDate">Save Last Seen Date</string>
+  <string name="ReXSaveLastSeenDateDesc">Saves the last online date for users with hidden online status based on their actions. You\'ll be able to see very approximately when they were last online.</string>
+  <string name="ReXSaveAttachments">Save Attachments</string>
+  <string name="ReXConfigureChatsAndLimits">Configure chats &amp; limits</string>
+  <string name="ReXAttachmentsFolder">Attachments Folder</string>
+  <string name="ReXSavedAttachments">Saved Attachments</string>
+  <string name="ReXMaxFolderSize">Max folder size</string>
+  <string name="ReXMaxFolderSizeDesc">If folder size exceeds this limit, the oldest attachments will be removed from the device.</string>
+  <string name="ReXExportDatabase">Export Database</string>
+  <string name="ReXImportDatabase">Import Database</string>
+  <string name="ReXClearDatabase">Clear</string>
+  
+  <!-- Filters -->
+  <string name="ReXFiltersDesc">Filter and organize content</string>
+  
+  <!-- Customization -->
+  <string name="ReXCustomizationDesc">Customize appearance and behavior</string>
+  
+  <!-- Legacy strings (kept for compatibility) -->
   <string name="ReXSpyCustomization">Spy Customization</string>
   <string name="ReXSpyCustomizationDesc">Customize privacy and visibility</string>
   <string name="ReXHideReadStatus">Hide Read Status</string>
@@ -1459,6 +1515,7 @@
   <string name="ReXHideOnlineStatusDesc">Appear offline to others</string>
   <string name="ReXHideRecording">Hide Recording Status</string>
   <string name="ReXHideRecordingDesc">Don\'t show voice/video recording</string>
+  
   <string name="ThemeClassic">Classic</string>
   <string name="ThemeBlue">Blue</string>
   <string name="ThemeNight">Night Black</string>

@@ -217,10 +217,35 @@ public class Settings {
   private static final String KEY_REACTION_AVATARS_MODE = "settings_reaction_avatars";
   private static final String KEY_AUTO_UPDATE_MODE = "settings_auto_update";
   private static final String KEY_INCOGNITO = "settings_incognito";
+  
+  // reX Ghost Mode Settings
+  private static final String KEY_REX_GHOST_MODE_EXPANDED = "settings_rex_ghost_mode_expanded";
+  private static final String KEY_REX_GHOST_MODE_MASTER = "settings_rex_ghost_mode_master";
+  private static final String KEY_REX_DONT_READ_MESSAGES = "settings_rex_dont_read_messages";
+  private static final String KEY_REX_DONT_READ_STORIES = "settings_rex_dont_read_stories";
+  private static final String KEY_REX_DONT_SEND_ONLINE = "settings_rex_dont_send_online";
+  private static final String KEY_REX_DONT_SEND_TYPING = "settings_rex_dont_send_typing";
+  private static final String KEY_REX_GO_OFFLINE_AUTO = "settings_rex_go_offline_auto";
+  private static final String KEY_REX_READ_ON_INTERACT = "settings_rex_read_on_interact";
+  private static final String KEY_REX_SCHEDULE_MESSAGES = "settings_rex_schedule_messages";
+  private static final String KEY_REX_SEND_WITHOUT_SOUND = "settings_rex_send_without_sound";
+  private static final String KEY_REX_STORY_GHOST_ALERT = "settings_rex_story_ghost_alert";
+  
+  // reX Spy Mode Settings
+  private static final String KEY_REX_SAVE_DELETED_MESSAGES = "settings_rex_save_deleted_messages";
+  private static final String KEY_REX_SAVE_EDITS_HISTORY = "settings_rex_save_edits_history";
+  private static final String KEY_REX_SAVE_IN_BOT_DIALOGS = "settings_rex_save_in_bot_dialogs";
+  private static final String KEY_REX_SAVE_READ_DATE = "settings_rex_save_read_date";
+  private static final String KEY_REX_SAVE_LAST_SEEN_DATE = "settings_rex_save_last_seen_date";
+  private static final String KEY_REX_SAVE_ATTACHMENTS = "settings_rex_save_attachments";
+  private static final String KEY_REX_MAX_FOLDER_SIZE = "settings_rex_max_folder_size";
+  
+  // Legacy reX Settings (kept for compatibility)
   private static final String KEY_REX_HIDE_READ_STATUS = "settings_rex_hide_read_status";
   private static final String KEY_REX_HIDE_TYPING = "settings_rex_hide_typing";
   private static final String KEY_REX_HIDE_ONLINE_STATUS = "settings_rex_hide_online_status";
   private static final String KEY_REX_HIDE_RECORDING = "settings_rex_hide_recording";
+  
   private static final String KEY_NIGHT_MODE = "settings_night_mode";
   private static final String KEY_VIDEO_LIMIT = "settings_video_limit";
   private static final String KEY_EARPIECE_MODE = "settings_earpiece_mode";
@@ -2993,6 +3018,162 @@ public class Settings {
   }
 
   // reX Ghost Mode Settings
+  public boolean isGhostModeExpanded () {
+    return getBoolean(KEY_REX_GHOST_MODE_EXPANDED, false);
+  }
+
+  public void setGhostModeExpanded (boolean expanded) {
+    putBoolean(KEY_REX_GHOST_MODE_EXPANDED, expanded);
+  }
+
+  public boolean getReXGhostModeMaster () {
+    return getBoolean(KEY_REX_GHOST_MODE_MASTER, false);
+  }
+
+  public void setReXGhostModeMaster (boolean enabled) {
+    putBoolean(KEY_REX_GHOST_MODE_MASTER, enabled);
+  }
+
+  public int getReXGhostModeEnabledCount () {
+    int count = 0;
+    if (getReXDontReadMessages()) count++;
+    if (getReXDontReadStories()) count++;
+    if (getReXDontSendOnline()) count++;
+    if (getReXDontSendTyping()) count++;
+    if (getReXGoOfflineAutomatically()) count++;
+    return count;
+  }
+
+  public boolean getReXDontReadMessages () {
+    return getBoolean(KEY_REX_DONT_READ_MESSAGES, false);
+  }
+
+  public void setReXDontReadMessages (boolean enabled) {
+    putBoolean(KEY_REX_DONT_READ_MESSAGES, enabled);
+  }
+
+  public boolean getReXDontReadStories () {
+    return getBoolean(KEY_REX_DONT_READ_STORIES, false);
+  }
+
+  public void setReXDontReadStories (boolean enabled) {
+    putBoolean(KEY_REX_DONT_READ_STORIES, enabled);
+  }
+
+  public boolean getReXDontSendOnline () {
+    return getBoolean(KEY_REX_DONT_SEND_ONLINE, false);
+  }
+
+  public void setReXDontSendOnline (boolean enabled) {
+    putBoolean(KEY_REX_DONT_SEND_ONLINE, enabled);
+  }
+
+  public boolean getReXDontSendTyping () {
+    return getBoolean(KEY_REX_DONT_SEND_TYPING, false);
+  }
+
+  public void setReXDontSendTyping (boolean enabled) {
+    putBoolean(KEY_REX_DONT_SEND_TYPING, enabled);
+  }
+
+  public boolean getReXGoOfflineAutomatically () {
+    return getBoolean(KEY_REX_GO_OFFLINE_AUTO, false);
+  }
+
+  public void setReXGoOfflineAutomatically (boolean enabled) {
+    putBoolean(KEY_REX_GO_OFFLINE_AUTO, enabled);
+  }
+
+  public boolean getReXReadOnInteract () {
+    return getBoolean(KEY_REX_READ_ON_INTERACT, false);
+  }
+
+  public void setReXReadOnInteract (boolean enabled) {
+    putBoolean(KEY_REX_READ_ON_INTERACT, enabled);
+  }
+
+  public boolean getReXScheduleMessages () {
+    return getBoolean(KEY_REX_SCHEDULE_MESSAGES, false);
+  }
+
+  public void setReXScheduleMessages (boolean enabled) {
+    putBoolean(KEY_REX_SCHEDULE_MESSAGES, enabled);
+  }
+
+  public int getReXSendWithoutSound () {
+    return getInt(KEY_REX_SEND_WITHOUT_SOUND, 0); // 0=Never, 1=Always, 2=PMs only
+  }
+
+  public void setReXSendWithoutSound (int mode) {
+    putInt(KEY_REX_SEND_WITHOUT_SOUND, mode);
+  }
+
+  public boolean getReXStoryGhostModeAlert () {
+    return getBoolean(KEY_REX_STORY_GHOST_ALERT, false);
+  }
+
+  public void setReXStoryGhostModeAlert (boolean enabled) {
+    putBoolean(KEY_REX_STORY_GHOST_ALERT, enabled);
+  }
+
+  // reX Spy Mode Settings
+  public boolean getReXSaveDeletedMessages () {
+    return getBoolean(KEY_REX_SAVE_DELETED_MESSAGES, false);
+  }
+
+  public void setReXSaveDeletedMessages (boolean enabled) {
+    putBoolean(KEY_REX_SAVE_DELETED_MESSAGES, enabled);
+  }
+
+  public boolean getReXSaveEditsHistory () {
+    return getBoolean(KEY_REX_SAVE_EDITS_HISTORY, false);
+  }
+
+  public void setReXSaveEditsHistory (boolean enabled) {
+    putBoolean(KEY_REX_SAVE_EDITS_HISTORY, enabled);
+  }
+
+  public boolean getReXSaveInBotDialogs () {
+    return getBoolean(KEY_REX_SAVE_IN_BOT_DIALOGS, false);
+  }
+
+  public void setReXSaveInBotDialogs (boolean enabled) {
+    putBoolean(KEY_REX_SAVE_IN_BOT_DIALOGS, enabled);
+  }
+
+  public boolean getReXSaveReadDate () {
+    return getBoolean(KEY_REX_SAVE_READ_DATE, false);
+  }
+
+  public void setReXSaveReadDate (boolean enabled) {
+    putBoolean(KEY_REX_SAVE_READ_DATE, enabled);
+  }
+
+  public boolean getReXSaveLastSeenDate () {
+    return getBoolean(KEY_REX_SAVE_LAST_SEEN_DATE, false);
+  }
+
+  public void setReXSaveLastSeenDate (boolean enabled) {
+    putBoolean(KEY_REX_SAVE_LAST_SEEN_DATE, enabled);
+  }
+
+  public boolean getReXSaveAttachments () {
+    return getBoolean(KEY_REX_SAVE_ATTACHMENTS, false);
+  }
+
+  public void setReXSaveAttachments (boolean enabled) {
+    putBoolean(KEY_REX_SAVE_ATTACHMENTS, enabled);
+  }
+
+  public int getReXMaxFolderSize () {
+    return getInt(KEY_REX_MAX_FOLDER_SIZE, 0); // 0=300MB, 1=1GB, 2=2GB, 3=5GB, 4=16GB, 5=No limit
+  }
+
+  public void setReXMaxFolderSize (int sizeIndex) {
+    putInt(KEY_REX_MAX_FOLDER_SIZE, sizeIndex);
+  }
+
+  // Legacy reX Settings (kept for compatibility)
   public boolean getReXHideReadStatus () {
     return getBoolean(KEY_REX_HIDE_READ_STATUS, false);
   }
