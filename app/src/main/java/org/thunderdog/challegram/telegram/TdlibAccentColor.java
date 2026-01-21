@@ -79,7 +79,6 @@ public final class TdlibAccentColor {
   }
   public static final int BUILT_IN_COLOR_COUNT = BuiltInId.PINK + 1;
 
-  public static final TdlibAccentColor DEFAULT = new TdlibAccentColor(BuiltInId.BLUE);
 
   private final int id;
   private @Nullable TdApi.AccentColor accentColor;

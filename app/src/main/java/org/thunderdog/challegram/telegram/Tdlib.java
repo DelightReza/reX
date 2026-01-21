@@ -3195,9 +3195,9 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
     return accentColor(accentColorId);
   }
 
-  public TdlibAccentColor senderAccentColor (TdApi.MessageSender sender) {
+  public @Nullable TdlibAccentColor senderAccentColor (TdApi.MessageSender sender) {
     if (sender == null) {
-      return TdlibAccentColor.DEFAULT;
+      return null;
     }
     switch (sender.getConstructor()) {
       case TdApi.MessageSenderUser.CONSTRUCTOR: {
