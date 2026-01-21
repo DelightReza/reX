@@ -38,9 +38,6 @@ class BaseApplication : MultiDexApplication(), Configuration.Provider {
   override fun onCreate() {
     super.onCreate()
     scope = MainScope()
-    
-    // Initialize reX Spy Mode Manager
-    org.thunderdog.challegram.core.SpyModeManager.instance().initialize(applicationContext)
 
     PushManagerBridge.initialize(
       scope,

@@ -56,10 +56,17 @@ public class SpyModeManager {
     return instance;
   }
   
-  public void initialize(@NonNull Context context) {
+  /**
+   * Ensures database is initialized. Called lazily only when needed.
+   */
+  private void ensureDatabase() {
     if (database == null) {
-      database = ReXDatabase.getInstance(context);
-      Log.i(TAG, "SpyModeManager initialized");
+      synchronized (this) {
+        if (database == null) {
+          database = ReXDatabase.getInstance(org.thunderdog.challegram.tool.UI.getAppContext());
+          Log.i(TAG, "SpyModeManager database initialized lazily");
+        }
+      }
     }
   }
   
@@ -69,6 +76,7 @@ public class SpyModeManager {
    * the message immediately. If the message is already gone from TDLib, it won't be saved.
    */
   public void onMessageDeleted(@NonNull Tdlib tdlib, long chatId, long messageId) {
+    ensureDatabase();
     if (!settings.getReXSaveDeletedMessages()) {
       return;
     }
@@ -114,6 +122,8 @@ public class SpyModeManager {
    */
   public void onMessageEdited(@NonNull Tdlib tdlib, long chatId, long messageId,
                                @NonNull TdApi.MessageContent newContent) {
+    ensureDatabase();
+    
     if (!settings.getReXSaveEditsHistory()) {
       return;
     }
@@ -251,6 +261,8 @@ public class SpyModeManager {
    * Clear all spy mode data
    */
   public void clearDatabase(int accountId, @NonNull ClearCallback callback) {
+    ensureDatabase();
+    
     if (database == null) {
       callback.onComplete(false);
       return;
