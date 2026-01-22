@@ -2423,6 +2423,9 @@ public class MessagesController extends ViewController<MessagesController.Argume
 
     public @Nullable TdApi.Background wallpaperObject;
 
+    public @Nullable TdApi.Message messageReplyToExternalMessage;
+    public @Nullable TdApi.InputTextQuote messageReplyToExternalMessageQuote;
+
     public Arguments (Tdlib tdlib, TdApi.ChatList chatList, TdApi.Chat chat, @Nullable ThreadInfo messageThread, @Nullable TdApi.MessageTopic messageTopicId, TdApi.SearchMessagesFilter filter) {
       this.constructor = 0;
       this.chatList = chatList;
@@ -2551,6 +2554,12 @@ public class MessagesController extends ViewController<MessagesController.Argume
 
     public Arguments setWallpaperObject (TdApi.Background wallpaperObject) {
       this.wallpaperObject = wallpaperObject;
+      return this;
+    }
+
+    public Arguments setInputReplyToExternalMessage(TdApi.Message replyToExternalMessage, @Nullable TdApi.InputTextQuote replyToExternalMessageQuote){
+      this.messageReplyToExternalMessage = replyToExternalMessage;
+      this.messageReplyToExternalMessageQuote = replyToExternalMessageQuote;
       return this;
     }
 
