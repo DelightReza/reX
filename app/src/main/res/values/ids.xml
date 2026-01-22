@@ -78,7 +78,10 @@
   <item type="id" name="menu_btn_pictureInPicture" />
 
   <item type="id" name="menu_btn_up" />
-  <item type="id" name="menu_btn_down" />
+  <parameter name="menu_btn_down" />
+  <item type="id" name="menu_btn_create_quote" />
+  <item type="id" name="menu_btn_quote_in_other_chat" />
+  <item type="id" name="menu_btn_reply_in_other_chat" />
 
   <item type="id" name="more_btn_settings" />
   <item type="id" name="more_btn_help" />
