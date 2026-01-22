@@ -254,6 +254,7 @@
   <item type="id" name="controller_editChatFolderInviteLink" />
   <item type="id" name="controller_chatFolderInviteLink" />
   <item type="id" name="controller_editChatFolders" />
+  <item type="id" name="controller_editSavedMessagesTagLabel" />
   <item type="id" name="controller_selectChats" />
 
   <item type="id" name="separator" />

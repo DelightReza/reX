@@ -2410,6 +2410,9 @@
   <string name="ReceivedXStars_other">%3$s received %1$s stars for %2$s</string>
   <string name="OpenMessage">View Message</string>
   <string name="SavedMessages">Saved Messages</string>
+  <string name="SavedMessagesTagLabel">Tag Label</string>
+  <string name="SavedMessagesTagLabelHint">Set a custom label for this tag (Premium feature, max 12 characters)</string>
+  <string name="SavedMessagesTagLabelPremiumRequired">**Premium subscription required** to set custom tag labels.</string>
   <string name="Saved">Saved</string>
   <string name="direct_messages_enabled">Direct messages were enabled in this channel</string>
   <string name="channel_enable_dm">%1$s now accepts direct messages</string>
