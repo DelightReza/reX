@@ -542,6 +542,7 @@
   <item type="id" name="btn_notifications" />
   <item type="id" name="btn_birthdate" />
   <item type="id" name="btn_addBirthdate" />
+  <item type="id" name="btn_profileNote" />
   <item type="id" name="btn_groupsInCommon" />
   <item type="id" name="btn_chatBackground" />
   <item type="id" name="btn_forcePlainChannels" />

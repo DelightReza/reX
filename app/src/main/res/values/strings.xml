@@ -1787,6 +1787,7 @@
   <string name="ViewPackPreview">View Pack</string>
   <string name="UserBio">Bio</string>
   <string name="UserBirthdate">Birthday</string>
+  <string name="ProfileNote">Note</string>
   <string name="BotInfo">Description</string>
   <string name="BotDescription">Intro</string>
   <string name="EditBotUsername">Public Link</string>
