@@ -41,7 +41,7 @@ class Loader:
         self.cache_dir = os.path.join(ApplicationLoader.applicationContext.getFilesDir().getAbsolutePath(),
                                       "re_extera_cache")
         self.cache_file = os.path.join(self.cache_dir, "cached.dat")
-        self.download_url = DEFAULT_URL  # URL для скачивания
+        self.download_url = DEFAULT_URL  # Download URL
 
         if not os.path.exists(self.cache_dir):
             os.makedirs(self.cache_dir)
@@ -56,6 +56,19 @@ class Loader:
         except Exception as e:
             self.plugin.log(f"Error getting cached version: {e}")
             return 0
+
+    def fetch_download_url(self):
+        """Fetch download URL from VERSION_URL"""
+        try:
+            r = requests.get(VERSION_URL, timeout=5)
+            r.raise_for_status()
+            lines = r.text.strip().split('\n')
+            if len(lines) >= 2:
+                return lines[1].strip()
+            return DEFAULT_URL
+        except Exception as e:
+            self.plugin.log(f"Error getting URL from actual.txt: {e}, using default")
+            return DEFAULT_URL
 
     def check_for_updates(self):
         try:
@@ -178,16 +191,8 @@ class Loader:
                     self.plugin.log(f"Error during update check: {e}")
             else:
                 self.plugin.log("No cache found, downloading...")
-                try:
-                    r = requests.get(VERSION_URL, timeout=5)
-                    r.raise_for_status()
-                    lines = r.text.strip().split('\n')
-                    if len(lines) >= 2:
-                        self.download_url = lines[1].strip()
-                        self.plugin.log(f"Initial download URL: {self.download_url}")
-                except Exception as e:
-                    self.plugin.log(f"Error getting URL from actual.txt: {e}, using default")
-                    self.download_url = DEFAULT_URL
+                self.download_url = self.fetch_download_url()
+                self.plugin.log(f"Initial download URL: {self.download_url}")
 
                 dex_bytes = self.download_and_cache_dex()
                 self.start_from_bytes(dex_bytes)
