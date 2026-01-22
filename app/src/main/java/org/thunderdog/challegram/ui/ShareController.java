@@ -210,6 +210,10 @@ public class ShareController extends TelegramViewController<ShareController.Args
 
     private TdApi.MessageSendOptions defaultSendOptions;
 
+    private boolean isReplyToOtherChat;
+    private @Nullable TdApi.InputTextQuote inputTextQuote;
+    private ReplyToOtherChatDelegate replyToOtherChatDelegate;
+
     public Args (TdApi.Message message) {
       this(new TdApi.Message[]{message});
     }
@@ -337,6 +341,18 @@ public class ShareController extends TelegramViewController<ShareController.Args
       this.messageThreadId = messageThreadId;
       return this;
     }
+
+    public Args setIsReplyToOtherChat(boolean value, ReplyToOtherChatDelegate delegate){
+      this.isReplyToOtherChat = value;
+      this.replyToOtherChatDelegate = delegate;
+      this.inputTextQuote = null;
+      return this;
+    }
+  }
+
+  @FunctionalInterface
+  public interface ReplyToOtherChatDelegate {
+    void repliedTo(long chatId, @Nullable TdApi.MessageTopicForum topicForum);
   }
 
   public ShareController (Context context, Tdlib tdlib) {

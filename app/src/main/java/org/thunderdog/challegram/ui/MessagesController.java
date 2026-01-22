@@ -6399,22 +6399,47 @@ public class MessagesController extends ViewController<MessagesController.Argume
   }
 
   public void highlightMessage (MessageId messageId, MessageId fromMessageId) {
+    highlightMessage(messageId, fromMessageId, null);
+  }
+
+  public void highlightMessage (MessageId messageId, MessageId fromMessageId, @Nullable org.thunderdog.challegram.data.TGMessage.TextQuoteInfo quoteInfo) {
     if (inOnlyFoundMode()) {
       manager.setHighlightMessageId(messageId, MessagesManager.HIGHLIGHT_MODE_NORMAL);
       onSetSearchFilteredShowMode(false);
       return;
     }
     long[] returnToMessageIds = manager.extendReturnToMessageIdStack(fromMessageId);
-    highlightMessage(messageId, returnToMessageIds);
+    highlightMessage(messageId, returnToMessageIds, quoteInfo);
   }
 
   public void highlightMessage (MessageId messageId, long[] returnToMessageIds) {
+    highlightMessage(messageId, returnToMessageIds, null);
+  }
+
+  public void highlightMessage (MessageId messageId, long[] returnToMessageIds, @Nullable org.thunderdog.challegram.data.TGMessage.TextQuoteInfo quoteInfo) {
     if (inPreviewSearchMode()) {
       tdlib.ui().openMessage(this, getChatId(), messageId, null);
       return;
     }
-    manager.highlightMessage(messageId, MessagesManager.HIGHLIGHT_MODE_NORMAL, returnToMessageIds, pagerScrollPosition == 0);
+    manager.highlightMessage(messageId, MessagesManager.HIGHLIGHT_MODE_NORMAL, returnToMessageIds, pagerScrollPosition == 0, quoteInfo);
     showMessagesListIfNeeded();
+  }
+
+  public void replyMessageInOtherChat(TdApi.Message message, @Nullable TdApi.InputTextQuote quote) {
+    if(message == null) return;
+    hideAllKeyboards();
+    final ShareController c = new ShareController(context, tdlib);
+    c.setArguments(new ShareController.Args(message).setIsReplyToOtherChat(true,(chatId, topicForum) -> {
+      MessagesController mc = new MessagesController(context, tdlib);
+      TdApi.Chat chat = tdlib().chat(chatId);
+      mc.setArguments(new Arguments(tdlib, null, chat, null, topicForum, null).setInputReplyToExternalMessage(message, quote));
+      mc.addOneShotFocusListener(() -> {
+        mc.destroyStackItemAt(mc.stackSize() - 2);
+      });
+      navigateTo(mc);
+    }));
+    c.show();
+    hideCursorsForInputView();
   }
 
   public static class ReplyInfo {

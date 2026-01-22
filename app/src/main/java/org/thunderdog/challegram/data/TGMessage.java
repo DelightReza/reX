@@ -169,6 +169,16 @@ import tgx.td.TdExt;
 import tgx.td.data.MessageWithProperties;
 
 public abstract class TGMessage implements InvalidateContentProvider, TdlibDelegate, FactorAnimator.Target, Comparable<TGMessage>, Counter.Callback, TGAvatars.Callback, TranslationsManager.Translatable {
+  public static class TextQuoteInfo {
+    public final int utf16Position;
+    public final int utf16Length;
+
+    public TextQuoteInfo(int position, int length) {
+      this.utf16Position = position;
+      this.utf16Length = length;
+    }
+  }
+
   private static final int MAXIMUM_CHANNEL_MERGE_TIME_DIFF = 150;
   private static final int MAXIMUM_COMMON_MERGE_TIME_DIFF = 900;
 
@@ -2950,6 +2960,15 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
             if (replyData != null && replyData.getError() != null) {
               buildContentHint(view, getReplyLocationProvider(), false).show(tdlib, replyData.toErrorText());
             } else {
+              // Extract quote info if present
+              TextQuoteInfo quoteInfo = null;
+              if (replyToMessage.quote != null && replyToMessage.quote.text != null) {
+                quoteInfo = new TextQuoteInfo(
+                  replyToMessage.quote.position,
+                  replyToMessage.quote.text.text.length()
+                );
+              }
+
               if (replyToMessage.chatId != msg.chatId) {
                 if (replyToMessage.chatId == 0 || replyToMessage.messageId == 0) {
                   buildContentHint(view, getReplyLocationProvider(), false).show(tdlib, Lang.getString(R.string.MessageReplyPrivate));
@@ -2959,7 +2978,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
               } else if (isScheduled()) {
                 tdlib.ui().openMessage(controller(), replyToMessage.chatId, new MessageId(replyToMessage), openParameters());
               } else {
-                highlightOtherMessage(new MessageId(replyToMessage));
+                highlightOtherMessage(new MessageId(replyToMessage), quoteInfo);
               }
             }
           }
@@ -2975,7 +2994,11 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   });
 
   protected final void highlightOtherMessage (MessageId messageId) {
-    manager.controller().highlightMessage(messageId, toMessageId());
+    highlightOtherMessage(messageId, null);
+  }
+
+  protected final void highlightOtherMessage (MessageId messageId, @Nullable TextQuoteInfo quoteInfo) {
+    manager.controller().highlightMessage(messageId, toMessageId(), quoteInfo);
   }
 
   protected final void highlightOtherMessage (long otherMessageId) {

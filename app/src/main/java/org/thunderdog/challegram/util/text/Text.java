@@ -2816,6 +2816,11 @@ public class Text implements Runnable, Emoji.CountLimiter, CounterTextPart, List
   @Nullable
   private QuoteBackground pressedQuote;
 
+  // Quote highlight fields
+  private int quoteHighlightStart = -1;
+  private int quoteHighlightEnd = -1;
+  private float quoteHighlightAlpha = 0f;
+
   @Nullable
   private PressHighlight pressHighlight;
   private int touchX, touchY;
@@ -2855,6 +2860,77 @@ public class Text implements Runnable, Emoji.CountLimiter, CounterTextPart, List
       }
     }
     setInLongPress(false);
+  }
+
+  public void setQuoteHighlight (int charStart, int charEnd, float alpha) {
+    this.quoteHighlightStart = charStart;
+    this.quoteHighlightEnd = charEnd;
+    this.quoteHighlightAlpha = alpha;
+  }
+
+  public void clearQuoteHighlight () {
+    this.quoteHighlightStart = -1;
+    this.quoteHighlightEnd = -1;
+  }
+
+  public void clearQuoteHighlightAlpha () {
+    this.quoteHighlightAlpha = 0f;
+  }
+
+  public int getCharIndexAt(float x, float y) {
+    if (parts == null || parts.isEmpty()) return -1;
+
+    TextPart bestPart = null;
+    float minDy = Float.MAX_VALUE;
+
+    for (TextPart part : parts) {
+      int partY = part.getY();
+      int partH = getLineHeight(part.getLineIndex());
+
+      float centerY = partY + partH / 2f;
+      float dy = Math.abs(y - centerY);
+
+      if (dy < minDy) {
+        minDy = dy;
+        bestPart = part;
+      }
+    }
+
+    if (bestPart == null) return -1;
+
+    int lineStart = bestPart.getStart();
+    int lineEnd = bestPart.getEnd();
+
+    if (x <= bestPart.getX()) {
+      return lineStart;
+    }
+    if (x >= bestPart.getX() + bestPart.getWidth()) {
+      return lineEnd;
+    }
+
+    String line = bestPart.getLine();
+    TextPaint paint = getTextPaint(bestPart.getEntity());
+
+    float currentX = bestPart.getX();
+    for (int i = lineStart; i < lineEnd; ) {
+      int codePoint = line.codePointAt(i);
+      int charCount = Character.charCount(codePoint);
+      String charStr = line.substring(i, i + charCount);
+      float charWidth = paint.measureText(charStr);
+
+      if (x >= currentX && x < currentX + charWidth) {
+        if (x < currentX + charWidth / 2f) {
+          return i;
+        } else {
+          return i + charCount;
+        }
+      }
+
+      currentX += charWidth;
+      i += charCount;
+    }
+
+    return lineEnd;
   }
 
   private void clearTouch () {
