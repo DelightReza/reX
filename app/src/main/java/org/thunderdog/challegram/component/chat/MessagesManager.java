@@ -2241,7 +2241,7 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
           }
           case TGMessage.REMOVE_COMBINATION: {
             // --- REX MOD START: Keep deleted messages as ghosts ---
-            if (RexConfig.INSTANCE.isSpyEnabled() && RexConfig.INSTANCE.getSaveDeletedMessages()) {
+            if (RexConfig.INSTANCE.isSpyEnabled() && RexConfig.INSTANCE.saveDeletedMessages()) {
               // Mark the message as a ghost instead of removing it
               RexGhostManager.INSTANCE.markAsGhost(messageId);
               
@@ -2281,7 +2281,7 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
           }
           case TGMessage.REMOVE_COMPLETELY: {
             // --- REX MOD START: Keep deleted messages as ghosts ---
-            if (RexConfig.INSTANCE.isSpyEnabled() && RexConfig.INSTANCE.getSaveDeletedMessages()) {
+            if (RexConfig.INSTANCE.isSpyEnabled() && RexConfig.INSTANCE.saveDeletedMessages()) {
               // Mark the message as a ghost instead of removing it
               RexGhostManager.INSTANCE.markAsGhost(messageId);
               

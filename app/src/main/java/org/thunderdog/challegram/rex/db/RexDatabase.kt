@@ -68,7 +68,9 @@ abstract class RexDatabase : RoomDatabase() {
                     RexDatabase::class.java,
                     "rex_database"
                 )
-                .fallbackToDestructiveMigration() // For simplicity, drop and recreate on version change
+                // TODO: For production, implement proper migration strategy
+                // Currently uses destructive migration which deletes all data on schema changes
+                .fallbackToDestructiveMigration()
                 .allowMainThreadQueries().build() // TODO: For production, use coroutines/background threads
                 INSTANCE = instance
                 instance

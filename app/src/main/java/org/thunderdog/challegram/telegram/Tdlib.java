@@ -9740,7 +9740,9 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
           }
         }
 
-        // 3. Track MESSAGE EDITS (Part 2: Edit History)
+        // 3. Track MESSAGE EDITS
+        // This saves the old text content before it's replaced, allowing users
+        // to view the full edit history of any message
         if (update.getConstructor() == TdApi.UpdateMessageContent.CONSTRUCTOR) {
           TdApi.UpdateMessageContent contentUpdate = (TdApi.UpdateMessageContent) update;
           // First, get the OLD message content before it's replaced
