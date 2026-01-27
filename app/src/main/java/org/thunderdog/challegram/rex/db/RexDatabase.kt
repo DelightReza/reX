@@ -12,28 +12,38 @@ package org.thunderdog.challegram.rex.db
 import android.content.Context
 import androidx.room.*
 
+/**
+ * Entity for storing saved/deleted messages
+ */
 @Entity(tableName = "rex_saved_messages")
 data class SavedMessage(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val chatId: Long,
     val messageId: Long,
     val text: String?,
-    val senderId: Long,
+    val senderId: Long = 0,
     val timestamp: Int,
-    var isDeleted: Boolean = false // If true, this was deleted by the sender
+    var isDeleted: Boolean = false
 )
 
+/**
+ * Entity for storing message edit history
+ */
 @Entity(tableName = "edit_history")
-data class EditVersion(
+data class EditHistory(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val messageId: Long,
-    val chatId: Long,
+    val originalMessageId: Long,
+    val chatId: Long = 0,
     val oldText: String,
-    val dateEdited: Int
+    val timestamp: Int
 )
 
+/**
+ * DAO for reX database operations
+ */
 @Dao
 interface RexDao {
+    // SavedMessage operations
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertMessage(msg: SavedMessage)
 
@@ -48,13 +58,19 @@ interface RexDao {
 
     // Edit history operations
     @Insert
-    fun saveEdit(edit: EditVersion)
+    fun insertEdit(edit: EditHistory)
 
-    @Query("SELECT * FROM edit_history WHERE messageId = :mid ORDER BY dateEdited DESC")
-    fun getEdits(mid: Long): List<EditVersion>
+    @Query("SELECT * FROM edit_history WHERE originalMessageId = :messageId ORDER BY timestamp DESC")
+    fun getEdits(messageId: Long): List<EditHistory>
+
+    @Query("SELECT COUNT(*) FROM edit_history WHERE originalMessageId = :messageId")
+    fun hasEdits(messageId: Long): Int
 }
 
-@Database(entities = [SavedMessage::class, EditVersion::class], version = 2, exportSchema = false)
+/**
+ * Room database for reX data persistence
+ */
+@Database(entities = [SavedMessage::class, EditHistory::class], version = 2, exportSchema = false)
 abstract class RexDatabase : RoomDatabase() {
     abstract fun rexDao(): RexDao
 

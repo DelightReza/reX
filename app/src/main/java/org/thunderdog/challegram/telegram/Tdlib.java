@@ -131,7 +131,7 @@ import me.vkryl.core.lambda.RunnableInt;
 import me.vkryl.core.lambda.RunnableLong;
 import me.vkryl.core.util.ConditionalExecutor;
 import org.thunderdog.challegram.rex.RexConfig;
-import org.thunderdog.challegram.rex.db.EditVersion;
+import org.thunderdog.challegram.rex.db.EditHistory;
 import org.thunderdog.challegram.rex.db.RexDatabase;
 import org.thunderdog.challegram.rex.db.SavedMessage;
 import tgx.app.RecaptchaProviderRegistry;
@@ -9758,14 +9758,14 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
               
               // Only save if text actually changed
               if (!oldText.equals(newText)) {
-                EditVersion edit = new EditVersion(
+                EditHistory edit = new EditHistory(
                   0, // auto-generated id
                   contentUpdate.messageId,
                   contentUpdate.chatId,
                   oldText,
                   (int)(System.currentTimeMillis() / 1000)
                 );
-                RexDatabase.Companion.get(context()).rexDao().saveEdit(edit);
+                RexDatabase.Companion.get(context()).rexDao().insertEdit(edit);
               }
             }
           }
