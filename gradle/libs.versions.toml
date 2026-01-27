@@ -50,6 +50,8 @@ androidx-palette = "1.0.0"
 androidx-collection = "1.5.0"
 androidx-interpolator = "1.0.0"
 
+androidx-room = "2.6.1"
+
 firebase-messaging-legacy = "22.0.0" # 23.0.0+ requires minSdk 19
 firebase-messaging-lollipop = "24.1.2" # 25.0.0+ requires minSdk 23
 firebase-messaging-latest = "25.0.1"
@@ -117,6 +119,10 @@ androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "a
 androidx-interpolator = { module = "androidx.interpolator:interpolator", version.ref = "androidx-interpolator" }
 androidx-collection = { module = "androidx.collection:collection", version.ref = "androidx-collection" }
 androidx-palette = { module = "androidx.palette:palette", version.ref = "androidx-palette" }
+
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "androidx-room" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "androidx-room" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "androidx-room" }
 
 androidx-core-ktx-legacy = { module = "androidx.core:core-ktx", version.ref = "androidx-core-legacy" }
 androidx-core-ktx-latest = { module = "androidx.core:core-ktx", version.ref = "androidx-core-latest" }

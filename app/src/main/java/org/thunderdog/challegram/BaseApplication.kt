@@ -21,6 +21,8 @@ import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import org.thunderdog.challegram.push.FirebaseDeviceTokenRetriever
+import org.thunderdog.challegram.rex.RexConfig
+import org.thunderdog.challegram.rex.db.RexDatabase
 import org.thunderdog.challegram.service.PushHandler
 import org.thunderdog.challegram.telegram.TdlibNotificationUtils
 import org.thunderdog.challegram.tool.UI
@@ -38,6 +40,10 @@ class BaseApplication : MultiDexApplication(), Configuration.Provider {
   override fun onCreate() {
     super.onCreate()
     scope = MainScope()
+
+    // Initialize reX features
+    RexConfig.init(this)
+    RexDatabase.get(this)
 
     PushManagerBridge.initialize(
       scope,

@@ -8,6 +8,7 @@ import java.util.*
 plugins {
   id(libs.plugins.android.application.get().pluginId)
   alias(libs.plugins.kotlin.android)
+  alias(libs.plugins.kotlin.kapt)
   id("tgx-config")
   id("tgx-module")
 }
@@ -524,6 +525,10 @@ dependencies {
   implementation(libs.androidx.palette)
   implementation(libs.androidx.collection)
   implementation(libs.androidx.interpolator)
+  // Room Database: https://developer.android.com/jetpack/androidx/releases/room
+  implementation(libs.androidx.room.runtime)
+  implementation(libs.androidx.room.ktx)
+  kapt(libs.androidx.room.compiler)
   // CameraX: https://developer.android.com/jetpack/androidx/releases/camera
   flavorImplementation(
     libs.androidx.camera.camera2.legacy,
