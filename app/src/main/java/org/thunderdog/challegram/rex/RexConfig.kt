@@ -47,5 +47,6 @@ object RexConfig {
         set(v) = prefs.edit().putBoolean("spy_save_deleted", v).apply()
 
     // --- FORCE READ REQUEST (for bypass) ---
+    @Volatile
     var isForceReadRequest: Boolean = false
 }

@@ -14,8 +14,6 @@ import android.view.View;
 
 import org.thunderdog.challegram.R;
 import org.thunderdog.challegram.component.base.SettingView;
-import org.thunderdog.challegram.core.Lang;
-import org.thunderdog.challegram.navigation.ViewController;
 import org.thunderdog.challegram.rex.RexConfig;
 import org.thunderdog.challegram.telegram.Tdlib;
 import org.thunderdog.challegram.v.CustomRecyclerView;

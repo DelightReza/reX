@@ -51,7 +51,7 @@ abstract class RexDatabase : RoomDatabase() {
                     context.applicationContext,
                     RexDatabase::class.java,
                     "rex_database"
-                ).allowMainThreadQueries().build() // For simplicity. In prod use coroutines.
+                ).allowMainThreadQueries().build() // TODO: For production, use coroutines/background threads
                 INSTANCE = instance
                 instance
             }
