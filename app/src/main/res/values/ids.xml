@@ -1418,6 +1418,7 @@
 
   <!-- reX Settings -->
   <item type="id" name="controller_rexSettings" />
+  <item type="id" name="btn_rexSettings" />
   <item type="id" name="btn_rexGhostMode" />
   <item type="id" name="btn_rexGhostNoRead" />
   <item type="id" name="btn_rexGhostNoOnline" />
