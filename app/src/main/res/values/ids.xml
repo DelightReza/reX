@@ -1415,4 +1415,13 @@
   <item type="id" name="btn_playback_speed_1_2" />
   <item type="id" name="btn_playback_speed_1_5" />
   <item type="id" name="btn_playback_speed_2_0" />
+
+  <!-- reX Settings -->
+  <item type="id" name="controller_rexSettings" />
+  <item type="id" name="btn_rexGhostMode" />
+  <item type="id" name="btn_rexGhostNoRead" />
+  <item type="id" name="btn_rexGhostNoOnline" />
+  <item type="id" name="btn_rexGhostNoTyping" />
+  <item type="id" name="btn_rexSpyEnabled" />
+  <item type="id" name="btn_rexSaveDeleted" />
 </resources>
