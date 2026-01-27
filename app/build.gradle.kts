@@ -8,7 +8,7 @@ import java.util.*
 plugins {
   id(libs.plugins.android.application.get().pluginId)
   alias(libs.plugins.kotlin.android)
-  alias(libs.plugins.kotlin.kapt)
+  kotlin("kapt")
   id("tgx-config")
   id("tgx-module")
 }
