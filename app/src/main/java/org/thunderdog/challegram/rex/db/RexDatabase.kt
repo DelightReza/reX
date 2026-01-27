@@ -23,6 +23,15 @@ data class SavedMessage(
     var isDeleted: Boolean = false // If true, this was deleted by the sender
 )
 
+@Entity(tableName = "edit_history")
+data class EditVersion(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val messageId: Long,
+    val chatId: Long,
+    val oldText: String,
+    val dateEdited: Int
+)
+
 @Dao
 interface RexDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -36,9 +45,16 @@ interface RexDao {
 
     @Query("SELECT * FROM rex_saved_messages WHERE isDeleted = 1 ORDER BY timestamp DESC")
     fun getAllDeletedMessages(): List<SavedMessage>
+
+    // Edit history operations
+    @Insert
+    fun saveEdit(edit: EditVersion)
+
+    @Query("SELECT * FROM edit_history WHERE messageId = :mid ORDER BY dateEdited DESC")
+    fun getEdits(mid: Long): List<EditVersion>
 }
 
-@Database(entities = [SavedMessage::class], version = 1)
+@Database(entities = [SavedMessage::class, EditVersion::class], version = 2, exportSchema = false)
 abstract class RexDatabase : RoomDatabase() {
     abstract fun rexDao(): RexDao
 
@@ -51,7 +67,9 @@ abstract class RexDatabase : RoomDatabase() {
                     context.applicationContext,
                     RexDatabase::class.java,
                     "rex_database"
-                ).allowMainThreadQueries().build() // TODO: For production, use coroutines/background threads
+                )
+                .fallbackToDestructiveMigration() // For simplicity, drop and recreate on version change
+                .allowMainThreadQueries().build() // TODO: For production, use coroutines/background threads
                 INSTANCE = instance
                 instance
             }

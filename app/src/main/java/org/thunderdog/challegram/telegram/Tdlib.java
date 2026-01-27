@@ -131,6 +131,7 @@ import me.vkryl.core.lambda.RunnableInt;
 import me.vkryl.core.lambda.RunnableLong;
 import me.vkryl.core.util.ConditionalExecutor;
 import org.thunderdog.challegram.rex.RexConfig;
+import org.thunderdog.challegram.rex.db.EditVersion;
 import org.thunderdog.challegram.rex.db.RexDatabase;
 import org.thunderdog.challegram.rex.db.SavedMessage;
 import tgx.app.RecaptchaProviderRegistry;
@@ -9736,6 +9737,35 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
               msgIdList.add(id);
             }
             RexDatabase.Companion.get(context()).rexDao().markAsDeleted(del.chatId, msgIdList);
+          }
+        }
+
+        // 3. Track MESSAGE EDITS (Part 2: Edit History)
+        if (update.getConstructor() == TdApi.UpdateMessageContent.CONSTRUCTOR) {
+          TdApi.UpdateMessageContent contentUpdate = (TdApi.UpdateMessageContent) update;
+          // First, get the OLD message content before it's replaced
+          TdApi.Message oldMessage = this.getMessage(contentUpdate.chatId, contentUpdate.messageId);
+          if (oldMessage != null && oldMessage.content.getConstructor() == TdApi.MessageText.CONSTRUCTOR) {
+            TdApi.MessageText oldTextContent = (TdApi.MessageText) oldMessage.content;
+            String oldText = oldTextContent.text.text;
+            
+            // Check if new content is also text and different
+            if (contentUpdate.newContent.getConstructor() == TdApi.MessageText.CONSTRUCTOR) {
+              TdApi.MessageText newTextContent = (TdApi.MessageText) contentUpdate.newContent;
+              String newText = newTextContent.text.text;
+              
+              // Only save if text actually changed
+              if (!oldText.equals(newText)) {
+                EditVersion edit = new EditVersion(
+                  0, // auto-generated id
+                  contentUpdate.messageId,
+                  contentUpdate.chatId,
+                  oldText,
+                  (int)(System.currentTimeMillis() / 1000)
+                );
+                RexDatabase.Companion.get(context()).rexDao().saveEdit(edit);
+              }
+            }
           }
         }
       } catch (Exception e) {

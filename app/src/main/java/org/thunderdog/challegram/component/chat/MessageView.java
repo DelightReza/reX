@@ -84,6 +84,7 @@ import me.vkryl.core.collection.IntList;
 import me.vkryl.core.lambda.CancellableRunnable;
 import me.vkryl.core.lambda.Destroyable;
 import me.vkryl.core.lambda.RunnableData;
+import org.thunderdog.challegram.rex.RexGhostManager;
 import tgx.td.ChatId;
 import tgx.td.Td;
 
@@ -338,6 +339,14 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
         invalidateOutline();
       }
     }
+    
+    // --- REX MOD: Apply ghost effect ---
+    if (RexGhostManager.INSTANCE.isGhost(message.getId())) {
+      setAlpha(0.5f); // Make it semi-transparent (grayed out)
+    } else {
+      setAlpha(1.0f); // Normal opacity
+    }
+    // --- END REX MOD ---
   }
 
   public void invalidatePreviewReceiver (long chatId, long messageId) {

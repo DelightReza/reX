@@ -88,6 +88,8 @@ import me.vkryl.core.ColorUtils;
 import me.vkryl.core.StringUtils;
 import me.vkryl.core.lambda.FutureBool;
 import me.vkryl.core.lambda.RunnableData;
+import org.thunderdog.challegram.rex.RexConfig;
+import org.thunderdog.challegram.rex.RexGhostManager;
 import tgx.td.ChatId;
 import tgx.td.MessageId;
 import tgx.td.Td;
@@ -2238,6 +2240,32 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
             break;
           }
           case TGMessage.REMOVE_COMBINATION: {
+            // --- REX MOD START: Keep deleted messages as ghosts ---
+            if (RexConfig.INSTANCE.isSpyEnabled() && RexConfig.INSTANCE.getSaveDeletedMessages()) {
+              // Mark the message as a ghost instead of removing it
+              RexGhostManager.INSTANCE.markAsGhost(messageId);
+              
+              // Unselect if selected
+              if (controller.unselectMessage(messageId, item)) {
+                selectedCount--;
+                unselectedSomeMessages = true;
+              }
+              
+              // Update visual appearance by requesting a rebind
+              adapter.notifyItemChanged(index);
+              
+              if (!item.isOutgoing() && messageId > lastReadInboxMessageId) {
+                removedUnreadCount++;
+              }
+              if (++removedCount == messageIds.length) {
+                break main;
+              } else {
+                continue main;
+              }
+            }
+            // --- REX MOD END ---
+            
+            // Original code
             if (controller.unselectMessage(messageId, item)) {
               selectedCount--;
               unselectedSomeMessages = true;
@@ -2252,6 +2280,32 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
             }
           }
           case TGMessage.REMOVE_COMPLETELY: {
+            // --- REX MOD START: Keep deleted messages as ghosts ---
+            if (RexConfig.INSTANCE.isSpyEnabled() && RexConfig.INSTANCE.getSaveDeletedMessages()) {
+              // Mark the message as a ghost instead of removing it
+              RexGhostManager.INSTANCE.markAsGhost(messageId);
+              
+              // Unselect if selected
+              if (controller.unselectMessage(messageId, item)) {
+                selectedCount--;
+                unselectedSomeMessages = true;
+              }
+              
+              // Update visual appearance by requesting a rebind
+              adapter.notifyItemChanged(index);
+              
+              if (!item.isOutgoing() && messageId > lastReadInboxMessageId) {
+                removedUnreadCount++;
+              }
+              if (++removedCount == messageIds.length) {
+                break main;
+              } else {
+                continue main;
+              }
+            }
+            // --- REX MOD END ---
+            
+            // Original code: Remove the message from UI
             TGMessage removed = adapter.removeItem(index);
             if (controller.unselectMessage(messageId, removed)) {
               selectedCount--;
