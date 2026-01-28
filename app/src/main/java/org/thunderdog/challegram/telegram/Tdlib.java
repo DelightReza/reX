@@ -20,7 +20,6 @@ import android.os.Build;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
-import android.util.Log;
 import android.util.SparseIntArray;
 import android.widget.Toast;
 
