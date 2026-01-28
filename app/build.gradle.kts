@@ -40,6 +40,17 @@ val checkEmojiKeyboard by tasks.registering(CheckEmojiKeyboardTask::class) {
 
 val config = extra["config"] as ApplicationConfig
 
+// Configure kapt to avoid MigrationStatus errors
+kapt {
+  correctErrorTypes = true
+  useBuildCache = true
+  arguments {
+    arg("room.schemaLocation", "$projectDir/schemas")
+    arg("room.incremental", "true")
+    arg("room.expandProjection", "true")
+  }
+}
+
 //noinspection WrongGradleMethod
 android {
   namespace = "org.thunderdog.challegram"
