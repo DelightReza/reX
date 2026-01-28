@@ -37,7 +37,7 @@ object RexCloneSender {
                 )
                 TdApi.SendMessage(
                     targetChatId,
-                    0, // messageThreadId
+                    null, // messageTopic
                     null, // replyTo
                     null, // options
                     null, // replyMarkup
@@ -72,7 +72,7 @@ object RexCloneSender {
 
                 TdApi.SendMessage(
                     targetChatId,
-                    0,
+                    null, // messageTopic
                     null,
                     null,
                     null,
@@ -106,7 +106,7 @@ object RexCloneSender {
 
                 TdApi.SendMessage(
                     targetChatId,
-                    0,
+                    null, // messageTopic
                     null,
                     null,
                     null,
@@ -133,7 +133,7 @@ object RexCloneSender {
 
                 TdApi.SendMessage(
                     targetChatId,
-                    0,
+                    null, // messageTopic
                     null,
                     null,
                     null,
@@ -162,7 +162,7 @@ object RexCloneSender {
 
                 TdApi.SendMessage(
                     targetChatId,
-                    0,
+                    null, // messageTopic
                     null,
                     null,
                     null,
@@ -190,7 +190,7 @@ object RexCloneSender {
 
                 TdApi.SendMessage(
                     targetChatId,
-                    0,
+                    null, // messageTopic
                     null,
                     null,
                     null,
@@ -218,7 +218,7 @@ object RexCloneSender {
 
                 TdApi.SendMessage(
                     targetChatId,
-                    0,
+                    null, // messageTopic
                     null,
                     null,
                     null,
@@ -250,7 +250,7 @@ object RexCloneSender {
 
                 TdApi.SendMessage(
                     targetChatId,
-                    0,
+                    null, // messageTopic
                     null,
                     null,
                     null,
