@@ -85,25 +85,25 @@ object RexConfig {
     // --- LEGACY COMPATIBILITY ALIASES ---
     
     /** Alias for isGhostMode for backwards compatibility */
-    @Deprecated("Use isGhostMode instead", ReplaceWith("isGhostMode"))
+    @Deprecated("Use isGhostMode instead")
     var ghostEnabled: Boolean
         get() = isGhostMode
         set(v) { isGhostMode = v }
 
     /** Alias for noReadRequest for backwards compatibility */
-    @Deprecated("Use noReadRequest instead", ReplaceWith("noReadRequest"))
+    @Deprecated("Use noReadRequest instead")
     var ghostNoRead: Boolean
         get() = noReadRequest
         set(v) { noReadRequest = v }
 
     /** Alias for noTyping for backwards compatibility */
-    @Deprecated("Use noTyping instead", ReplaceWith("noTyping"))
+    @Deprecated("Use noTyping instead")
     var ghostNoTyping: Boolean
         get() = noTyping
         set(v) { noTyping = v }
 
     /** Alias for isSpyMode for backwards compatibility */
-    @Deprecated("Use isSpyMode instead", ReplaceWith("isSpyMode"))
+    @Deprecated("Use isSpyMode instead")
     var isSpyEnabled: Boolean
         get() = isSpyMode
         set(v) { isSpyMode = v }
