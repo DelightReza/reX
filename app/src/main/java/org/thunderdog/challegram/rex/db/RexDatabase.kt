@@ -7,6 +7,8 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  */
+@file:Suppress("DEPRECATION", "DEPRECATION_ERROR")
+
 package org.thunderdog.challegram.rex.db
 
 import android.content.Context
@@ -70,6 +72,7 @@ interface RexDao {
 /**
  * Room database for reX data persistence
  */
+@Suppress("DEPRECATION")
 @Database(entities = [SavedMessage::class, EditHistory::class], version = 2, exportSchema = false)
 abstract class RexDatabase : RoomDatabase() {
     abstract fun rexDao(): RexDao
