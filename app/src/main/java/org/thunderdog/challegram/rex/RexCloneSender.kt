@@ -93,7 +93,9 @@ object RexCloneSender {
                 val inputContent = TdApi.InputMessageVideo(
                     TdApi.InputFileLocal(file.local.path),
                     null, // thumbnail
-                    intArrayOf(), // addedStickerFileIds
+                    null, // addedVideos
+                    0, // addedStickerFileIdsCount
+                    null, // addedStickerFileIds
                     video.duration,
                     video.width,
                     video.height,
