@@ -77,6 +77,7 @@ abstract class RexDatabase : RoomDatabase() {
     companion object {
         @Volatile private var INSTANCE: RexDatabase? = null
 
+        @JvmStatic
         fun get(context: Context): RexDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
