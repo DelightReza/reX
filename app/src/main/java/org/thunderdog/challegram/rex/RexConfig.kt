@@ -33,16 +33,22 @@ object RexConfig {
         set(v) = prefs.edit().putBoolean("ghost_enabled", v).apply()
 
     /** Don't send read receipts (ViewMessages) */
+    @get:JvmName("getGhostNoRead")
+    @set:JvmName("setGhostNoRead")
     var noReadRequest: Boolean
         get() = prefs.getBoolean("ghost_no_read", true)
         set(v) = prefs.edit().putBoolean("ghost_no_read", v).apply()
 
     /** Don't send online status updates */
+    @get:JvmName("getGhostNoOnline")
+    @set:JvmName("setGhostNoOnline")
     var ghostNoOnline: Boolean
         get() = prefs.getBoolean("ghost_no_online", true)
         set(v) = prefs.edit().putBoolean("ghost_no_online", v).apply()
 
     /** Don't send typing indicators (SetChatAction) */
+    @get:JvmName("getGhostNoTyping")
+    @set:JvmName("setGhostNoTyping")
     var noTyping: Boolean
         get() = prefs.getBoolean("ghost_no_typing", true)
         set(v) = prefs.edit().putBoolean("ghost_no_typing", v).apply()
@@ -50,57 +56,18 @@ object RexConfig {
     // --- SPY MODE SETTINGS (Persistent) ---
     
     /** Enable/disable Spy Mode (message preservation) */
+    @get:JvmName("isSpyEnabled")
+    @set:JvmName("setSpyEnabled")
     var isSpyMode: Boolean
         get() = prefs.getBoolean("spy_enabled", false)
         set(v) = prefs.edit().putBoolean("spy_enabled", v).apply()
         
     /** Save deleted messages to database */
+    @get:JvmName("getSaveDeletedMessages")
+    @set:JvmName("setSaveDeletedMessages")
     var saveDeletedMessages: Boolean
         get() = prefs.getBoolean("spy_save_deleted", true)
         set(v) = prefs.edit().putBoolean("spy_save_deleted", v).apply()
-
-    // --- JAVA COMPATIBILITY METHODS ---
-    // These methods provide Java-style getters/setters for compatibility with Java code
-    
-    @JvmStatic
-    fun getGhostNoRead(): Boolean = noReadRequest
-    
-    @JvmStatic
-    fun setGhostNoRead(value: Boolean) {
-        noReadRequest = value
-    }
-    
-    @JvmStatic
-    fun getGhostNoTyping(): Boolean = noTyping
-    
-    @JvmStatic
-    fun setGhostNoTyping(value: Boolean) {
-        noTyping = value
-    }
-    
-    @JvmStatic
-    fun getGhostNoOnline(): Boolean = ghostNoOnline
-    
-    @JvmStatic
-    fun setGhostNoOnline(value: Boolean) {
-        ghostNoOnline = value
-    }
-    
-    @JvmStatic
-    fun isSpyEnabled(): Boolean = isSpyMode
-    
-    @JvmStatic
-    fun setSpyEnabled(value: Boolean) {
-        isSpyMode = value
-    }
-    
-    @JvmStatic
-    fun getSaveDeletedMessages(): Boolean = saveDeletedMessages
-    
-    @JvmStatic
-    fun setSaveDeletedMessages(value: Boolean) {
-        saveDeletedMessages = value
-    }
 
     // --- RESTRICTED CONTENT SETTINGS (Persistent) ---
     
