@@ -61,7 +61,7 @@ object RexCloneSender {
                 val inputContent = TdApi.InputMessagePhoto(
                     TdApi.InputFileLocal(file.local.path),
                     null, // thumbnail
-                    intArrayOf(), // addedStickerFileIds
+                    null, // addedStickerFileIds
                     0, // width
                     0, // height
                     photoContent.caption,
@@ -241,7 +241,7 @@ object RexCloneSender {
                 val inputContent = TdApi.InputMessageAnimation(
                     TdApi.InputFileLocal(file.local.path),
                     null, // thumbnail
-                    intArrayOf(), // addedStickerFileIds
+                    null, // addedStickerFileIds
                     animation.duration,
                     animation.width,
                     animation.height,
