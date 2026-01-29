@@ -59,6 +59,49 @@ object RexConfig {
         get() = prefs.getBoolean("spy_save_deleted", true)
         set(v) = prefs.edit().putBoolean("spy_save_deleted", v).apply()
 
+    // --- JAVA COMPATIBILITY METHODS ---
+    // These methods provide Java-style getters/setters for compatibility with Java code
+    
+    @JvmStatic
+    fun getGhostNoRead(): Boolean = noReadRequest
+    
+    @JvmStatic
+    fun setGhostNoRead(value: Boolean) {
+        noReadRequest = value
+    }
+    
+    @JvmStatic
+    fun getGhostNoTyping(): Boolean = noTyping
+    
+    @JvmStatic
+    fun setGhostNoTyping(value: Boolean) {
+        noTyping = value
+    }
+    
+    @JvmStatic
+    fun getGhostNoOnline(): Boolean = ghostNoOnline
+    
+    @JvmStatic
+    fun setGhostNoOnline(value: Boolean) {
+        ghostNoOnline = value
+    }
+    
+    @JvmStatic
+    fun isSpyEnabled(): Boolean = isSpyMode
+    
+    @JvmStatic
+    fun setSpyEnabled(value: Boolean) {
+        isSpyMode = value
+    }
+    
+    @JvmStatic
+    fun getSaveDeletedMessages(): Boolean = saveDeletedMessages
+    
+    @JvmStatic
+    fun setSaveDeletedMessages(value: Boolean) {
+        saveDeletedMessages = value
+    }
+
     // --- RESTRICTED CONTENT SETTINGS (Persistent) ---
     
     /** Allow forwarding/saving of restricted content */
