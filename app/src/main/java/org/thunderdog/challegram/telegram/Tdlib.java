@@ -9718,7 +9718,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
               msg.id,
               text,
               senderId,
-              msg.date,
+              (long) msg.date,
               false
             );
             RexDatabase.Companion.get(context()).rexDao().insertMessage(saved);
@@ -9745,7 +9745,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
         if (update.getConstructor() == TdApi.UpdateMessageContent.CONSTRUCTOR) {
           TdApi.UpdateMessageContent contentUpdate = (TdApi.UpdateMessageContent) update;
           // First, get the OLD message content before it's replaced
-          TdApi.Message oldMessage = this.getMessage(contentUpdate.chatId, contentUpdate.messageId);
+          TdApi.Message oldMessage = this.getMessageLocally(contentUpdate.chatId, contentUpdate.messageId);
           if (oldMessage != null && oldMessage.content.getConstructor() == TdApi.MessageText.CONSTRUCTOR) {
             TdApi.MessageText oldTextContent = (TdApi.MessageText) oldMessage.content;
             String oldText = oldTextContent.text.text;

@@ -22,6 +22,8 @@ import java.util.ArrayList;
 
 public class RexSettingsController extends RecyclerViewController<Void> implements View.OnClickListener {
 
+  private SettingsAdapter adapter;
+
   public RexSettingsController(Context context, Tdlib tdlib) {
     super(context, tdlib);
   }
@@ -38,7 +40,7 @@ public class RexSettingsController extends RecyclerViewController<Void> implemen
 
   @Override
   protected void onCreateView(Context context, CustomRecyclerView recyclerView) {
-    SettingsAdapter adapter = new SettingsAdapter(this) {
+    adapter = new SettingsAdapter(this) {
       @Override
       protected void setValuedSetting(ListItem item, SettingView view, boolean isUpdate) {
         final int itemId = item.getId();
