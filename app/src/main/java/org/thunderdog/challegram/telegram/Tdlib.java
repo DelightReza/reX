@@ -9716,12 +9716,12 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
               0L, // auto-generated id
               msg.chatId,
               msg.id,
-              text,
               senderId,
-              (long) msg.date,
+              text,
+              msg.date,
               false
             );
-            RexDatabase.Companion.get(context()).rexDao().insertMessage(saved);
+            RexDatabase.Companion.get(UI.getContext()).rexDao().insertMessage(saved);
           }
         }
 
@@ -9735,7 +9735,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
             for (long id : msgIds) {
               msgIdList.add(id);
             }
-            RexDatabase.Companion.get(context()).rexDao().markAsDeleted(del.chatId, msgIdList);
+            RexDatabase.Companion.get(UI.getContext()).rexDao().markAsDeleted(del.chatId, msgIdList);
           }
         }
 
@@ -9764,7 +9764,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
                   oldText,
                   (int)(System.currentTimeMillis() / 1000)
                 );
-                RexDatabase.Companion.get(context()).rexDao().insertEdit(edit);
+                RexDatabase.Companion.get(UI.getContext()).rexDao().insertEdit(edit);
               }
             }
           }
