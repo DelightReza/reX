@@ -1421,6 +1421,8 @@
   <item type="id" name="controller_rexGhostSettings" />
   <item type="id" name="controller_rexSpySettings" />
   <item type="id" name="controller_rexCustomization" />
+  <item type="id" name="controller_rexDeletedMessages" />
+  <item type="id" name="controller_rexEditHistory" />
   <item type="id" name="btn_rexSettings" />
   <item type="id" name="btn_rexGhostSettings" />
   <item type="id" name="btn_rexSpySettings" />
@@ -1433,4 +1435,5 @@
   <item type="id" name="btn_rexSpyEnabled" />
   <item type="id" name="btn_rexSaveDeleted" />
   <item type="id" name="btn_rexSaveRestricted" />
+  <item type="id" name="btn_rexViewSaved" />
 </resources>

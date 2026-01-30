@@ -62,10 +62,13 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
     items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Save deleted messages and edit history to local database."));
     
-    // TODO: Add button to view saved messages
-    // items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    // items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexViewSaved, 0, "View Saved Messages"));
-    // items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+    // View saved messages button
+    items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Saved Data"));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexViewSaved, 0, "View Deleted Messages", R.drawable.baseline_message_24));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Browse all deleted messages saved by Spy Mode."));
 
     adapter.setItems(items, false);
     recyclerView.setAdapter(adapter);
@@ -80,6 +83,8 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
     } else if (viewId == R.id.btn_rexSaveDeleted) {
       RexConfig.INSTANCE.setSaveDeletedMessages(!RexConfig.INSTANCE.getSaveDeletedMessages());
       adapter.updateValuedSettingById(R.id.btn_rexSaveDeleted);
+    } else if (viewId == R.id.btn_rexViewSaved) {
+      navigateTo(new RexDeletedMessagesController(context, tdlib));
     }
   }
 }
