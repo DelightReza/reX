@@ -13,27 +13,29 @@ import android.content.Context;
 import android.view.View;
 
 import org.thunderdog.challegram.R;
+import org.thunderdog.challegram.component.base.SettingView;
+import org.thunderdog.challegram.rex.RexConfig;
 import org.thunderdog.challegram.telegram.Tdlib;
 import org.thunderdog.challegram.v.CustomRecyclerView;
 
 import java.util.ArrayList;
 
-public class RexSettingsController extends RecyclerViewController<Void> implements View.OnClickListener {
+public class RexCustomizationController extends RecyclerViewController<Void> implements View.OnClickListener {
 
   private SettingsAdapter adapter;
 
-  public RexSettingsController(Context context, Tdlib tdlib) {
+  public RexCustomizationController(Context context, Tdlib tdlib) {
     super(context, tdlib);
   }
 
   @Override
   public CharSequence getName() {
-    return "reX Settings";
+    return "Customization";
   }
 
   @Override
   public int getId() {
-    return R.id.controller_rexSettings;
+    return R.id.controller_rexCustomization;
   }
 
   @Override
@@ -41,21 +43,20 @@ public class RexSettingsController extends RecyclerViewController<Void> implemen
     adapter = new SettingsAdapter(this) {
       @Override
       protected void setValuedSetting(ListItem item, SettingView view, boolean isUpdate) {
-        // No valued settings in main category menu
+        final int itemId = item.getId();
+        if (itemId == R.id.btn_rexSaveRestricted) {
+          view.getToggler().setRadioEnabled(RexConfig.INSTANCE.isSaveRestricted(), isUpdate);
+        }
       }
     };
 
     ArrayList<ListItem> items = new ArrayList<>();
     items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
-    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "reX Settings"));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Customization"));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexGhostSettings, 0, "Ghost Mode", R.drawable.baseline_visibility_off_24));
-    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexSpySettings, 0, "Spy/Anti-Delete", R.drawable.baseline_remove_red_eye_24));
-    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexCustomization, 0, "Customization", R.drawable.baseline_tune_24));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveRestricted, 0, "Save Restricted Content", R.id.btn_rexSaveRestricted, RexConfig.INSTANCE.isSaveRestricted()));
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Configure reX features and privacy settings."));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Enable saving and forwarding of restricted messages."));
 
     adapter.setItems(items, false);
     recyclerView.setAdapter(adapter);
@@ -64,12 +65,9 @@ public class RexSettingsController extends RecyclerViewController<Void> implemen
   @Override
   public void onClick(View v) {
     final int viewId = v.getId();
-    if (viewId == R.id.btn_rexGhostSettings) {
-      navigateTo(new RexGhostSettingsController(context, tdlib));
-    } else if (viewId == R.id.btn_rexSpySettings) {
-      navigateTo(new RexSpySettingsController(context, tdlib));
-    } else if (viewId == R.id.btn_rexCustomization) {
-      navigateTo(new RexCustomizationController(context, tdlib));
+    if (viewId == R.id.btn_rexSaveRestricted) {
+      RexConfig.INSTANCE.setSaveRestricted(!RexConfig.INSTANCE.isSaveRestricted());
+      adapter.updateValuedSettingById(R.id.btn_rexSaveRestricted);
     }
   }
 }
