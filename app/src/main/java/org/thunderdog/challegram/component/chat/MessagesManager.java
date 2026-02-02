@@ -3531,6 +3531,7 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
               EditHistory editHistory = new EditHistory(
                 0, // id (auto-increment)
                 messageId,
+                chatId, // chatId
                 oldTextStr,
                 (int) (System.currentTimeMillis() / 1000)
               );
