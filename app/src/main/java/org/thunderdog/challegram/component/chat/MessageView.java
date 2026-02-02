@@ -860,19 +860,29 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
       }
     }
 
-    // 4. Burn Message (Ghost Mode - local deletion)
+    // 4. Burn Message (Ghost Mode - local deletion) - Only for self-destruct messages
     if (!isMore && isSent && RexConfig.INSTANCE.isSpyEnabled()) {
-      ids.append(R.id.btn_messageRexBurn);
-      strings.append(R.string.RexBurnMessage);
-      icons.append(R.drawable.baseline_whatshot_24);
+      TdApi.Message message = msg.getNewestMessage();
+      // Only show burn option for self-destructing messages (view-once)
+      if (message.selfDestructType != null) {
+        ids.append(R.id.btn_messageRexBurn);
+        strings.append(R.string.RexBurnMessage);
+        icons.append(R.drawable.baseline_whatshot_24);
+      }
     }
 
     // 5. View Edit History
     if (!isMore && isSent && RexConfig.INSTANCE.isSpyEnabled()) {
+      TdApi.Message message = msg.getNewestMessage();
       // Check if this message has edit history
-      // Note: We rely on the message having been drawn at least once to cache the edit count
-      // If not yet cached, we skip showing the menu item to avoid blocking UI thread
+      // First try cached value, if not cached (-1), query database
       int editCount = msg.getCachedEditCount();
+      if (editCount == -1) {
+        // Not yet cached, query database
+        android.content.Context ctx = m.context();
+        org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(ctx);
+        editCount = db.rexDao().hasEdits(message.id);
+      }
       if (editCount > 0) {
         ids.append(R.id.btn_messageRexViewEditHistory);
         strings.append(R.string.RexViewEditHistory);

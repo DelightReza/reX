@@ -5841,6 +5841,8 @@ public class MessagesController extends ViewController<MessagesController.Argume
         TdApi.FormattedText formattedText = Td.textOrCaption(message.content);
         String text = formattedText != null ? formattedText.text : "";
         long senderId = Td.getSenderId(message.senderId);
+        
+        // Save message metadata to database
         SavedMessage savedMsg = new SavedMessage(
           0, // id (auto-increment)
           message.chatId,
@@ -5851,7 +5853,55 @@ public class MessagesController extends ViewController<MessagesController.Argume
           false // isDeleted
         );
         RexDatabase.get(context()).rexDao().insertMessage(savedMsg);
-        UI.showToast("View-once message saved", Toast.LENGTH_SHORT);
+        
+        // For view-once media (photos/videos), download and save the file
+        if (message.content.getConstructor() == TdApi.MessagePhoto.CONSTRUCTOR) {
+          TdApi.MessagePhoto photo = (TdApi.MessagePhoto) message.content;
+          TdApi.PhotoSize photoSize = photo.photo.sizes.length > 0 ? 
+            photo.photo.sizes[photo.photo.sizes.length - 1] : null;
+          if (photoSize != null) {
+            TdApi.File file = photoSize.photo;
+            if (file.local.isDownloadingCompleted) {
+              // File already downloaded, save it
+              List<TD.DownloadedFile> files = new ArrayList<>();
+              files.add(new TD.DownloadedFile(file, "image/*", null));
+              TD.saveFiles(context, files);
+              UI.showToast("View-once photo saved to gallery", Toast.LENGTH_SHORT);
+            } else {
+              // Download first, then save
+              tdlib.files().downloadFile(file, result -> {
+                if (result.local.isDownloadingCompleted) {
+                  List<TD.DownloadedFile> files = new ArrayList<>();
+                  files.add(new TD.DownloadedFile(result, "image/*", null));
+                  TD.saveFiles(context, files);
+                  UI.showToast("View-once photo saved to gallery", Toast.LENGTH_SHORT);
+                }
+              });
+            }
+          }
+        } else if (message.content.getConstructor() == TdApi.MessageVideo.CONSTRUCTOR) {
+          TdApi.MessageVideo video = (TdApi.MessageVideo) message.content;
+          TdApi.File file = video.video.video;
+          if (file.local.isDownloadingCompleted) {
+            // File already downloaded, save it
+            List<TD.DownloadedFile> files = new ArrayList<>();
+            files.add(new TD.DownloadedFile(file, video.video.mimeType, null));
+            TD.saveFiles(context, files);
+            UI.showToast("View-once video saved to gallery", Toast.LENGTH_SHORT);
+          } else {
+            // Download first, then save
+            tdlib.files().downloadFile(file, result -> {
+              if (result.local.isDownloadingCompleted) {
+                List<TD.DownloadedFile> files = new ArrayList<>();
+                files.add(new TD.DownloadedFile(result, video.video.mimeType, null));
+                TD.saveFiles(context, files);
+                UI.showToast("View-once video saved to gallery", Toast.LENGTH_SHORT);
+              }
+            });
+          }
+        } else {
+          UI.showToast("View-once message saved", Toast.LENGTH_SHORT);
+        }
         return true;
       } else if (id == R.id.btn_messageRexBurn) {
         // reX: Burn message (mark as ghost - hide locally)
