@@ -524,6 +524,10 @@ dependencies {
   implementation(libs.androidx.palette)
   implementation(libs.androidx.collection)
   implementation(libs.androidx.interpolator)
+  // Room Database: Not used - switched to SQLite directly to avoid kapt issues
+  // implementation(libs.androidx.room.runtime)
+  // implementation(libs.androidx.room.ktx)
+  // kapt(libs.androidx.room.compiler)
   // CameraX: https://developer.android.com/jetpack/androidx/releases/camera
   flavorImplementation(
     libs.androidx.camera.camera2.legacy,

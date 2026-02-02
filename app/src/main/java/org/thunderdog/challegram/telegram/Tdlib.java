@@ -129,6 +129,10 @@ import me.vkryl.core.lambda.RunnableData;
 import me.vkryl.core.lambda.RunnableInt;
 import me.vkryl.core.lambda.RunnableLong;
 import me.vkryl.core.util.ConditionalExecutor;
+import org.thunderdog.challegram.rex.RexConfig;
+import org.thunderdog.challegram.rex.db.EditHistory;
+import org.thunderdog.challegram.rex.db.RexDatabase;
+import org.thunderdog.challegram.rex.db.SavedMessage;
 import tgx.app.RecaptchaProviderRegistry;
 import tgx.td.ChatId;
 import tgx.td.ChatPosition;
@@ -1700,6 +1704,51 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   }
 
   private static <T extends TdApi.Object> void send (Client client, TdApi.Function<T> function, Client.ResultHandler handler) {
+    // --- REX GHOST MODE INTERCEPTOR ---
+    if (RexConfig.INSTANCE.isGhostMode()) {
+      int constructor = function.getConstructor();
+
+      // 1. Block "Mark as Read" (ViewMessages)
+      if (RexConfig.INSTANCE.getGhostNoRead()) {
+        if (constructor == TdApi.ViewMessages.CONSTRUCTOR) {
+          // Check if this is a forced read request (bypass)
+          if (RexConfig.INSTANCE.isForceReadRequest()) {
+            // Allow it to pass through to the server
+            RexConfig.INSTANCE.setForceReadRequest(false);
+          } else {
+            // Block it - fake a success callback
+            if (handler != null) {
+              handler.onResult(new TdApi.Ok());
+            }
+            return; // STOP EXECUTION HERE
+          }
+        }
+      }
+
+      // 2. Block "Online Status"
+      if (RexConfig.INSTANCE.getGhostNoOnline()) {
+        if (constructor == TdApi.SetOption.CONSTRUCTOR) {
+          TdApi.SetOption opt = (TdApi.SetOption) function;
+          if ("online".equals(opt.name)) {
+            return; // Block
+          }
+        }
+      }
+
+      // 3. Block "Typing..." action
+      if (RexConfig.INSTANCE.getGhostNoTyping()) {
+        if (constructor == TdApi.SendChatAction.CONSTRUCTOR) {
+          return; // Block
+        }
+      }
+
+      // 4. Block Story Views
+      if (constructor == TdApi.OpenStory.CONSTRUCTOR) {
+        return; // Block
+      }
+    }
+    // --- END REX INTERCEPTOR ---
+    
     client.send(function, handler);
   }
 
@@ -9644,6 +9693,89 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   }
 
   private void processUpdate (ClientHolder context, TdApi.Update update) {
+    // --- REX SPY LOGIC ---
+    if (RexConfig.INSTANCE.isSpyEnabled()) {
+      try {
+        // 1. Save INCOMING text messages to our shadow DB
+        if (update.getConstructor() == TdApi.UpdateNewMessage.CONSTRUCTOR) {
+          TdApi.UpdateNewMessage updateNewMessage = (TdApi.UpdateNewMessage) update;
+          TdApi.Message msg = updateNewMessage.message;
+          if (msg.content.getConstructor() == TdApi.MessageText.CONSTRUCTOR) {
+            TdApi.MessageText textContent = (TdApi.MessageText) msg.content;
+            String text = textContent.text.text;
+            
+            // Extract sender ID (handle different sender types)
+            long senderId = 0;
+            if (msg.senderId.getConstructor() == TdApi.MessageSenderUser.CONSTRUCTOR) {
+              senderId = ((TdApi.MessageSenderUser) msg.senderId).userId;
+            } else if (msg.senderId.getConstructor() == TdApi.MessageSenderChat.CONSTRUCTOR) {
+              senderId = ((TdApi.MessageSenderChat) msg.senderId).chatId;
+            }
+            
+            SavedMessage saved = new SavedMessage(
+              0L, // auto-generated id
+              msg.chatId,
+              msg.id,
+              senderId,
+              text,
+              msg.date,
+              false
+            );
+            RexDatabase.Companion.get(UI.getContext()).rexDao().insertMessage(saved);
+          }
+        }
+
+        // 2. Catch DELETIONS
+        if (update.getConstructor() == TdApi.UpdateDeleteMessages.CONSTRUCTOR) {
+          TdApi.UpdateDeleteMessages del = (TdApi.UpdateDeleteMessages) update;
+          if (del.isPermanent && RexConfig.INSTANCE.getSaveDeletedMessages()) {
+            // Mark them as deleted in our DB, but they remain readable there
+            long[] msgIds = del.messageIds;
+            java.util.List<Long> msgIdList = new java.util.ArrayList<>();
+            for (long id : msgIds) {
+              msgIdList.add(id);
+            }
+            RexDatabase.Companion.get(UI.getContext()).rexDao().markAsDeleted(del.chatId, msgIdList);
+          }
+        }
+
+        // 3. Track MESSAGE EDITS
+        // This saves the old text content before it's replaced, allowing users
+        // to view the full edit history of any message
+        if (update.getConstructor() == TdApi.UpdateMessageContent.CONSTRUCTOR) {
+          TdApi.UpdateMessageContent contentUpdate = (TdApi.UpdateMessageContent) update;
+          // First, get the OLD message content before it's replaced
+          TdApi.Message oldMessage = this.getMessageLocally(contentUpdate.chatId, contentUpdate.messageId);
+          if (oldMessage != null && oldMessage.content.getConstructor() == TdApi.MessageText.CONSTRUCTOR) {
+            TdApi.MessageText oldTextContent = (TdApi.MessageText) oldMessage.content;
+            String oldText = oldTextContent.text.text;
+            
+            // Check if new content is also text and different
+            if (contentUpdate.newContent.getConstructor() == TdApi.MessageText.CONSTRUCTOR) {
+              TdApi.MessageText newTextContent = (TdApi.MessageText) contentUpdate.newContent;
+              String newText = newTextContent.text.text;
+              
+              // Only save if text actually changed
+              if (!oldText.equals(newText)) {
+                EditHistory edit = new EditHistory(
+                  0, // auto-generated id
+                  contentUpdate.messageId,
+                  contentUpdate.chatId,
+                  oldText,
+                  (int)(System.currentTimeMillis() / 1000)
+                );
+                RexDatabase.Companion.get(UI.getContext()).rexDao().insertEdit(edit);
+              }
+            }
+          }
+        }
+      } catch (Exception e) {
+        // Silently catch exceptions to avoid breaking the app
+        Log.e("reX", "Error in spy logic", e);
+      }
+    }
+    // --- END REX SPY LOGIC ---
+    
     switch (update.getConstructor()) {
       // Notifications
       case TdApi.UpdateHavePendingNotifications.CONSTRUCTOR:
