@@ -85,6 +85,7 @@ import me.vkryl.core.lambda.CancellableRunnable;
 import me.vkryl.core.lambda.Destroyable;
 import me.vkryl.core.lambda.RunnableData;
 import org.thunderdog.challegram.rex.RexGhostManager;
+import org.thunderdog.challegram.rex.RexConfig;
 import tgx.td.ChatId;
 import tgx.td.Td;
 
@@ -826,6 +827,45 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
         strings.append(R.string.Share);
         icons.append(R.drawable.baseline_forward_24);
       }
+    }
+
+    // reX Feature Menu Items
+
+    // 1. Force Read Message (when Ghost Mode is active and message is unread)
+    if (!isMore && RexConfig.INSTANCE.isGhostMode() && !msg.isOutgoing() && isSent) {
+      // Only show if message hasn't been read yet
+      ids.append(R.id.btn_messageRexForceRead);
+      strings.append(R.string.RexForceReadMessage);
+      icons.append(R.drawable.deproko_baseline_check_double_24);
+    }
+
+    // 2. Forward Restricted Content
+    if (!isMore && !msg.canBeForwarded() && isSent && RexConfig.INSTANCE.getSaveRestricted()) {
+      // Show option to forward restricted content via cloning
+      TdApi.Message message = msg.getNewestMessage();
+      if (message.canBeSaved || msg.canBeSaved()) {
+        ids.append(R.id.btn_messageRexForwardRestricted);
+        strings.append(R.string.RexForwardRestricted);
+        icons.append(R.drawable.baseline_forward_24);
+      }
+    }
+
+    // 3. Save View-Once Message
+    if (!isMore && isSent && RexConfig.INSTANCE.isSpyEnabled()) {
+      TdApi.Message message = msg.getNewestMessage();
+      if (message.selfDestructType != null) {
+        // This is a view-once or self-destructing message
+        ids.append(R.id.btn_messageRexSaveViewOnce);
+        strings.append(R.string.RexSaveViewOnce);
+        icons.append(R.drawable.baseline_save_24);
+      }
+    }
+
+    // 4. Burn Message (Ghost Mode - local deletion)
+    if (!isMore && isSent && RexConfig.INSTANCE.isSpyEnabled()) {
+      ids.append(R.id.btn_messageRexBurn);
+      strings.append(R.string.RexBurnMessage);
+      icons.append(R.drawable.baseline_whatshot_24);
     }
 
     int moreOptions = 0;

@@ -291,6 +291,11 @@ import tgx.td.Td;
 import tgx.td.TdConstants;
 import tgx.td.data.MessageWithProperties;
 import tgx.td.ui.TdUi;
+import org.thunderdog.challegram.rex.RexConfig;
+import org.thunderdog.challegram.rex.RexCloneSender;
+import org.thunderdog.challegram.rex.db.RexDatabase;
+import org.thunderdog.challegram.rex.db.SavedMessage;
+import org.thunderdog.challegram.rex.RexGhostManager;
 
 public class MessagesController extends ViewController<MessagesController.Arguments> implements
   Menu, Unlockable, View.OnClickListener,
@@ -5797,6 +5802,83 @@ public class MessagesController extends ViewController<MessagesController.Argume
         if (selectedMessage.canBeForwarded()) {
           shareMessages(selectedMessage.getAllMessages(), false);
         }
+        return true;
+      } else if (id == R.id.btn_messageRexForceRead) {
+        // reX: Force read message despite Ghost Mode
+        cancelSheduledKeyboardOpeningAndHideAllKeyboards();
+        TdApi.Message message = selectedMessage.getNewestMessage();
+        RexConfig.INSTANCE.setForceReadRequest(true);
+        tdlib.client().send(new TdApi.ViewMessages(message.chatId, new long[]{message.id}, new TdApi.MessageSourceChatHistory(), true), result -> {
+          RexConfig.INSTANCE.setForceReadRequest(false);
+        });
+        UI.showToast("Message marked as read", Toast.LENGTH_SHORT);
+        return true;
+      } else if (id == R.id.btn_messageRexForwardRestricted) {
+        // reX: Forward restricted content via cloning
+        cancelSheduledKeyboardOpeningAndHideAllKeyboards();
+        TdApi.Message message = selectedMessage.getNewestMessage();
+        
+        // Check if message can be cloned (files downloaded)
+        if (!RexCloneSender.INSTANCE.canClone(message)) {
+          UI.showToast("Download the file first before forwarding", Toast.LENGTH_SHORT);
+          return true;
+        }
+        
+        RexConfig.INSTANCE.setPendingRestrictedMessage(message);
+        // Open chat selector to forward to
+        tdlib.ui().selectChats(this, chats -> {
+          if (chats != null && chats.length > 0) {
+            for (long chatId : chats) {
+              TdApi.Function<?> cloneRequest = RexCloneSender.INSTANCE.createCloneRequest(chatId, message);
+              if (cloneRequest != null) {
+                tdlib.client().send(cloneRequest, tdlib.okHandler());
+              }
+            }
+            RexConfig.INSTANCE.setPendingRestrictedMessage(null);
+            UI.showToast("Forwarding restricted message...", Toast.LENGTH_SHORT);
+          } else {
+            RexConfig.INSTANCE.setPendingRestrictedMessage(null);
+          }
+        }, 0, false, false, new TdApi.ChatListMain());
+        return true;
+      } else if (id == R.id.btn_messageRexSaveViewOnce) {
+        // reX: Save view-once message before it disappears
+        cancelSheduledKeyboardOpeningAndHideAllKeyboards();
+        TdApi.Message message = selectedMessage.getNewestMessage();
+        String text = Td.getText(message.content);
+        long senderId = Td.getSenderId(message.senderId);
+        SavedMessage savedMsg = new SavedMessage(
+          0, // id (auto-increment)
+          message.chatId,
+          message.id,
+          senderId,
+          text,
+          message.date,
+          false // isDeleted
+        );
+        RexDatabase.get(context()).rexDao().insertMessage(savedMsg);
+        UI.showToast("View-once message saved", Toast.LENGTH_SHORT);
+        return true;
+      } else if (id == R.id.btn_messageRexBurn) {
+        // reX: Burn message (mark as ghost - hide locally)
+        cancelSheduledKeyboardOpeningAndHideAllKeyboards();
+        TdApi.Message message = selectedMessage.getNewestMessage();
+        String text = Td.getText(message.content);
+        long senderId = Td.getSenderId(message.senderId);
+        // Save message to database before hiding
+        SavedMessage savedMsg = new SavedMessage(
+          0, // id (auto-increment)
+          message.chatId,
+          message.id,
+          senderId,
+          text,
+          message.date,
+          false // isDeleted
+        );
+        RexDatabase.get(context()).rexDao().insertMessage(savedMsg);
+        // Mark as ghost message
+        RexGhostManager.INSTANCE.addGhostMessage(message.chatId, message.id);
+        UI.showToast("Message burned (hidden locally)", Toast.LENGTH_SHORT);
         return true;
       } else if (id == R.id.btn_chatTranslate) {
         cancelSheduledKeyboardOpeningAndHideAllKeyboards();

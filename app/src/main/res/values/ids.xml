@@ -1170,6 +1170,10 @@
   <item type="id" name="btn_messageReschedule" />
   <item type="id" name="btn_messageSendNow" />
   <item type="id" name="btn_messageSponsorInfo" />
+  <item type="id" name="btn_messageRexForceRead" />
+  <item type="id" name="btn_messageRexForwardRestricted" />
+  <item type="id" name="btn_messageRexSaveViewOnce" />
+  <item type="id" name="btn_messageRexBurn" />
 
   <item type="id" name="btn_unpinMessage" />
   <item type="id" name="btn_dismissForSelf" />
