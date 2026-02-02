@@ -869,11 +869,11 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
 
     // 5. View Edit History
     if (!isMore && isSent && RexConfig.INSTANCE.isSpyEnabled()) {
-      TdApi.Message message = msg.getNewestMessage();
-      // Check if this message has edit history in database
-      android.content.Context ctx = m.context();
-      org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(ctx);
-      if (db.rexDao().hasEdits(message.id) > 0) {
+      // Check if this message has edit history
+      // Note: We rely on the message having been drawn at least once to cache the edit count
+      // If not yet cached, we skip showing the menu item to avoid blocking UI thread
+      int editCount = msg.getCachedEditCount();
+      if (editCount > 0) {
         ids.append(R.id.btn_messageRexViewEditHistory);
         strings.append(R.string.RexViewEditHistory);
         icons.append(R.drawable.baseline_edit_24);
