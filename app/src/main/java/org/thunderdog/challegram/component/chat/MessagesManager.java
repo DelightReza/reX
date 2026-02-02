@@ -90,6 +90,8 @@ import me.vkryl.core.lambda.FutureBool;
 import me.vkryl.core.lambda.RunnableData;
 import org.thunderdog.challegram.rex.RexConfig;
 import org.thunderdog.challegram.rex.RexGhostManager;
+import org.thunderdog.challegram.rex.db.EditHistory;
+import org.thunderdog.challegram.rex.db.RexDatabase;
 import tgx.td.ChatId;
 import tgx.td.MessageId;
 import tgx.td.Td;
@@ -3513,6 +3515,33 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
     }
     tdlib.ui().post(() -> {
       if (loader.getChatId() == chatId) {
+        // --- REX MOD START: Save edit history ---
+        if (RexConfig.INSTANCE.isSpyEnabled()) {
+          // Get the old message content before updating
+          int index = adapter.indexOfMessageContainer(messageId);
+          if (index != -1) {
+            TGMessage tgMessage = adapter.getItem(index);
+            TdApi.Message oldMessage = tgMessage.getMessage();
+            if (oldMessage != null) {
+              // Extract old text
+              TdApi.FormattedText oldText = Td.textOrCaption(oldMessage.content);
+              String oldTextStr = oldText != null ? oldText.text : "";
+              
+              // Save to edit history database
+              EditHistory editHistory = new EditHistory(
+                0, // id (auto-increment)
+                messageId,
+                oldTextStr,
+                (int) (System.currentTimeMillis() / 1000)
+              );
+              RexDatabase.get(controller.context()).rexDao().insertEditHistory(editHistory);
+              
+              // Invalidate the cached edit count so it will be reloaded
+              tgMessage.invalidateCachedEditCount();
+            }
+          }
+        }
+        // --- REX MOD END ---
         updateMessageContent(chatId, messageId, newContent);
       }
     });

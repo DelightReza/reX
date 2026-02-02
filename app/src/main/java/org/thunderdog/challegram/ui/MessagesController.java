@@ -5904,7 +5904,7 @@ public class MessagesController extends ViewController<MessagesController.Argume
         }
         return true;
       } else if (id == R.id.btn_messageRexBurn) {
-        // reX: Burn message (mark as ghost - hide locally)
+        // reX: Burn message (mark as ghost - hide locally and mark as read/opened)
         cancelSheduledKeyboardOpeningAndHideAllKeyboards();
         TdApi.Message message = selectedMessage.getNewestMessage();
         TdApi.FormattedText formattedText = Td.textOrCaption(message.content);
@@ -5923,6 +5923,12 @@ public class MessagesController extends ViewController<MessagesController.Argume
         RexDatabase.get(context()).rexDao().insertMessage(savedMsg);
         // Mark as ghost message
         RexGhostManager.INSTANCE.addGhostMessage(message.id);
+        
+        // Mark the message as viewed/opened (this will show it as "Expired" for view-once)
+        if (message.selfDestructType != null && !message.isOutgoing) {
+          tdlib.client().send(new TdApi.ViewMessages(message.chatId, new long[]{message.id}, null, true), tdlib.okHandler());
+        }
+        
         UI.showToast("Message burned (hidden locally)", Toast.LENGTH_SHORT);
         return true;
       } else if (id == R.id.btn_messageRexViewEditHistory) {

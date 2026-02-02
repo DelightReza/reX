@@ -4702,6 +4702,10 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   public final int getCachedEditCount () {
     return cachedEditCount;
   }
+  
+  public final void invalidateCachedEditCount () {
+    cachedEditCount = -1;
+  }
   // --- END REX MOD ---
 
   public final MessageId toMessageId () {
