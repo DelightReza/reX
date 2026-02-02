@@ -17,4 +17,5 @@
   <string name="RexForwardRestricted">Forward Restricted</string>
   <string name="RexSaveViewOnce">Save View Once</string>
   <string name="RexBurnMessage">Burn</string>
+  <string name="RexViewEditHistory">View Edit History</string>
 </resources>

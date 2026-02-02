@@ -5880,6 +5880,16 @@ public class MessagesController extends ViewController<MessagesController.Argume
         RexGhostManager.INSTANCE.addGhostMessage(message.chatId, message.id);
         UI.showToast("Message burned (hidden locally)", Toast.LENGTH_SHORT);
         return true;
+      } else if (id == R.id.btn_messageRexViewEditHistory) {
+        // reX: View edit history for this message
+        cancelSheduledKeyboardOpeningAndHideAllKeyboards();
+        TdApi.Message message = selectedMessage.getNewestMessage();
+        // Open RexEditHistoryController to show edit history
+        org.thunderdog.challegram.ui.RexEditHistoryController editHistoryController = 
+          new org.thunderdog.challegram.ui.RexEditHistoryController(context(), tdlib);
+        editHistoryController.setArguments(new org.thunderdog.challegram.ui.RexEditHistoryController.Args(message.id));
+        navigateTo(editHistoryController);
+        return true;
       } else if (id == R.id.btn_chatTranslate) {
         cancelSheduledKeyboardOpeningAndHideAllKeyboards();
         startTranslateMessages(selectedMessage);

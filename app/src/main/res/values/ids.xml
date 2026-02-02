@@ -1174,6 +1174,7 @@
   <item type="id" name="btn_messageRexForwardRestricted" />
   <item type="id" name="btn_messageRexSaveViewOnce" />
   <item type="id" name="btn_messageRexBurn" />
+  <item type="id" name="btn_messageRexViewEditHistory" />
 
   <item type="id" name="btn_unpinMessage" />
   <item type="id" name="btn_dismissForSelf" />
