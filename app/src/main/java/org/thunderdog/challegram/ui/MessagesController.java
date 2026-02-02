@@ -5869,8 +5869,8 @@ public class MessagesController extends ViewController<MessagesController.Argume
               UI.showToast("View-once photo saved to gallery", Toast.LENGTH_SHORT);
             } else {
               // Download first, then save
-              tdlib.files().downloadFile(file, 32, result -> {
-                if (result.local.isDownloadingCompleted) {
+              tdlib.files().downloadFile(file, 32, (TdApi.File result, TdApi.Error error) -> {
+                if (error == null && result != null && result.local.isDownloadingCompleted) {
                   List<TD.DownloadedFile> files = new ArrayList<>();
                   files.add(TD.DownloadedFile.valueOfPhoto(result, false));
                   TD.saveFiles(context, files);
@@ -5890,8 +5890,8 @@ public class MessagesController extends ViewController<MessagesController.Argume
             UI.showToast("View-once video saved to gallery", Toast.LENGTH_SHORT);
           } else {
             // Download first, then save
-            tdlib.files().downloadFile(file, 32, result -> {
-              if (result.local.isDownloadingCompleted) {
+            tdlib.files().downloadFile(file, 32, (TdApi.File result, TdApi.Error error) -> {
+              if (error == null && result != null && result.local.isDownloadingCompleted) {
                 List<TD.DownloadedFile> files = new ArrayList<>();
                 files.add(TD.DownloadedFile.valueOf(video.video));
                 TD.saveFiles(context, files);
