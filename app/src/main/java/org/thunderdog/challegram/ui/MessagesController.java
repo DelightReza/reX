@@ -5864,15 +5864,15 @@ public class MessagesController extends ViewController<MessagesController.Argume
             if (file.local.isDownloadingCompleted) {
               // File already downloaded, save it
               List<TD.DownloadedFile> files = new ArrayList<>();
-              files.add(new TD.DownloadedFile(file, "image/*", null));
+              files.add(TD.DownloadedFile.valueOfPhoto(file, false));
               TD.saveFiles(context, files);
               UI.showToast("View-once photo saved to gallery", Toast.LENGTH_SHORT);
             } else {
               // Download first, then save
-              tdlib.files().downloadFile(file, result -> {
+              tdlib.files().downloadFile(file, 32, result -> {
                 if (result.local.isDownloadingCompleted) {
                   List<TD.DownloadedFile> files = new ArrayList<>();
-                  files.add(new TD.DownloadedFile(result, "image/*", null));
+                  files.add(TD.DownloadedFile.valueOfPhoto(result, false));
                   TD.saveFiles(context, files);
                   UI.showToast("View-once photo saved to gallery", Toast.LENGTH_SHORT);
                 }
@@ -5885,15 +5885,15 @@ public class MessagesController extends ViewController<MessagesController.Argume
           if (file.local.isDownloadingCompleted) {
             // File already downloaded, save it
             List<TD.DownloadedFile> files = new ArrayList<>();
-            files.add(new TD.DownloadedFile(file, video.video.mimeType, null));
+            files.add(TD.DownloadedFile.valueOf(video.video));
             TD.saveFiles(context, files);
             UI.showToast("View-once video saved to gallery", Toast.LENGTH_SHORT);
           } else {
             // Download first, then save
-            tdlib.files().downloadFile(file, result -> {
+            tdlib.files().downloadFile(file, 32, result -> {
               if (result.local.isDownloadingCompleted) {
                 List<TD.DownloadedFile> files = new ArrayList<>();
-                files.add(new TD.DownloadedFile(result, video.video.mimeType, null));
+                files.add(TD.DownloadedFile.valueOf(video.video));
                 TD.saveFiles(context, files);
                 UI.showToast("View-once video saved to gallery", Toast.LENGTH_SHORT);
               }
