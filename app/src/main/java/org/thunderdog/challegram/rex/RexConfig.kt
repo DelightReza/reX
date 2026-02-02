@@ -72,6 +72,8 @@ object RexConfig {
     // --- RESTRICTED CONTENT SETTINGS (Persistent) ---
     
     /** Allow forwarding/saving of restricted content */
+    @get:JvmName("isSaveRestricted")
+    @set:JvmName("setSaveRestricted")
     var saveRestricted: Boolean
         get() = prefs.getBoolean("save_restricted", true)
         set(v) = prefs.edit().putBoolean("save_restricted", v).apply()

@@ -13,6 +13,7 @@ import android.content.Context;
 import android.view.View;
 
 import org.thunderdog.challegram.R;
+import org.thunderdog.challegram.component.base.SettingView;
 import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.telegram.Tdlib;
 import org.thunderdog.challegram.v.CustomRecyclerView;
