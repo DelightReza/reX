@@ -2512,6 +2512,24 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
       c.translate(translation, 0);
     }
     drawOverlay(view, c, pContentX, pContentY, pContentMaxWidth);
+    
+    // --- REX MOD: Draw ghost message overlay ---
+    if (org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.isGhost(getId())) {
+      drawGhostOverlay(c, pContentX, pContentY, pContentMaxWidth);
+    }
+    // --- END REX MOD ---
+    
+    // --- REX MOD: Draw edit history indicator ---
+    if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.isSpyEnabled()) {
+      android.content.Context ctx = view.getContext();
+      org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(ctx);
+      int editCount = db.rexDao().hasEdits(getId());
+      if (editCount > 0) {
+        drawEditIndicator(c, pContentX, pContentY, pContentMaxWidth, editCount);
+      }
+    }
+    // --- END REX MOD ---
+    
     if (savedTranslation) {
       Views.restore(c, restoreToCount);
       drawTranslate(view, c);
@@ -2531,6 +2549,50 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   protected void drawOverlay (MessageView view, Canvas c, int startX, int startY, int maxWidth) {
     // Override
   }
+  
+  // --- REX MOD: Ghost message overlay methods ---
+  private void drawGhostOverlay (Canvas c, int startX, int startY, int maxWidth) {
+    // Draw "[DELETED]" badge overlay
+    String deletedText = "[DELETED]";
+    TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+    textPaint.setColor(android.graphics.Color.RED);
+    textPaint.setTextSize(Screen.dp(11f));
+    textPaint.setTypeface(Fonts.getRobotoMedium());
+    
+    float textWidth = textPaint.measureText(deletedText);
+    float badgeX = startX + (maxWidth - textWidth) / 2;
+    float badgeY = startY + Screen.dp(12f);
+    
+    // Draw semi-transparent background for badge
+    Paint bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    bgPaint.setColor(android.graphics.Color.argb(180, 255, 230, 230));
+    c.drawRoundRect(badgeX - Screen.dp(6f), badgeY - Screen.dp(10f),
+                    badgeX + textWidth + Screen.dp(6f), badgeY + Screen.dp(4f),
+                    Screen.dp(4f), Screen.dp(4f), bgPaint);
+    
+    // Draw text
+    c.drawText(deletedText, badgeX, badgeY, textPaint);
+  }
+  
+  private void drawEditIndicator (Canvas c, int startX, int startY, int maxWidth, int editCount) {
+    // Draw "✎ Edited" indicator
+    String editText = "✎ Edited";
+    if (editCount > 1) {
+      editText += " (" + editCount + "x)";
+    }
+    
+    TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+    textPaint.setColor(Theme.getColor(ColorId.textLight));
+    textPaint.setTextSize(Screen.dp(10f));
+    textPaint.setTypeface(Fonts.getRobotoRegular());
+    
+    float textWidth = textPaint.measureText(editText);
+    float indicatorX = startX + maxWidth - textWidth - Screen.dp(8f);
+    float indicatorY = startY + Screen.dp(10f);
+    
+    c.drawText(editText, indicatorX, indicatorY, textPaint);
+  }
+  // --- END REX MOD ---
 
   protected void drawContent (MessageView view, Canvas c, int startX, int startY, int maxWidth) {
     // These two dots should never appear in MessagesListView
