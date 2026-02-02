@@ -14,6 +14,7 @@ import android.view.View;
 
 import org.thunderdog.challegram.R;
 import org.thunderdog.challegram.component.base.SettingView;
+import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.rex.RexConfig;
 import org.thunderdog.challegram.telegram.Tdlib;
 import org.thunderdog.challegram.v.CustomRecyclerView;
@@ -30,7 +31,7 @@ public class RexGhostSettingsController extends RecyclerViewController<Void> imp
 
   @Override
   public CharSequence getName() {
-    return "Ghost Mode";
+    return Lang.getString(R.string.RexGhostMode);
   }
 
   @Override
@@ -58,17 +59,17 @@ public class RexGhostSettingsController extends RecyclerViewController<Void> imp
 
     ArrayList<ListItem> items = new ArrayList<>();
     items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
-    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Ghost Mode Settings"));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.RexGhostModeSettings));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexGhostMode, 0, "Enable Ghost Mode", R.id.btn_rexGhostMode, RexConfig.INSTANCE.isGhostMode()));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexGhostMode, 0, R.string.RexEnableGhostMode));
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
-    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexGhostNoRead, 0, "No Read Receipts", R.id.btn_rexGhostNoRead, RexConfig.INSTANCE.getGhostNoRead()));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexGhostNoRead, 0, R.string.RexNoReadReceipts));
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
-    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexGhostNoTyping, 0, "No Typing Indicator", R.id.btn_rexGhostNoTyping, RexConfig.INSTANCE.getGhostNoTyping()));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexGhostNoTyping, 0, R.string.RexNoTypingIndicator));
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
-    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexGhostNoOnline, 0, "No Online Status", R.id.btn_rexGhostNoOnline, RexConfig.INSTANCE.getGhostNoOnline()));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexGhostNoOnline, 0, R.string.RexNoOnlineStatus));
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Hide your online status, read receipts, and typing indicators from others."));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.RexGhostModeDescription));
 
     adapter.setItems(items, false);
     recyclerView.setAdapter(adapter);

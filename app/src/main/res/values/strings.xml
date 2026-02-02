@@ -5666,4 +5666,41 @@
   <string name="RestrictedContent">Restricted Content</string>
   <string name="SensitiveContent">Sensitive Content</string>
 
+  <!-- reX Settings -->
+  <string name="RexSettings">reX Settings</string>
+  <string name="RexGhostMode">Ghost Mode</string>
+  <string name="RexSpyAntiDelete">Spy/Anti-Delete</string>
+  <string name="RexCustomization">Customization</string>
+  <string name="RexSettingsDescription">Configure reX features and privacy settings.</string>
+  
+  <!-- reX Ghost Mode -->
+  <string name="RexGhostModeSettings">Ghost Mode Settings</string>
+  <string name="RexEnableGhostMode">Enable Ghost Mode</string>
+  <string name="RexNoReadReceipts">No Read Receipts</string>
+  <string name="RexNoTypingIndicator">No Typing Indicator</string>
+  <string name="RexNoOnlineStatus">No Online Status</string>
+  <string name="RexGhostModeDescription">Hide your online status, read receipts, and typing indicators from others.</string>
+  
+  <!-- reX Spy/Anti-Delete -->
+  <string name="RexSpySettings">Spy/Anti-Delete Settings</string>
+  <string name="RexEnableSpyMode">Enable Spy Mode</string>
+  <string name="RexSaveDeletedMessages">Save Deleted Messages</string>
+  <string name="RexViewDeletedMessages">View Deleted Messages</string>
+  <string name="RexSpyModeDescription">Save messages before they are deleted or edited by others.</string>
+  
+  <!-- reX Customization -->
+  <string name="RexCustomizationSettings">Customization Settings</string>
+  <string name="RexSaveRestrictedContent">Save Restricted Content</string>
+  <string name="RexCustomizationDescription">Enable advanced features and customization options.</string>
+  
+  <!-- reX Deleted Messages Viewer -->
+  <string name="RexDeletedMessages">Deleted Messages</string>
+  <string name="RexNoDeletedMessages">No deleted messages saved yet.</string>
+  <string name="RexDeletedMessagesDescription">Messages will appear here when Spy Mode saves them.</string>
+  
+  <!-- reX Edit History Viewer -->
+  <string name="RexEditHistory">Edit History</string>
+  <string name="RexNoEditHistory">No edit history for this message.</string>
+  <string name="RexEditHistoryDescription">Previous versions of this message will appear here.</string>
+
 </resources>

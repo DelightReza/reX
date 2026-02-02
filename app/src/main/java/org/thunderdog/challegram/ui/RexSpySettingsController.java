@@ -14,6 +14,7 @@ import android.view.View;
 
 import org.thunderdog.challegram.R;
 import org.thunderdog.challegram.component.base.SettingView;
+import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.rex.RexConfig;
 import org.thunderdog.challegram.telegram.Tdlib;
 import org.thunderdog.challegram.v.CustomRecyclerView;
@@ -30,7 +31,7 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
 
   @Override
   public CharSequence getName() {
-    return "Spy/Anti-Delete";
+    return Lang.getString(R.string.RexSpyAntiDelete);
   }
 
   @Override
@@ -54,19 +55,19 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
 
     ArrayList<ListItem> items = new ArrayList<>();
     items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
-    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Spy/Anti-Delete Settings"));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.RexSpySettings));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSpyMode, 0, "Enable Spy Mode", R.id.btn_rexSpyMode, RexConfig.INSTANCE.isSpyEnabled()));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSpyMode, 0, R.string.RexEnableSpyMode));
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
-    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveDeleted, 0, "Save Deleted Messages", R.id.btn_rexSaveDeleted, RexConfig.INSTANCE.getSaveDeletedMessages()));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveDeleted, 0, R.string.RexSaveDeletedMessages));
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Save deleted messages and edit history to local database."));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.RexSpyModeDescription));
     
     // View saved messages button
     items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
     items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Saved Data"));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexViewSaved, 0, "View Deleted Messages", R.drawable.baseline_message_24));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexViewSaved, R.drawable.baseline_archive_24, R.string.RexViewDeletedMessages));
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
     items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Browse all deleted messages saved by Spy Mode."));
 

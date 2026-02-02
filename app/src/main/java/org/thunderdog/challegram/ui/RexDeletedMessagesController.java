@@ -38,7 +38,7 @@ public class RexDeletedMessagesController extends RecyclerViewController<Void> i
 
   @Override
   public CharSequence getName() {
-    return "Deleted Messages";
+    return Lang.getString(R.string.RexDeletedMessages);
   }
 
   @Override
@@ -60,11 +60,11 @@ public class RexDeletedMessagesController extends RecyclerViewController<Void> i
 
     ArrayList<ListItem> items = new ArrayList<>();
     items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
-    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Saved Deleted Messages"));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.RexDeletedMessages));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
 
     if (deletedMessages.isEmpty()) {
-      items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "No deleted messages saved yet.\n\nEnable 'Save Deleted Messages' in Spy settings to start tracking."));
+      items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.RexDeletedMessagesDescription));
     } else {
       SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault());
       
@@ -100,7 +100,7 @@ public class RexDeletedMessagesController extends RecyclerViewController<Void> i
       deletedMessages = RexDatabase.get(UI.getContext()).rexDao().getAllDeletedMessages();
     } catch (Exception e) {
       deletedMessages = new ArrayList<>();
-      UI.showToast("Error loading deleted messages: " + e.getMessage(), false);
+      UI.showToast("Error loading deleted messages: " + e.getMessage(), android.widget.Toast.LENGTH_SHORT);
     }
   }
 

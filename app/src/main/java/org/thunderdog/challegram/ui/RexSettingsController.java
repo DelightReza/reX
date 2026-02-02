@@ -13,6 +13,7 @@ import android.content.Context;
 import android.view.View;
 
 import org.thunderdog.challegram.R;
+import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.telegram.Tdlib;
 import org.thunderdog.challegram.v.CustomRecyclerView;
 
@@ -28,7 +29,7 @@ public class RexSettingsController extends RecyclerViewController<Void> implemen
 
   @Override
   public CharSequence getName() {
-    return "reX Settings";
+    return Lang.getString(R.string.RexSettings);
   }
 
   @Override
@@ -47,15 +48,15 @@ public class RexSettingsController extends RecyclerViewController<Void> implemen
 
     ArrayList<ListItem> items = new ArrayList<>();
     items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
-    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "reX Settings"));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.RexSettings));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexGhostSettings, 0, "Ghost Mode", R.drawable.baseline_visibility_off_24));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexGhostSettings, R.drawable.baseline_eye_off_24, R.string.RexGhostMode));
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexSpySettings, 0, "Spy/Anti-Delete", R.drawable.baseline_remove_red_eye_24));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexSpySettings, R.drawable.baseline_visibility_24, R.string.RexSpyAntiDelete));
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexCustomization, 0, "Customization", R.drawable.baseline_tune_24));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexCustomization, R.drawable.baseline_tune_24, R.string.RexCustomization));
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Configure reX features and privacy settings."));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.RexSettingsDescription));
 
     adapter.setItems(items, false);
     recyclerView.setAdapter(adapter);

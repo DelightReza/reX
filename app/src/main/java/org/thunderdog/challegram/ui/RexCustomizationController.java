@@ -14,6 +14,7 @@ import android.view.View;
 
 import org.thunderdog.challegram.R;
 import org.thunderdog.challegram.component.base.SettingView;
+import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.rex.RexConfig;
 import org.thunderdog.challegram.telegram.Tdlib;
 import org.thunderdog.challegram.v.CustomRecyclerView;
@@ -30,7 +31,7 @@ public class RexCustomizationController extends RecyclerViewController<Void> imp
 
   @Override
   public CharSequence getName() {
-    return "Customization";
+    return Lang.getString(R.string.RexCustomization);
   }
 
   @Override
@@ -52,11 +53,11 @@ public class RexCustomizationController extends RecyclerViewController<Void> imp
 
     ArrayList<ListItem> items = new ArrayList<>();
     items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
-    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Customization"));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.RexCustomizationSettings));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveRestricted, 0, "Save Restricted Content", R.id.btn_rexSaveRestricted, RexConfig.INSTANCE.isSaveRestricted()));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveRestricted, 0, R.string.RexSaveRestrictedContent));
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Enable saving and forwarding of restricted messages."));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.RexCustomizationDescription));
 
     adapter.setItems(items, false);
     recyclerView.setAdapter(adapter);

@@ -14,6 +14,7 @@ import android.view.View;
 
 import org.thunderdog.challegram.R;
 import org.thunderdog.challegram.component.base.SettingView;
+import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.rex.db.EditHistory;
 import org.thunderdog.challegram.rex.db.RexDatabase;
 import org.thunderdog.challegram.telegram.Tdlib;
@@ -39,7 +40,7 @@ public class RexEditHistoryController extends RecyclerViewController<Void> imple
 
   @Override
   public CharSequence getName() {
-    return "Edit History";
+    return Lang.getString(R.string.RexEditHistory);
   }
 
   @Override
@@ -61,11 +62,11 @@ public class RexEditHistoryController extends RecyclerViewController<Void> imple
 
     ArrayList<ListItem> items = new ArrayList<>();
     items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
-    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Message Edit History"));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.RexEditHistory));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
 
     if (allEdits.isEmpty()) {
-      items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "No edit history found for this message."));
+      items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.RexEditHistoryDescription));
     } else {
       SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy HH:mm:ss", Locale.getDefault());
       
@@ -107,7 +108,7 @@ public class RexEditHistoryController extends RecyclerViewController<Void> imple
       allEdits = RexDatabase.get(UI.getContext()).rexDao().getEdits(messageId);
     } catch (Exception e) {
       allEdits = new ArrayList<>();
-      UI.showToast("Error loading edit history: " + e.getMessage(), false);
+      UI.showToast("Error loading edit history: " + e.getMessage(), android.widget.Toast.LENGTH_SHORT);
     }
   }
 
