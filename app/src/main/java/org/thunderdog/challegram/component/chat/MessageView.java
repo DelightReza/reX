@@ -344,6 +344,7 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
     // --- REX MOD: Apply ghost effect ---
     if (RexGhostManager.INSTANCE.isGhost(message.getId())) {
       setAlpha(0.5f); // Make it semi-transparent (grayed out)
+      invalidate(); // Force redraw to show overlay
     } else {
       setAlpha(1.0f); // Normal opacity
     }
