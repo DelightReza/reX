@@ -840,7 +840,7 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
     }
 
     // 2. Forward Restricted Content
-    if (!isMore && !msg.canBeForwarded() && isSent && RexConfig.INSTANCE.getSaveRestricted()) {
+    if (!isMore && !msg.canBeForwarded() && isSent && RexConfig.INSTANCE.isSaveRestricted()) {
       // Show option to forward restricted content via cloning
       if (msg.canBeSaved()) {
         ids.append(R.id.btn_messageRexForwardRestricted);
@@ -856,7 +856,7 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
         // This is a view-once or self-destructing message
         ids.append(R.id.btn_messageRexSaveViewOnce);
         strings.append(R.string.RexSaveViewOnce);
-        icons.append(R.drawable.baseline_save_24);
+        icons.append(R.drawable.baseline_file_download_24);
       }
     }
 
