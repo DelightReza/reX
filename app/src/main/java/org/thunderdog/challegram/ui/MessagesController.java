@@ -5877,7 +5877,7 @@ public class MessagesController extends ViewController<MessagesController.Argume
         );
         RexDatabase.get(context()).rexDao().insertMessage(savedMsg);
         // Mark as ghost message
-        RexGhostManager.INSTANCE.addGhostMessage(message.chatId, message.id);
+        RexGhostManager.INSTANCE.addGhostMessage(message.id);
         UI.showToast("Message burned (hidden locally)", Toast.LENGTH_SHORT);
         return true;
       } else if (id == R.id.btn_messageRexViewEditHistory) {

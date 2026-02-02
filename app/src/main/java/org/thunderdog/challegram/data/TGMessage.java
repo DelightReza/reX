@@ -301,6 +301,10 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   protected final RectF bubblePathRect, bubbleClipPathRect;
 
   private boolean needSponsorSmallPadding;
+  
+  // --- REX MOD: Cache edit count for performance ---
+  private int cachedEditCount = -1; // -1 means not computed yet
+  // --- END REX MOD ---
 
   protected final MessagesManager manager;
   protected final Tdlib tdlib;
@@ -2521,11 +2525,14 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
     
     // --- REX MOD: Draw edit history indicator ---
     if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.isSpyEnabled()) {
-      android.content.Context ctx = view.getContext();
-      org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(ctx);
-      int editCount = db.rexDao().hasEdits(getId());
-      if (editCount > 0) {
-        drawEditIndicator(c, pContentX, pContentY, pContentMaxWidth, editCount);
+      // Lazy-load edit count only once
+      if (cachedEditCount == -1) {
+        android.content.Context ctx = view.getContext();
+        org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(ctx);
+        cachedEditCount = db.rexDao().hasEdits(getId());
+      }
+      if (cachedEditCount > 0) {
+        drawEditIndicator(c, pContentX, pContentY, pContentMaxWidth, cachedEditCount);
       }
     }
     // --- END REX MOD ---

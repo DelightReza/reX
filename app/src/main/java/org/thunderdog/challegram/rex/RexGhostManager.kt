@@ -16,7 +16,7 @@ object RexGhostManager {
     // Using ConcurrentHashMap for thread safety
     private val ghostMessageIds = ConcurrentHashMap.newKeySet<Long>()
 
-    fun addGhostMessage(chatId: Long, messageId: Long) {
+    fun addGhostMessage(messageId: Long) {
         ghostMessageIds.add(messageId)
     }
 
