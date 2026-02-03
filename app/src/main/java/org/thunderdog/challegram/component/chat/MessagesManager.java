@@ -3535,7 +3535,7 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
                 oldTextStr,
                 (int) (System.currentTimeMillis() / 1000)
               );
-              RexDatabase.get(controller.context()).rexDao().insertEditHistory(editHistory);
+              RexDatabase.get(controller.context()).rexDao().insertEdit(editHistory);
               
               // Invalidate the cached edit count so it will be reloaded
               tgMessage.invalidateCachedEditCount();
