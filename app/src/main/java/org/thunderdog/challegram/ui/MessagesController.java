@@ -5833,7 +5833,7 @@ public class MessagesController extends ViewController<MessagesController.Argume
         
         // Use ShareController to select target chats, then send clones
         final ShareController c = new ShareController(context, tdlib);
-        c.setArguments(new ShareController.Args(message.chatId).setAfter((targetChatIds, copyOptions, disableMarkdown, disableNotification) -> {
+        c.setArguments(new ShareController.Args(message).setAfter((targetChatIds, copyOptions, disableMarkdown, disableNotification) -> {
           // For each selected chat, create and send a cloned message
           if (targetChatIds != null && targetChatIds.length > 0) {
             for (long targetChatId : targetChatIds) {
