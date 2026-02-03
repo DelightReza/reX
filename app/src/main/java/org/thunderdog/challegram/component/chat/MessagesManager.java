@@ -2244,8 +2244,17 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
           case TGMessage.REMOVE_COMBINATION: {
             // --- REX MOD START: Keep deleted messages as ghosts ---
             if (RexConfig.INSTANCE.isSpyEnabled() && RexConfig.INSTANCE.getSaveDeletedMessages()) {
-              // Mark the message as a ghost instead of removing it
+              // Mark the message as a ghost in memory and database
               RexGhostManager.INSTANCE.markAsGhost(messageId);
+              
+              // Persist to database
+              try {
+                long chatId = item.getChatId();
+                java.util.List<Long> msgIdList = java.util.Collections.singletonList(messageId);
+                org.thunderdog.challegram.rex.db.RexDatabase.get(controller.context()).rexDao().markAsDeleted(chatId, msgIdList);
+              } catch (Exception e) {
+                // Silently fail to avoid crashes
+              }
               
               // Unselect if selected
               if (controller.unselectMessage(messageId, item)) {
@@ -2284,8 +2293,17 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
           case TGMessage.REMOVE_COMPLETELY: {
             // --- REX MOD START: Keep deleted messages as ghosts ---
             if (RexConfig.INSTANCE.isSpyEnabled() && RexConfig.INSTANCE.getSaveDeletedMessages()) {
-              // Mark the message as a ghost instead of removing it
+              // Mark the message as a ghost in memory and database
               RexGhostManager.INSTANCE.markAsGhost(messageId);
+              
+              // Persist to database
+              try {
+                long chatId = item.getChatId();
+                java.util.List<Long> msgIdList = java.util.Collections.singletonList(messageId);
+                org.thunderdog.challegram.rex.db.RexDatabase.get(controller.context()).rexDao().markAsDeleted(chatId, msgIdList);
+              } catch (Exception e) {
+                // Silently fail to avoid crashes
+              }
               
               // Unselect if selected
               if (controller.unselectMessage(messageId, item)) {

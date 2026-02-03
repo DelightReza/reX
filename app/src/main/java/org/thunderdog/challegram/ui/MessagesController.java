@@ -2637,6 +2637,13 @@ public class MessagesController extends ViewController<MessagesController.Argume
     this.openKeyboard = args.openKeyboard;
     this.foundMessageId = args.foundMessageId;
     this.fillDraft = args.fillDraft;
+    
+    // --- REX MOD: Load ghost messages for this chat ---
+    if (args.chat != null && org.thunderdog.challegram.rex.RexConfig.INSTANCE.isSpyEnabled() && 
+        org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveDeletedMessages()) {
+      org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.loadGhostMessagesForChat(context(), args.chat.id);
+    }
+    // --- END REX MOD ---
 
     if (contentView != null) {
       updateView();
