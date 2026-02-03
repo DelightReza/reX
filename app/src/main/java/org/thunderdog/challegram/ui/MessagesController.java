@@ -5925,7 +5925,7 @@ public class MessagesController extends ViewController<MessagesController.Argume
         RexGhostManager.INSTANCE.addGhostMessage(message.id);
         
         // Mark the message as viewed/opened (this will show it as "Expired" for view-once)
-        if (message.selfDestructType != null && !message.isOutgoing) {
+        if (message.selfDestructType != null) {
           tdlib.client().send(new TdApi.ViewMessages(message.chatId, new long[]{message.id}, null, true), tdlib.okHandler());
         }
         
