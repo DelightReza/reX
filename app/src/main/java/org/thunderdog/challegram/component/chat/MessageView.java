@@ -844,9 +844,9 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
     if (!isMore && isSent && RexConfig.INSTANCE.isSaveRestricted()) {
       TdApi.Message message = msg.getNewestMessage();
       // Show option to forward:
-      // - Restricted content that cannot be forwarded (!canBeForwarded)
+      // - Restricted content that cannot be forwarded (!canBeForwarded) - includes restricted chats
       // - Self-destruct/view-once messages (selfDestructType != null)
-      boolean isRestricted = !msg.canBeForwarded() && msg.canBeSaved();
+      boolean isRestricted = !msg.canBeForwarded(); // Simplified - just check if forwarding is blocked
       boolean isViewOnce = message.selfDestructType != null;
       
       if (isRestricted || isViewOnce) {

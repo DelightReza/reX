@@ -5831,13 +5831,26 @@ public class MessagesController extends ViewController<MessagesController.Argume
           return true;
         }
         
-        // Use ShareController to select target chats
+        // Use ShareController to select target chats, then send clones
         final ShareController c = new ShareController(context, tdlib);
-        c.setArguments(new ShareController.Args(new TdApi.Message[]{message}).setAfter(() -> {
-          // After chats are selected, the ShareController will handle forwarding
-          // But we need to intercept and use our clone method instead
-          // For now, we'll just use the standard share mechanism
-          // TODO: Implement custom chat selection if needed
+        c.setArguments(new ShareController.Args(message.chatId).setAfter((targetChatIds, copyOptions, disableMarkdown, disableNotification) -> {
+          // For each selected chat, create and send a cloned message
+          if (targetChatIds != null && targetChatIds.length > 0) {
+            for (long targetChatId : targetChatIds) {
+              TdApi.Function<?> cloneRequest = RexCloneSender.INSTANCE.createCloneRequest(targetChatId, message);
+              if (cloneRequest != null) {
+                tdlib.client().send(cloneRequest, result -> {
+                  if (result.getConstructor() == TdApi.Message.CONSTRUCTOR) {
+                    // Success
+                  } else if (result.getConstructor() == TdApi.Error.CONSTRUCTOR) {
+                    TdApi.Error error = (TdApi.Error) result;
+                    UI.showToast("Failed to forward: " + error.message, Toast.LENGTH_SHORT);
+                  }
+                });
+              }
+            }
+            UI.showToast("Forwarding restricted content...", Toast.LENGTH_SHORT);
+          }
         }));
         c.show();
         return true;
@@ -5933,7 +5946,7 @@ public class MessagesController extends ViewController<MessagesController.Argume
         
         // Mark the message as viewed/opened (this will show it as "Expired" for view-once)
         if (message.selfDestructType != null) {
-          tdlib.client().send(new TdApi.ViewMessages(message.chatId, new long[]{message.id}, null, true), tdlib.okHandler());
+          tdlib.client().send(new TdApi.ViewMessages(message.chatId, new long[]{message.id}, new TdApi.MessageSourceChatHistory(), true), tdlib.okHandler());
         }
         
         UI.showToast("Message burned (hidden locally)", Toast.LENGTH_SHORT);
