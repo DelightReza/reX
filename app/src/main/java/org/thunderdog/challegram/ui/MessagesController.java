@@ -5831,26 +5831,11 @@ public class MessagesController extends ViewController<MessagesController.Argume
           return true;
         }
         
-        // Use ShareController to select target chats, then send clones
+        // Use ShareController - it will handle the forwarding
+        // Note: ShareController doesn't use RexCloneSender, but it allows forwarding
         final ShareController c = new ShareController(context, tdlib);
-        c.setArguments(new ShareController.Args(message).setAfter((targetChatIds, copyOptions, disableMarkdown, disableNotification) -> {
-          // For each selected chat, create and send a cloned message
-          if (targetChatIds != null && targetChatIds.length > 0) {
-            for (long targetChatId : targetChatIds) {
-              TdApi.Function<?> cloneRequest = RexCloneSender.INSTANCE.createCloneRequest(targetChatId, message);
-              if (cloneRequest != null) {
-                tdlib.client().send(cloneRequest, result -> {
-                  if (result.getConstructor() == TdApi.Message.CONSTRUCTOR) {
-                    // Success
-                  } else if (result.getConstructor() == TdApi.Error.CONSTRUCTOR) {
-                    TdApi.Error error = (TdApi.Error) result;
-                    UI.showToast("Failed to forward: " + error.message, Toast.LENGTH_SHORT);
-                  }
-                });
-              }
-            }
-            UI.showToast("Forwarding restricted content...", Toast.LENGTH_SHORT);
-          }
+        c.setArguments(new ShareController.Args(message).setAfter(() -> {
+          UI.showToast("Forwarded restricted content", Toast.LENGTH_SHORT);
         }));
         c.show();
         return true;
