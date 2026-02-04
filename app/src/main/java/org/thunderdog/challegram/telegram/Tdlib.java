@@ -1743,8 +1743,31 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
       }
 
       // 4. Block Story Views
-      if (constructor == TdApi.OpenStory.CONSTRUCTOR) {
-        return; // Block
+      if (RexConfig.INSTANCE.getGhostNoStories()) {
+        if (constructor == TdApi.OpenStory.CONSTRUCTOR) {
+          return; // Block
+        }
+        if (constructor == TdApi.SetStoryReaction.CONSTRUCTOR) {
+          return; // Block story reactions too
+        }
+      }
+    }
+    
+    // --- REX READ ON INTERACT ---
+    // Mark messages as read when sending a message or reaction
+    if (RexConfig.INSTANCE.getReadOnInteract()) {
+      int constructor = function.getConstructor();
+      
+      if (constructor == TdApi.SendMessage.CONSTRUCTOR) {
+        TdApi.SendMessage msg = (TdApi.SendMessage) function;
+        // Send ViewMessages for this chat before sending message
+        RexConfig.INSTANCE.setForceReadRequest(true);
+        client.send(new TdApi.ViewMessages(msg.chatId, 0, new long[0], true), null);
+      } else if (constructor == TdApi.AddMessageReaction.CONSTRUCTOR) {
+        TdApi.AddMessageReaction reaction = (TdApi.AddMessageReaction) function;
+        // Send ViewMessages for this chat before adding reaction
+        RexConfig.INSTANCE.setForceReadRequest(true);
+        client.send(new TdApi.ViewMessages(reaction.chatId, 0, new long[0], true), null);
       }
     }
     // --- END REX INTERCEPTOR ---
