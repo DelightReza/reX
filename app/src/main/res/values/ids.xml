@@ -1475,6 +1475,9 @@
   <item type="id" name="btn_rexReadExclusion" />
   <item type="id" name="btn_rexTypeExclusion" />
   <item type="id" name="btn_rexClearDeleted" />
+  
+  <!-- Message Options IDs -->
+  <item type="id" name="btn_rexKeepLocally" />
 
 
 </resources>

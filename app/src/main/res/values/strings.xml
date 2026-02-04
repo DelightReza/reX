@@ -5738,6 +5738,10 @@
   <string name="RexTypeExclusion">Type Exclusion</string>
   <string name="RexClearDeleted">Clear Deleted</string>
   
+  <!-- reX Message Options -->
+  <string name="RexKeepLocally">Keep Locally</string>
+  <string name="RexKeepLocallyDescription">Delete from chat but keep a local copy</string>
+  
   <!-- reX Placeholders and UI Text -->
   <string name="RexSavedData">Saved Data</string>
   <string name="RexDatabase">Database</string>
