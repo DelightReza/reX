@@ -47,6 +47,10 @@ public class RexCustomizationController extends RecyclerViewController<Void> imp
         final int itemId = item.getId();
         if (itemId == R.id.btn_rexSaveRestricted) {
           view.getToggler().setRadioEnabled(RexConfig.INSTANCE.isSaveRestricted(), isUpdate);
+        } else if (itemId == R.id.btn_rexDisableColorfulReplies) {
+          view.getToggler().setRadioEnabled(RexConfig.INSTANCE.getDisableColorfulReplies(), isUpdate);
+        } else if (itemId == R.id.btn_rexTranslucentDeleted) {
+          view.getToggler().setRadioEnabled(RexConfig.INSTANCE.getTranslucentDeletedMessages(), isUpdate);
         }
       }
     };
@@ -59,6 +63,27 @@ public class RexCustomizationController extends RecyclerViewController<Void> imp
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
     items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.RexCustomizationDescription));
 
+    // Visual customizations
+    items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Visual"));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexDisableColorfulReplies, 0, R.string.RexDisableColorfulReplies));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexTranslucentDeleted, 0, R.string.RexTranslucentDeletedMessages));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexDeletedMarkIcon, 0, R.string.RexDeletedMarkIcon));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexDeletedMarkColor, 0, R.string.RexDeletedMarkColor));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+
+    // Drawer options
+    items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Drawer"));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexDrawerOptions, 0, R.string.RexDrawerOptions));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Customize drawer item order and visibility."));
+
     adapter.setItems(items, false);
     recyclerView.setAdapter(adapter);
   }
@@ -69,6 +94,18 @@ public class RexCustomizationController extends RecyclerViewController<Void> imp
     if (viewId == R.id.btn_rexSaveRestricted) {
       RexConfig.INSTANCE.setSaveRestricted(!RexConfig.INSTANCE.isSaveRestricted());
       adapter.updateValuedSettingById(R.id.btn_rexSaveRestricted);
+    } else if (viewId == R.id.btn_rexDisableColorfulReplies) {
+      RexConfig.INSTANCE.setDisableColorfulReplies(!RexConfig.INSTANCE.getDisableColorfulReplies());
+      adapter.updateValuedSettingById(R.id.btn_rexDisableColorfulReplies);
+    } else if (viewId == R.id.btn_rexTranslucentDeleted) {
+      RexConfig.INSTANCE.setTranslucentDeletedMessages(!RexConfig.INSTANCE.getTranslucentDeletedMessages());
+      adapter.updateValuedSettingById(R.id.btn_rexTranslucentDeleted);
+    } else if (viewId == R.id.btn_rexDeletedMarkIcon) {
+      // TODO: Open icon selector dialog
+    } else if (viewId == R.id.btn_rexDeletedMarkColor) {
+      // TODO: Open color picker dialog
+    } else if (viewId == R.id.btn_rexDrawerOptions) {
+      // TODO: Open drawer customization controller
     }
   }
 }
