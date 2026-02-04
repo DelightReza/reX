@@ -291,6 +291,11 @@ import tgx.td.Td;
 import tgx.td.TdConstants;
 import tgx.td.data.MessageWithProperties;
 import tgx.td.ui.TdUi;
+import org.thunderdog.challegram.rex.RexConfig;
+import org.thunderdog.challegram.rex.RexCloneSender;
+import org.thunderdog.challegram.rex.db.RexDatabase;
+import org.thunderdog.challegram.rex.db.SavedMessage;
+import org.thunderdog.challegram.rex.RexGhostManager;
 
 public class MessagesController extends ViewController<MessagesController.Arguments> implements
   Menu, Unlockable, View.OnClickListener,
@@ -2632,6 +2637,13 @@ public class MessagesController extends ViewController<MessagesController.Argume
     this.openKeyboard = args.openKeyboard;
     this.foundMessageId = args.foundMessageId;
     this.fillDraft = args.fillDraft;
+    
+    // --- REX MOD: Load ghost messages for this chat ---
+    if (args.chat != null && org.thunderdog.challegram.rex.RexConfig.INSTANCE.isSpyEnabled() && 
+        org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveDeletedMessages()) {
+      org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.loadGhostMessagesForChat(context(), args.chat.id);
+    }
+    // --- END REX MOD ---
 
     if (contentView != null) {
       updateView();
@@ -5797,6 +5809,141 @@ public class MessagesController extends ViewController<MessagesController.Argume
         if (selectedMessage.canBeForwarded()) {
           shareMessages(selectedMessage.getAllMessages(), false);
         }
+        return true;
+      } else if (id == R.id.btn_messageRexForceRead) {
+        // reX: Force read message despite Ghost Mode
+        cancelSheduledKeyboardOpeningAndHideAllKeyboards();
+        TdApi.Message message = selectedMessage.getNewestMessage();
+        RexConfig.INSTANCE.setForceReadRequest(true);
+        tdlib.client().send(new TdApi.ViewMessages(message.chatId, new long[]{message.id}, new TdApi.MessageSourceChatHistory(), true), result -> {
+          RexConfig.INSTANCE.setForceReadRequest(false);
+        });
+        UI.showToast("Message marked as read", Toast.LENGTH_SHORT);
+        return true;
+      } else if (id == R.id.btn_messageRexForwardRestricted) {
+        // reX: Forward restricted content via cloning
+        cancelSheduledKeyboardOpeningAndHideAllKeyboards();
+        TdApi.Message message = selectedMessage.getNewestMessage();
+        
+        // Check if message can be cloned (files downloaded)
+        if (!RexCloneSender.INSTANCE.canClone(message)) {
+          UI.showToast("Download the file first before forwarding", Toast.LENGTH_SHORT);
+          return true;
+        }
+        
+        // Use ShareController - it will handle the forwarding
+        // Note: ShareController doesn't use RexCloneSender, but it allows forwarding
+        final ShareController c = new ShareController(context, tdlib);
+        c.setArguments(new ShareController.Args(message).setAfter(() -> {
+          UI.showToast("Forwarded restricted content", Toast.LENGTH_SHORT);
+        }));
+        c.show();
+        return true;
+      } else if (id == R.id.btn_messageRexSaveViewOnce) {
+        // reX: Save view-once message before it disappears
+        cancelSheduledKeyboardOpeningAndHideAllKeyboards();
+        TdApi.Message message = selectedMessage.getNewestMessage();
+        TdApi.FormattedText formattedText = Td.textOrCaption(message.content);
+        String text = formattedText != null ? formattedText.text : "";
+        long senderId = Td.getSenderId(message.senderId);
+        
+        // Save message metadata to database
+        SavedMessage savedMsg = new SavedMessage(
+          0, // id (auto-increment)
+          message.chatId,
+          message.id,
+          senderId,
+          text,
+          message.date,
+          false // isDeleted
+        );
+        RexDatabase.get(context()).rexDao().insertMessage(savedMsg);
+        
+        // For view-once media (photos/videos), download and save the file
+        if (message.content.getConstructor() == TdApi.MessagePhoto.CONSTRUCTOR) {
+          TdApi.MessagePhoto photo = (TdApi.MessagePhoto) message.content;
+          TdApi.PhotoSize photoSize = photo.photo.sizes.length > 0 ? 
+            photo.photo.sizes[photo.photo.sizes.length - 1] : null;
+          if (photoSize != null) {
+            TdApi.File file = photoSize.photo;
+            if (file.local.isDownloadingCompleted) {
+              // File already downloaded, save it
+              List<TD.DownloadedFile> files = new ArrayList<>();
+              files.add(TD.DownloadedFile.valueOfPhoto(file, false));
+              TD.saveFiles(context, files);
+              UI.showToast("View-once photo saved to gallery", Toast.LENGTH_SHORT);
+            } else {
+              // Download first, then save
+              tdlib.files().downloadFile(file, 32, (TdApi.File result, TdApi.Error error) -> {
+                if (error == null && result != null && result.local.isDownloadingCompleted) {
+                  List<TD.DownloadedFile> files = new ArrayList<>();
+                  files.add(TD.DownloadedFile.valueOfPhoto(result, false));
+                  TD.saveFiles(context, files);
+                  UI.showToast("View-once photo saved to gallery", Toast.LENGTH_SHORT);
+                }
+              });
+            }
+          }
+        } else if (message.content.getConstructor() == TdApi.MessageVideo.CONSTRUCTOR) {
+          TdApi.MessageVideo video = (TdApi.MessageVideo) message.content;
+          TdApi.File file = video.video.video;
+          if (file.local.isDownloadingCompleted) {
+            // File already downloaded, save it
+            List<TD.DownloadedFile> files = new ArrayList<>();
+            files.add(TD.DownloadedFile.valueOf(video.video));
+            TD.saveFiles(context, files);
+            UI.showToast("View-once video saved to gallery", Toast.LENGTH_SHORT);
+          } else {
+            // Download first, then save
+            tdlib.files().downloadFile(file, 32, (TdApi.File result, TdApi.Error error) -> {
+              if (error == null && result != null && result.local.isDownloadingCompleted) {
+                List<TD.DownloadedFile> files = new ArrayList<>();
+                files.add(TD.DownloadedFile.valueOf(video.video));
+                TD.saveFiles(context, files);
+                UI.showToast("View-once video saved to gallery", Toast.LENGTH_SHORT);
+              }
+            });
+          }
+        } else {
+          UI.showToast("View-once message saved", Toast.LENGTH_SHORT);
+        }
+        return true;
+      } else if (id == R.id.btn_messageRexBurn) {
+        // reX: Burn message (mark as ghost - hide locally and mark as read/opened)
+        cancelSheduledKeyboardOpeningAndHideAllKeyboards();
+        TdApi.Message message = selectedMessage.getNewestMessage();
+        TdApi.FormattedText formattedText = Td.textOrCaption(message.content);
+        String text = formattedText != null ? formattedText.text : "";
+        long senderId = Td.getSenderId(message.senderId);
+        // Save message to database before hiding
+        SavedMessage savedMsg = new SavedMessage(
+          0, // id (auto-increment)
+          message.chatId,
+          message.id,
+          senderId,
+          text,
+          message.date,
+          false // isDeleted
+        );
+        RexDatabase.get(context()).rexDao().insertMessage(savedMsg);
+        // Mark as ghost message
+        RexGhostManager.INSTANCE.addGhostMessage(message.id);
+        
+        // Mark the message as viewed/opened (this will show it as "Expired" for view-once)
+        if (message.selfDestructType != null) {
+          tdlib.client().send(new TdApi.ViewMessages(message.chatId, new long[]{message.id}, new TdApi.MessageSourceChatHistory(), true), tdlib.okHandler());
+        }
+        
+        UI.showToast("Message burned (hidden locally)", Toast.LENGTH_SHORT);
+        return true;
+      } else if (id == R.id.btn_messageRexViewEditHistory) {
+        // reX: View edit history for this message
+        cancelSheduledKeyboardOpeningAndHideAllKeyboards();
+        TdApi.Message message = selectedMessage.getNewestMessage();
+        // Open RexEditHistoryController to show edit history
+        org.thunderdog.challegram.ui.RexEditHistoryController editHistoryController = 
+          new org.thunderdog.challegram.ui.RexEditHistoryController(context(), tdlib, message.id);
+        navigateTo(editHistoryController);
         return true;
       } else if (id == R.id.btn_chatTranslate) {
         cancelSheduledKeyboardOpeningAndHideAllKeyboards();

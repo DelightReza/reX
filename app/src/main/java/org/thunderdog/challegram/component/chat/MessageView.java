@@ -85,6 +85,7 @@ import me.vkryl.core.lambda.CancellableRunnable;
 import me.vkryl.core.lambda.Destroyable;
 import me.vkryl.core.lambda.RunnableData;
 import org.thunderdog.challegram.rex.RexGhostManager;
+import org.thunderdog.challegram.rex.RexConfig;
 import tgx.td.ChatId;
 import tgx.td.Td;
 
@@ -343,6 +344,7 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
     // --- REX MOD: Apply ghost effect ---
     if (RexGhostManager.INSTANCE.isGhost(message.getId())) {
       setAlpha(0.5f); // Make it semi-transparent (grayed out)
+      invalidate(); // Force redraw to show overlay
     } else {
       setAlpha(1.0f); // Normal opacity
     }
@@ -825,6 +827,73 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
         ids.append(R.id.btn_messageShare);
         strings.append(R.string.Share);
         icons.append(R.drawable.baseline_forward_24);
+      }
+    }
+
+    // reX Feature Menu Items
+
+    // 1. Force Read Message (when Ghost Mode is active and message is unread)
+    if (!isMore && RexConfig.INSTANCE.isGhostMode() && !msg.isOutgoing() && isSent) {
+      // Only show if message hasn't been read yet
+      ids.append(R.id.btn_messageRexForceRead);
+      strings.append(R.string.RexForceReadMessage);
+      icons.append(R.drawable.deproko_baseline_check_double_24);
+    }
+
+    // 2. Forward Restricted Content
+    if (!isMore && isSent && RexConfig.INSTANCE.isSaveRestricted()) {
+      TdApi.Message message = msg.getNewestMessage();
+      // Show option to forward:
+      // - Restricted content that cannot be forwarded (!canBeForwarded) - includes restricted chats
+      // - Self-destruct/view-once messages (selfDestructType != null)
+      boolean isRestricted = !msg.canBeForwarded(); // Simplified - just check if forwarding is blocked
+      boolean isViewOnce = message.selfDestructType != null;
+      
+      if (isRestricted || isViewOnce) {
+        ids.append(R.id.btn_messageRexForwardRestricted);
+        strings.append(R.string.RexForwardRestricted);
+        icons.append(R.drawable.baseline_forward_24);
+      }
+    }
+
+    // 3. Save View-Once Message
+    if (!isMore && isSent && RexConfig.INSTANCE.isSpyEnabled()) {
+      TdApi.Message message = msg.getNewestMessage();
+      if (message.selfDestructType != null) {
+        // This is a view-once or self-destructing message
+        ids.append(R.id.btn_messageRexSaveViewOnce);
+        strings.append(R.string.RexSaveViewOnce);
+        icons.append(R.drawable.baseline_file_download_24);
+      }
+    }
+
+    // 4. Burn Message (Ghost Mode - local deletion) - Only for self-destruct messages
+    if (!isMore && isSent && RexConfig.INSTANCE.isSpyEnabled()) {
+      TdApi.Message message = msg.getNewestMessage();
+      // Only show burn option for self-destructing messages (view-once)
+      if (message.selfDestructType != null) {
+        ids.append(R.id.btn_messageRexBurn);
+        strings.append(R.string.RexBurnMessage);
+        icons.append(R.drawable.baseline_whatshot_24);
+      }
+    }
+
+    // 5. View Edit History
+    if (!isMore && isSent && RexConfig.INSTANCE.isSpyEnabled()) {
+      TdApi.Message message = msg.getNewestMessage();
+      // Check if this message has edit history
+      // First try cached value, if not cached (-1), query database
+      int editCount = msg.getCachedEditCount();
+      if (editCount == -1) {
+        // Not yet cached, query database
+        android.content.Context ctx = m.context();
+        org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(ctx);
+        editCount = db.rexDao().hasEdits(message.id);
+      }
+      if (editCount > 0) {
+        ids.append(R.id.btn_messageRexViewEditHistory);
+        strings.append(R.string.RexViewEditHistory);
+        icons.append(R.drawable.baseline_edit_24);
       }
     }
 

@@ -9,12 +9,18 @@
  */
 package org.thunderdog.challegram.rex
 
+import android.content.Context
+import org.thunderdog.challegram.rex.db.RexDatabase
 import java.util.concurrent.ConcurrentHashMap
 
 object RexGhostManager {
     // Stores IDs of messages that were deleted by server but kept by us
-    // Using ConcurrentHashMap for thread safety
+    // Using ConcurrentHashMap for thread safety (in-memory cache)
     private val ghostMessageIds = ConcurrentHashMap.newKeySet<Long>()
+
+    fun addGhostMessage(messageId: Long) {
+        ghostMessageIds.add(messageId)
+    }
 
     fun markAsGhost(messageId: Long) {
         ghostMessageIds.add(messageId)
@@ -30,5 +36,36 @@ object RexGhostManager {
 
     fun clear() {
         ghostMessageIds.clear()
+    }
+    
+    /**
+     * Load ghost messages for a specific chat from database into memory cache
+     */
+    fun loadGhostMessagesForChat(context: Context, chatId: Long) {
+        try {
+            val db = RexDatabase.get(context)
+            val deletedMessages = db.rexDao().getDeletedMessages(chatId)
+            deletedMessages.forEach { msg ->
+                ghostMessageIds.add(msg.messageId)
+            }
+        } catch (e: Exception) {
+            // Silently fail to avoid crashes
+        }
+    }
+    
+    /**
+     * Load all ghost messages from database into memory cache
+     * Call this on app start
+     */
+    fun loadAllGhostMessages(context: Context) {
+        try {
+            val db = RexDatabase.get(context)
+            val deletedMessages = db.rexDao().getAllDeletedMessages()
+            deletedMessages.forEach { msg ->
+                ghostMessageIds.add(msg.messageId)
+            }
+        } catch (e: Exception) {
+            // Silently fail to avoid crashes
+        }
     }
 }

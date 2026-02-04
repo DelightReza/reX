@@ -90,6 +90,8 @@ import me.vkryl.core.lambda.FutureBool;
 import me.vkryl.core.lambda.RunnableData;
 import org.thunderdog.challegram.rex.RexConfig;
 import org.thunderdog.challegram.rex.RexGhostManager;
+import org.thunderdog.challegram.rex.db.EditHistory;
+import org.thunderdog.challegram.rex.db.RexDatabase;
 import tgx.td.ChatId;
 import tgx.td.MessageId;
 import tgx.td.Td;
@@ -2242,8 +2244,17 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
           case TGMessage.REMOVE_COMBINATION: {
             // --- REX MOD START: Keep deleted messages as ghosts ---
             if (RexConfig.INSTANCE.isSpyEnabled() && RexConfig.INSTANCE.getSaveDeletedMessages()) {
-              // Mark the message as a ghost instead of removing it
+              // Mark the message as a ghost in memory and database
               RexGhostManager.INSTANCE.markAsGhost(messageId);
+              
+              // Persist to database
+              try {
+                long itemChatId = item.getChatId();
+                java.util.List<Long> msgIdList = java.util.Collections.singletonList(messageId);
+                org.thunderdog.challegram.rex.db.RexDatabase.get(controller.context()).rexDao().markAsDeleted(itemChatId, msgIdList);
+              } catch (Exception e) {
+                // Silently fail to avoid crashes
+              }
               
               // Unselect if selected
               if (controller.unselectMessage(messageId, item)) {
@@ -2282,8 +2293,17 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
           case TGMessage.REMOVE_COMPLETELY: {
             // --- REX MOD START: Keep deleted messages as ghosts ---
             if (RexConfig.INSTANCE.isSpyEnabled() && RexConfig.INSTANCE.getSaveDeletedMessages()) {
-              // Mark the message as a ghost instead of removing it
+              // Mark the message as a ghost in memory and database
               RexGhostManager.INSTANCE.markAsGhost(messageId);
+              
+              // Persist to database
+              try {
+                long itemChatId = item.getChatId();
+                java.util.List<Long> msgIdList = java.util.Collections.singletonList(messageId);
+                org.thunderdog.challegram.rex.db.RexDatabase.get(controller.context()).rexDao().markAsDeleted(itemChatId, msgIdList);
+              } catch (Exception e) {
+                // Silently fail to avoid crashes
+              }
               
               // Unselect if selected
               if (controller.unselectMessage(messageId, item)) {
@@ -3513,6 +3533,34 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
     }
     tdlib.ui().post(() -> {
       if (loader.getChatId() == chatId) {
+        // --- REX MOD START: Save edit history ---
+        if (RexConfig.INSTANCE.isSpyEnabled()) {
+          // Get the old message content before updating
+          int index = adapter.indexOfMessageContainer(messageId);
+          if (index != -1) {
+            TGMessage tgMessage = adapter.getItem(index);
+            TdApi.Message oldMessage = tgMessage.getMessage();
+            if (oldMessage != null) {
+              // Extract old text
+              TdApi.FormattedText oldText = Td.textOrCaption(oldMessage.content);
+              String oldTextStr = oldText != null ? oldText.text : "";
+              
+              // Save to edit history database
+              EditHistory editHistory = new EditHistory(
+                0, // id (auto-increment)
+                messageId,
+                chatId, // chatId
+                oldTextStr,
+                (int) (System.currentTimeMillis() / 1000)
+              );
+              RexDatabase.get(controller.context()).rexDao().insertEdit(editHistory);
+              
+              // Invalidate the cached edit count so it will be reloaded
+              tgMessage.invalidateCachedEditCount();
+            }
+          }
+        }
+        // --- REX MOD END ---
         updateMessageContent(chatId, messageId, newContent);
       }
     });

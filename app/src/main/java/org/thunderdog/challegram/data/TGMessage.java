@@ -301,6 +301,10 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   protected final RectF bubblePathRect, bubbleClipPathRect;
 
   private boolean needSponsorSmallPadding;
+  
+  // --- REX MOD: Cache edit count for performance ---
+  private int cachedEditCount = -1; // -1 means not computed yet
+  // --- END REX MOD ---
 
   protected final MessagesManager manager;
   protected final Tdlib tdlib;
@@ -1560,6 +1564,12 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   private static Paint topShadowPaint, bottomShadowPaint, leftShadowPaint, rightShadowPaint;
   private static Bitmap leftShadow, topShadow, rightShadow, bottomShadow;
   private static Paint shadowPaint;
+  
+  // --- REX MOD: Cached paint objects for visual overlays ---
+  private static TextPaint rexDeletedTextPaint;
+  private static Paint rexDeletedBgPaint;
+  private static TextPaint rexEditedTextPaint;
+  // --- END REX MOD ---
 
   private static void initBubbleResources () {
     Resources res = UI.getResources();
@@ -2512,6 +2522,27 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
       c.translate(translation, 0);
     }
     drawOverlay(view, c, pContentX, pContentY, pContentMaxWidth);
+    
+    // --- REX MOD: Draw ghost message overlay ---
+    if (org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.isGhost(getId())) {
+      drawGhostOverlay(c, pContentX, pContentY, pContentMaxWidth);
+    }
+    // --- END REX MOD ---
+    
+    // --- REX MOD: Draw edit history indicator ---
+    if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.isSpyEnabled()) {
+      // Lazy-load edit count only once
+      if (cachedEditCount == -1) {
+        android.content.Context ctx = view.getContext();
+        org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(ctx);
+        cachedEditCount = db.rexDao().hasEdits(getId());
+      }
+      if (cachedEditCount > 0) {
+        drawEditIndicator(c, pContentX, pContentY, pContentMaxWidth, cachedEditCount);
+      }
+    }
+    // --- END REX MOD ---
+    
     if (savedTranslation) {
       Views.restore(c, restoreToCount);
       drawTranslate(view, c);
@@ -2531,6 +2562,58 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   protected void drawOverlay (MessageView view, Canvas c, int startX, int startY, int maxWidth) {
     // Override
   }
+  
+  // --- REX MOD: Ghost message overlay methods ---
+  private void drawGhostOverlay (Canvas c, int startX, int startY, int maxWidth) {
+    // Initialize paints if needed (lazy initialization)
+    if (rexDeletedTextPaint == null) {
+      rexDeletedTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+      rexDeletedTextPaint.setColor(android.graphics.Color.RED);
+      rexDeletedTextPaint.setTextSize(Screen.dp(11f));
+      rexDeletedTextPaint.setTypeface(Fonts.getRobotoMedium());
+    }
+    if (rexDeletedBgPaint == null) {
+      rexDeletedBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+      rexDeletedBgPaint.setColor(android.graphics.Color.argb(180, 255, 230, 230));
+    }
+    
+    // Draw "[DELETED]" badge overlay
+    String deletedText = "[DELETED]";
+    float textWidth = rexDeletedTextPaint.measureText(deletedText);
+    float badgeX = startX + (maxWidth - textWidth) / 2;
+    float badgeY = startY + Screen.dp(12f);
+    
+    // Draw semi-transparent background for badge
+    c.drawRoundRect(badgeX - Screen.dp(6f), badgeY - Screen.dp(10f),
+                    badgeX + textWidth + Screen.dp(6f), badgeY + Screen.dp(4f),
+                    Screen.dp(4f), Screen.dp(4f), rexDeletedBgPaint);
+    
+    // Draw text
+    c.drawText(deletedText, badgeX, badgeY, rexDeletedTextPaint);
+  }
+  
+  private void drawEditIndicator (Canvas c, int startX, int startY, int maxWidth, int editCount) {
+    // Initialize paint if needed (lazy initialization)
+    if (rexEditedTextPaint == null) {
+      rexEditedTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+      rexEditedTextPaint.setColor(Theme.getColor(ColorId.textLight));
+      rexEditedTextPaint.setTextSize(Screen.dp(10f));
+      rexEditedTextPaint.setTypeface(Fonts.getRobotoRegular());
+    }
+    
+    // Draw "✎ Edited" indicator
+    String editText = "✎ Edited";
+    if (editCount > 1) {
+      editText += " (" + editCount + "x)";
+    }
+    
+    float textWidth = rexEditedTextPaint.measureText(editText);
+    float indicatorX = startX + maxWidth - textWidth - Screen.dp(8f);
+    float indicatorY = startY + Screen.dp(10f);
+    
+    c.drawText(editText, indicatorX, indicatorY, rexEditedTextPaint);
+  }
+  // --- END REX MOD ---
 
   protected void drawContent (MessageView view, Canvas c, int startX, int startY, int maxWidth) {
     // These two dots should never appear in MessagesListView
@@ -4614,6 +4697,16 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   public final long getId () {
     return msg.id;
   }
+  
+  // --- REX MOD: Getter for cached edit count ---
+  public final int getCachedEditCount () {
+    return cachedEditCount;
+  }
+  
+  public final void invalidateCachedEditCount () {
+    cachedEditCount = -1;
+  }
+  // --- END REX MOD ---
 
   public final MessageId toMessageId () {
     return new MessageId(msg.chatId, msg.id, getOtherMessageIds(msg.id));
