@@ -5730,4 +5730,11 @@
   <string name="RexNoEditHistory">No edit history for this message.</string>
   <string name="RexEditHistoryDescription">Previous versions of this message will appear here.</string>
 
+  <!-- reX Chat Menu -->
+  <string name="RexChatMenu">reX</string>
+  <string name="RexViewDeleted">View Deleted</string>
+  <string name="RexReadExclusion">Read Exclusion</string>
+  <string name="RexTypeExclusion">Type Exclusion</string>
+  <string name="RexClearDeleted">Clear Deleted</string>
+
 </resources>

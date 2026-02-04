@@ -1468,5 +1468,13 @@
   <item type="id" name="btn_rexDeletedMarkIcon" />
   <item type="id" name="btn_rexDeletedMarkColor" />
   <item type="id" name="btn_rexDrawerOptions" />
+  
+  <!-- Chat Menu IDs -->
+  <item type="id" name="btn_rexChatMenu" />
+  <item type="id" name="btn_rexViewDeleted" />
+  <item type="id" name="btn_rexReadExclusion" />
+  <item type="id" name="btn_rexTypeExclusion" />
+  <item type="id" name="btn_rexClearDeleted" />
+
 
 </resources>

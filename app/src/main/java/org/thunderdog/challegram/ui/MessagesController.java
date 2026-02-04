@@ -2287,8 +2287,52 @@ public class MessagesController extends ViewController<MessagesController.Argume
       if (chat != null) {
         tdlib.ui().toggleMute(this, chat.id, false, null);
       }
+    // --- REX MOD ---
+    } else if (id == R.id.btn_rexChatMenu) {
+      showRexChatMenu();
+    } else if (id == R.id.btn_rexViewDeleted) {
+      // Open deleted messages viewer for this chat
+      RexDeletedMessagesController controller = new RexDeletedMessagesController(context, tdlib);
+      // TODO: Pass chat ID to filter deleted messages for this chat
+      navigateTo(controller);
+    } else if (id == R.id.btn_rexReadExclusion) {
+      // TODO: Toggle Ghost Mode read exclusion for this chat
+      UI.showToast("Read Exclusion toggle not yet implemented", Toast.LENGTH_SHORT);
+    } else if (id == R.id.btn_rexTypeExclusion) {
+      // TODO: Toggle Ghost Mode typing exclusion for this chat
+      UI.showToast("Type Exclusion toggle not yet implemented", Toast.LENGTH_SHORT);
+    } else if (id == R.id.btn_rexClearDeleted) {
+      // TODO: Clear deleted messages for this chat with confirmation
+      UI.showToast("Clear Deleted not yet implemented", Toast.LENGTH_SHORT);
+    // --- END REX ---
     }
   }
+
+  // --- REX MOD ---
+  /**
+   * Show reX submenu with chat-specific options
+   */
+  private void showRexChatMenu() {
+    if (chat == null) return;
+    
+    IntList ids = new IntList(4);
+    StringList strings = new StringList(4);
+    
+    ids.append(R.id.btn_rexViewDeleted);
+    strings.append(R.string.RexViewDeleted);
+    
+    ids.append(R.id.btn_rexReadExclusion);
+    strings.append(R.string.RexReadExclusion);
+    
+    ids.append(R.id.btn_rexTypeExclusion);
+    strings.append(R.string.RexTypeExclusion);
+    
+    ids.append(R.id.btn_rexClearDeleted);
+    strings.append(R.string.RexClearDeleted);
+    
+    showMore(ids.get(), strings.get(), 0);
+  }
+  // --- END REX ---
 
   private void reportChat (@Nullable MessageWithProperties[] messages, final @Nullable Runnable after) {
     TdApi.Message[] array;
@@ -4535,6 +4579,14 @@ public class MessagesController extends ViewController<MessagesController.Argume
         strings.append("Show/hide bottom bar");
       }
     }
+
+    // --- REX MOD ---
+    // Add reX submenu if Spy Mode is enabled
+    if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.isSpyEnabled()) {
+      ids.append(R.id.btn_rexChatMenu);
+      strings.append(R.string.RexChatMenu);
+    }
+    // --- END REX ---
 
     showMore(ids.get(), strings.get(), 0);
   }
