@@ -51,7 +51,9 @@ object RexScheduler {
      */
     private fun sendScheduledMessage(scheduled: ScheduledMessage) {
         messageQueue.remove(scheduled)
-        scheduled.tdlib.send(scheduled.request, scheduled.tdlib.okHandler())
+        scheduled.tdlib.send(scheduled.request) { _, _ -> 
+            // Simple handler that ignores result
+        }
     }
     
     /**
