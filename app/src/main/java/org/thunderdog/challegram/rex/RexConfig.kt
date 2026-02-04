@@ -96,12 +96,12 @@ object RexConfig {
         set(v) = prefs.edit().putBoolean("ghost_story_alert", v).apply()
 
     /** Locked Ghost Mode options (prevent Master Toggle from changing) */
-    @get:JvmName("getLockedGhostOptions")
+    @JvmName("getLockedGhostOptions")
     fun getLockedGhostOptions(): Set<String> {
         return prefs.getStringSet("ghost_locked_options", emptySet()) ?: emptySet()
     }
 
-    @set:JvmName("setLockedGhostOptions")
+    @JvmName("setLockedGhostOptions")
     fun setLockedGhostOptions(locked: Set<String>) {
         prefs.edit().putStringSet("ghost_locked_options", locked).apply()
     }
