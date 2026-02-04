@@ -1762,7 +1762,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
         TdApi.SendMessage msg = (TdApi.SendMessage) function;
         // Send ViewMessages for this chat before sending message
         RexConfig.INSTANCE.setForceReadRequest(true);
-        client.send(new TdApi.ViewMessages(msg.chatId, 0, new long[0], true), result -> {
+        client.send(new TdApi.ViewMessages(msg.chatId, new long[0], new TdApi.MessageSourceOther(), true), result -> {
           // Reset flag after request completes
           RexConfig.INSTANCE.setForceReadRequest(false);
         });
@@ -1770,7 +1770,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
         TdApi.AddMessageReaction reaction = (TdApi.AddMessageReaction) function;
         // Send ViewMessages for this chat before adding reaction
         RexConfig.INSTANCE.setForceReadRequest(true);
-        client.send(new TdApi.ViewMessages(reaction.chatId, 0, new long[0], true), result -> {
+        client.send(new TdApi.ViewMessages(reaction.chatId, new long[0], new TdApi.MessageSourceOther(), true), result -> {
           // Reset flag after request completes
           RexConfig.INSTANCE.setForceReadRequest(false);
         });

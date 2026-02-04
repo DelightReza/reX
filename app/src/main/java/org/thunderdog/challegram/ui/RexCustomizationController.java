@@ -11,12 +11,14 @@ package org.thunderdog.challegram.ui;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.Toast;
 
 import org.thunderdog.challegram.R;
 import org.thunderdog.challegram.component.base.SettingView;
 import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.rex.RexConfig;
 import org.thunderdog.challegram.telegram.Tdlib;
+import org.thunderdog.challegram.tool.UI;
 import org.thunderdog.challegram.v.CustomRecyclerView;
 
 import java.util.ArrayList;
