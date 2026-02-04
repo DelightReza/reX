@@ -7654,7 +7654,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   // --- REX MOD: Helper method to save message to database ---
   private void saveMessageToDatabase(TdApi.Message msg) {
     try {
-      org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(context());
+      org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(UI.getAppContext());
       
       // Extract text from message content
       String text = null;
