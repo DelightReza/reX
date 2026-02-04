@@ -65,7 +65,7 @@ public class RexCustomizationController extends RecyclerViewController<Void> imp
 
     // Visual customizations
     items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
-    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Visual"));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.RexVisual));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
     items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexDisableColorfulReplies, 0, R.string.RexDisableColorfulReplies));
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
@@ -78,11 +78,11 @@ public class RexCustomizationController extends RecyclerViewController<Void> imp
 
     // Drawer options
     items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
-    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Drawer"));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.RexDrawer));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
     items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexDrawerOptions, 0, R.string.RexDrawerOptions));
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Customize drawer item order and visibility."));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.RexDrawerOptionsDescription));
 
     adapter.setItems(items, false);
     recyclerView.setAdapter(adapter);
@@ -101,11 +101,11 @@ public class RexCustomizationController extends RecyclerViewController<Void> imp
       RexConfig.INSTANCE.setTranslucentDeletedMessages(!RexConfig.INSTANCE.getTranslucentDeletedMessages());
       adapter.updateValuedSettingById(R.id.btn_rexTranslucentDeleted);
     } else if (viewId == R.id.btn_rexDeletedMarkIcon) {
-      // TODO: Open icon selector dialog
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
     } else if (viewId == R.id.btn_rexDeletedMarkColor) {
-      // TODO: Open color picker dialog
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
     } else if (viewId == R.id.btn_rexDrawerOptions) {
-      // TODO: Open drawer customization controller
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
     }
   }
 }

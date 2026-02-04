@@ -2296,14 +2296,11 @@ public class MessagesController extends ViewController<MessagesController.Argume
       // TODO: Pass chat ID to filter deleted messages for this chat
       navigateTo(controller);
     } else if (id == R.id.btn_rexReadExclusion) {
-      // TODO: Toggle Ghost Mode read exclusion for this chat
-      UI.showToast("Read Exclusion toggle not yet implemented", Toast.LENGTH_SHORT);
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
     } else if (id == R.id.btn_rexTypeExclusion) {
-      // TODO: Toggle Ghost Mode typing exclusion for this chat
-      UI.showToast("Type Exclusion toggle not yet implemented", Toast.LENGTH_SHORT);
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
     } else if (id == R.id.btn_rexClearDeleted) {
-      // TODO: Clear deleted messages for this chat with confirmation
-      UI.showToast("Clear Deleted not yet implemented", Toast.LENGTH_SHORT);
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
     // --- END REX ---
     }
   }

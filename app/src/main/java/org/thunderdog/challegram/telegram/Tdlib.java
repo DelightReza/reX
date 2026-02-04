@@ -1762,12 +1762,18 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
         TdApi.SendMessage msg = (TdApi.SendMessage) function;
         // Send ViewMessages for this chat before sending message
         RexConfig.INSTANCE.setForceReadRequest(true);
-        client.send(new TdApi.ViewMessages(msg.chatId, 0, new long[0], true), null);
+        client.send(new TdApi.ViewMessages(msg.chatId, 0, new long[0], true), result -> {
+          // Reset flag after request completes
+          RexConfig.INSTANCE.setForceReadRequest(false);
+        });
       } else if (constructor == TdApi.AddMessageReaction.CONSTRUCTOR) {
         TdApi.AddMessageReaction reaction = (TdApi.AddMessageReaction) function;
         // Send ViewMessages for this chat before adding reaction
         RexConfig.INSTANCE.setForceReadRequest(true);
-        client.send(new TdApi.ViewMessages(reaction.chatId, 0, new long[0], true), null);
+        client.send(new TdApi.ViewMessages(reaction.chatId, 0, new long[0], true), result -> {
+          // Reset flag after request completes
+          RexConfig.INSTANCE.setForceReadRequest(false);
+        });
       }
     }
     // --- END REX INTERCEPTOR ---

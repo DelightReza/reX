@@ -61,9 +61,9 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
           view.getToggler().setRadioEnabled(RexConfig.INSTANCE.getSaveAttachments(), isUpdate);
         } else if (itemId == R.id.btn_rexMaxFolderSize) {
           int size = RexConfig.INSTANCE.getMaxFolderSize();
-          String sizeText = size == 0 ? "No Limit" : 
-                           size < 1024 ? size + " MB" : 
-                           (size / 1024) + " GB";
+          String sizeText = size == 0 ? Lang.getString(R.string.RexNoLimit) : 
+                           size < 1024 ? size + " " + Lang.getString(R.string.RexMB) : 
+                           (size / 1024) + " " + Lang.getString(R.string.RexGB);
           view.setData(sizeText);
         }
       }
@@ -89,7 +89,7 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
     
     // Attachments section
     items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
-    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Attachments"));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.RexAttachments));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
     items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveAttachments, 0, R.string.RexSaveAttachments));
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
@@ -101,15 +101,15 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
     
     // View saved messages button
     items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
-    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Saved Data"));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.RexSavedData));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
     items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexViewSaved, R.drawable.baseline_archive_24, R.string.RexViewDeletedMessages));
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Browse all deleted messages saved by Spy Mode."));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.RexViewDeletedDescription));
 
     // Database actions
     items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
-    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Database"));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.RexDatabase));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
     items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexExportDb, 0, R.string.RexExportDatabase));
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
@@ -147,17 +147,17 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
       RexConfig.INSTANCE.setSaveAttachments(!RexConfig.INSTANCE.getSaveAttachments());
       adapter.updateValuedSettingById(R.id.btn_rexSaveAttachments);
     } else if (viewId == R.id.btn_rexAttachmentsFolder) {
-      // TODO: Open folder picker
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
     } else if (viewId == R.id.btn_rexMaxFolderSize) {
-      // TODO: Open size picker dialog
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
     } else if (viewId == R.id.btn_rexViewSaved) {
       navigateTo(new RexDeletedMessagesController(context, tdlib));
     } else if (viewId == R.id.btn_rexExportDb) {
-      // TODO: Implement database export
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
     } else if (viewId == R.id.btn_rexImportDb) {
-      // TODO: Implement database import
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
     } else if (viewId == R.id.btn_rexClearDb) {
-      // TODO: Implement database clear with confirmation
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
     }
   }
 }
