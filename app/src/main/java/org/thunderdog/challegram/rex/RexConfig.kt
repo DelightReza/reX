@@ -108,12 +108,20 @@ object RexConfig {
 
     // --- SPY MODE SETTINGS (Persistent) ---
     
-    /** Enable/disable Spy Mode (message preservation) */
+    /** Enable/disable Spy Mode (message preservation) - DEPRECATED: use individual feature checks */
+    @Deprecated("No longer used - check individual spy features instead", ReplaceWith("hasAnySpyFeatureEnabled()"))
     @get:JvmName("isSpyEnabled")
     @set:JvmName("setSpyEnabled")
     var isSpyMode: Boolean
-        get() = prefs.getBoolean("spy_enabled", false)
-        set(v) = prefs.edit().putBoolean("spy_enabled", v).apply()
+        get() = hasAnySpyFeatureEnabled()
+        set(v) = Unit // No-op, kept for compatibility
+    
+    /** Check if any spy feature is enabled */
+    @JvmName("hasAnySpyFeatureEnabled")
+    fun hasAnySpyFeatureEnabled(): Boolean {
+        return saveDeletedMessages || saveEditsHistory || saveInBotDialogs || 
+               saveReadDate || saveLastSeenDate || saveAttachments
+    }
         
     /** Save deleted messages to database */
     @get:JvmName("getSaveDeletedMessages")

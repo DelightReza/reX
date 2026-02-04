@@ -47,9 +47,7 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
       @Override
       protected void setValuedSetting(ListItem item, SettingView view, boolean isUpdate) {
         final int itemId = item.getId();
-        if (itemId == R.id.btn_rexSpyMode) {
-          view.getToggler().setRadioEnabled(RexConfig.INSTANCE.isSpyEnabled(), isUpdate);
-        } else if (itemId == R.id.btn_rexSaveDeleted) {
+        if (itemId == R.id.btn_rexSaveDeleted) {
           view.getToggler().setRadioEnabled(RexConfig.INSTANCE.getSaveDeletedMessages(), isUpdate);
         } else if (itemId == R.id.btn_rexSaveEdits) {
           view.getToggler().setRadioEnabled(RexConfig.INSTANCE.getSaveEditsHistory(), isUpdate);
@@ -75,8 +73,6 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
     items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
     items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.RexSpySettings));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSpyMode, 0, R.string.RexEnableSpyMode));
-    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
     items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveDeleted, 0, R.string.RexSaveDeletedMessages));
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
     items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveEdits, 0, R.string.RexSaveEditsHistory));
@@ -87,7 +83,7 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
     items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexSaveLastSeen, 0, R.string.RexSaveLastSeenDate));
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.RexSpyModeDescription));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.RexSpyFeaturesDescription));
     
     // Attachments section
     items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
@@ -127,10 +123,7 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
   @Override
   public void onClick(View v) {
     final int viewId = v.getId();
-    if (viewId == R.id.btn_rexSpyMode) {
-      RexConfig.INSTANCE.setSpyEnabled(!RexConfig.INSTANCE.isSpyEnabled());
-      adapter.updateValuedSettingById(R.id.btn_rexSpyMode);
-    } else if (viewId == R.id.btn_rexSaveDeleted) {
+    if (viewId == R.id.btn_rexSaveDeleted) {
       RexConfig.INSTANCE.setSaveDeletedMessages(!RexConfig.INSTANCE.getSaveDeletedMessages());
       adapter.updateValuedSettingById(R.id.btn_rexSaveDeleted);
     } else if (viewId == R.id.btn_rexSaveEdits) {
