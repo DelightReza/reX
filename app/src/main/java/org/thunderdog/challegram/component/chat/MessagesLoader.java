@@ -1684,6 +1684,66 @@ public class MessagesLoader implements Client.ResultHandler {
         }
       }
 
+      // --- REX MOD: Load ghost messages from database and merge them ---
+      if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveDeletedMessages()) {
+        try {
+          org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(org.thunderdog.challegram.tool.UI.getAppContext());
+          java.util.List<org.thunderdog.challegram.rex.db.SavedMessage> ghostMessages = db.rexDao().getDeletedMessages(chatId);
+          
+          if (!ghostMessages.isEmpty()) {
+            // Convert deleted messages back to TdApi.Message and TGMessage
+            java.util.Set<Long> existingIds = new java.util.HashSet<>();
+            for (TGMessage msg : items) {
+              existingIds.add(msg.getId());
+            }
+            
+            java.util.List<TGMessage> ghostItems = new java.util.ArrayList<>();
+            for (org.thunderdog.challegram.rex.db.SavedMessage deleted : ghostMessages) {
+              if (!existingIds.contains(deleted.getMessageId())) {
+                // Create a minimal TdApi.Message from database
+                TdApi.Message msg = new TdApi.Message();
+                msg.id = deleted.getMessageId();
+                msg.chatId = deleted.getChatId();
+                msg.senderId = new TdApi.MessageSenderUser(deleted.getSenderId());
+                msg.date = deleted.getTimestamp();
+                msg.isOutgoing = false;
+                
+                // Set content based on what we saved
+                if (deleted.getText() != null && !deleted.getText().isEmpty()) {
+                  msg.content = new TdApi.MessageText(
+                    new TdApi.FormattedText(deleted.getText(), new TdApi.TextEntity[0]),
+                    null,
+                    null
+                  );
+                } else {
+                  msg.content = new TdApi.MessageText(
+                    new TdApi.FormattedText("[Deleted Media]", new TdApi.TextEntity[0]),
+                    null,
+                    null
+                  );
+                }
+                
+                // Create TGMessage and mark as ghost
+                TGMessage tgMsg = TGMessage.valueOf(manager, msg, chatAdmins);
+                if (tgMsg != null) {
+                  org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.markAsGhost(msg.id);
+                  ghostItems.add(tgMsg);
+                }
+              }
+            }
+            
+            // Merge ghost messages into items list, sorted by ID
+            if (!ghostItems.isEmpty()) {
+              items.addAll(ghostItems);
+              java.util.Collections.sort(items, (a, b) -> Long.compare(b.getId(), a.getId()));
+            }
+          }
+        } catch (Exception e) {
+          android.util.Log.e("REX", "Failed to load ghost messages", e);
+        }
+      }
+      // --- END REX MOD ---
+
       final int chunkSize = scrollItemIndexFinal == -1 ? CHUNK_SIZE_SMALL : CHUNK_SIZE_SEARCH;
       boolean willTryAgain = (loadingMode == MODE_INITIAL || loadingMode == MODE_REPEAT_INITIAL) && items.size() < chunkSize && items.size() > 0;
       manager.displayMessages(items, loadingMode, scrollPosition, scrollItemView, scrollMessageId, scrollHighlightMode, willTryAgain && loadingLocal, canLoadTop);
