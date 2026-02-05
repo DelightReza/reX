@@ -641,7 +641,7 @@ public class TdlibUi extends Handler {
           new int[] {R.id.menu_btn_delete, R.id.btn_rexKeepLocally, R.id.btn_cancel},
           new String[] {deleteActionMsg, Lang.getString(R.string.RexKeepLocally), Lang.getString(R.string.Cancel)},
           new int[] {ViewController.OptionColor.RED, ViewController.OptionColor.NORMAL, ViewController.OptionColor.NORMAL},
-          new int[] {R.drawable.baseline_delete_24, R.drawable.baseline_visibility_off_24, R.drawable.baseline_cancel_24},
+          new int[] {R.drawable.baseline_delete_24, R.drawable.baseline_visibility_24, R.drawable.baseline_cancel_24},
           (itemView, id) -> {
             if (id == R.id.menu_btn_delete) {
               LongSparseArray<long[]> messageIds = TdExt.toMessageIdsMap(messages);
