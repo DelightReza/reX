@@ -2243,7 +2243,7 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
           }
           case TGMessage.REMOVE_COMBINATION: {
             // --- REX MOD START: Keep deleted messages as ghosts ---
-            if (RexConfig.INSTANCE.isSpyEnabled() && RexConfig.INSTANCE.getSaveDeletedMessages()) {
+            if (RexConfig.INSTANCE.getSaveDeletedMessages()) {
               // Mark the message as a ghost in memory and database
               RexGhostManager.INSTANCE.markAsGhost(messageId);
               
