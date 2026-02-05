@@ -1726,7 +1726,7 @@ public class MessagesLoader implements Client.ResultHandler {
                     TdApi.PhotoSize photoSize = new TdApi.PhotoSize("m", photoFile, 640, 480, new int[0]);
                     TdApi.Photo photo = new TdApi.Photo(false, null, new TdApi.PhotoSize[]{photoSize});
                     String caption = deleted.getText() != null ? deleted.getText().replace("[Photo]", "").replace(": ", "") : "";
-                    msg.content = new TdApi.MessagePhoto(photo, new TdApi.FormattedText(caption, new TdApi.TextEntity[0]), false, false);
+                    msg.content = new TdApi.MessagePhoto(photo, new TdApi.FormattedText(caption, new TdApi.TextEntity[0]), false, false, false);
                   } else if (deleted.getContentType() == TdApi.MessageVideo.CONSTRUCTOR) {
                     TdApi.File videoFile = new TdApi.File();
                     if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
@@ -1736,7 +1736,7 @@ public class MessagesLoader implements Client.ResultHandler {
                     }
                     TdApi.Video video = new TdApi.Video(0, 640, 480, "video.mp4", "video/mp4", false, false, null, null, videoFile);
                     String caption = deleted.getText() != null ? deleted.getText().replace("[Video]", "").replace(": ", "") : "";
-                    msg.content = new TdApi.MessageVideo(video, new TdApi.FormattedText(caption, new TdApi.TextEntity[0]), false, false);
+                    msg.content = new TdApi.MessageVideo(video, new TdApi.AlternativeVideo[0], new TdApi.VideoStoryboard[0], null, 0, new TdApi.FormattedText(caption, new TdApi.TextEntity[0]), false, false, false);
                   } else if (deleted.getContentType() == TdApi.MessageDocument.CONSTRUCTOR) {
                     TdApi.File docFile = new TdApi.File();
                     if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
@@ -1759,7 +1759,7 @@ public class MessagesLoader implements Client.ResultHandler {
                       audioFile.local = new TdApi.LocalFile("", false, false, false, false, 0, 0, 0);
                     }
                     String title = deleted.getText() != null ? deleted.getText().replace("[Audio: ", "").replace("]", "") : "Audio";
-                    TdApi.Audio audio = new TdApi.Audio(0, title, "", "", "audio/mp3", null, null, audioFile);
+                    TdApi.Audio audio = new TdApi.Audio(0, title, "", "", "audio/mp3", null, null, null, audioFile);
                     msg.content = new TdApi.MessageAudio(audio, new TdApi.FormattedText("", new TdApi.TextEntity[0]));
                   } else if (deleted.getContentType() == TdApi.MessageVoiceNote.CONSTRUCTOR) {
                     TdApi.File voiceFile = new TdApi.File();
@@ -1768,7 +1768,7 @@ public class MessagesLoader implements Client.ResultHandler {
                     } else {
                       voiceFile.local = new TdApi.LocalFile("", false, false, false, false, 0, 0, 0);
                     }
-                    TdApi.VoiceNote voiceNote = new TdApi.VoiceNote(0, new byte[0], "audio/ogg", voiceFile);
+                    TdApi.VoiceNote voiceNote = new TdApi.VoiceNote(0, new byte[0], "audio/ogg", null, voiceFile);
                     msg.content = new TdApi.MessageVoiceNote(voiceNote, new TdApi.FormattedText("", new TdApi.TextEntity[0]), false);
                   } else if (deleted.getContentType() == TdApi.MessageSticker.CONSTRUCTOR) {
                     TdApi.File stickerFile = new TdApi.File();
@@ -1778,7 +1778,7 @@ public class MessagesLoader implements Client.ResultHandler {
                       stickerFile.local = new TdApi.LocalFile("", false, false, false, false, 0, 0, 0);
                     }
                     String emoji = deleted.getText() != null ? deleted.getText().replace("[Sticker: ", "").replace("]", "") : "😀";
-                    TdApi.Sticker sticker = new TdApi.Sticker(0, 512, 512, emoji, null, null, null, stickerFile);
+                    TdApi.Sticker sticker = new TdApi.Sticker(0, 0, 512, 512, emoji, new TdApi.StickerFormatWebp(), new TdApi.StickerFullTypeRegular(), null, stickerFile);
                     msg.content = new TdApi.MessageSticker(sticker, false);
                   } else if (deleted.getContentType() == TdApi.MessageAnimation.CONSTRUCTOR) {
                     TdApi.File animFile = new TdApi.File();
@@ -1789,7 +1789,7 @@ public class MessagesLoader implements Client.ResultHandler {
                     }
                     TdApi.Animation animation = new TdApi.Animation(0, 320, 240, "animation.gif", "image/gif", false, null, null, animFile);
                     String caption = deleted.getText() != null ? deleted.getText().replace("[GIF]", "").replace(": ", "") : "";
-                    msg.content = new TdApi.MessageAnimation(animation, new TdApi.FormattedText(caption, new TdApi.TextEntity[0]), false);
+                    msg.content = new TdApi.MessageAnimation(animation, new TdApi.FormattedText(caption, new TdApi.TextEntity[0]), false, false, false);
                   } else {
                     // Fallback to text
                     msg.content = new TdApi.MessageText(

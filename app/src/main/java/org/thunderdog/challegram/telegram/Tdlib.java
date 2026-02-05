@@ -9877,7 +9877,9 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
               senderId,
               text,
               msg.date,
-              false
+              false,
+              msg.content.getConstructor(), // contentType
+              mediaPath // mediaPath
             );
             RexDatabase.Companion.get(UI.getContext()).rexDao().insertMessage(saved);
           }

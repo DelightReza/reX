@@ -5904,7 +5904,9 @@ public class MessagesController extends ViewController<MessagesController.Argume
           senderId,
           text,
           message.date,
-          false // isDeleted
+          false, // isDeleted
+          message.content.getConstructor(), // contentType
+          null // mediaPath (will be saved after download)
         );
         RexDatabase.get(context()).rexDao().insertMessage(savedMsg);
         
@@ -5972,7 +5974,9 @@ public class MessagesController extends ViewController<MessagesController.Argume
           senderId,
           text,
           message.date,
-          false // isDeleted
+          false, // isDeleted
+          message.content.getConstructor(), // contentType
+          null // mediaPath
         );
         RexDatabase.get(context()).rexDao().insertMessage(savedMsg);
         // Mark as ghost message
