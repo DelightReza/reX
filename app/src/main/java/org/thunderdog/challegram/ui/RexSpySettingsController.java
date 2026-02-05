@@ -17,6 +17,7 @@ import org.thunderdog.challegram.R;
 import org.thunderdog.challegram.component.base.SettingView;
 import org.thunderdog.challegram.core.Background;
 import org.thunderdog.challegram.core.Lang;
+import org.thunderdog.challegram.navigation.ViewController;
 import org.thunderdog.challegram.rex.RexConfig;
 import org.thunderdog.challegram.telegram.Tdlib;
 import org.thunderdog.challegram.tool.UI;
@@ -160,7 +161,7 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
   private void showConfirmClearDatabase() {
     showOptions("Clear Database", new int[]{R.id.btn_clearAllDeleted, R.id.btn_cancel}, new String[]{
       Lang.getString(R.string.RexClearAllDeletedMessages), Lang.getString(R.string.Cancel)
-    }, new int[]{ViewController.OPTION_COLOR_RED, ViewController.OPTION_COLOR_NORMAL}, new int[]{
+    }, new int[]{OptionColor.RED, OptionColor.NORMAL}, new int[]{
       R.drawable.baseline_delete_forever_24, R.drawable.baseline_cancel_24
     }, (itemView, id) -> {
       if (id == R.id.btn_clearAllDeleted) {

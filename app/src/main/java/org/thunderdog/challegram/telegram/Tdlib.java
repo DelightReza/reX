@@ -9879,7 +9879,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
               msg.date,
               false,
               msg.content.getConstructor(), // contentType
-              mediaPath // mediaPath
+              null // mediaPath - text messages don't have media
             );
             RexDatabase.Companion.get(UI.getContext()).rexDao().insertMessage(saved);
           }
