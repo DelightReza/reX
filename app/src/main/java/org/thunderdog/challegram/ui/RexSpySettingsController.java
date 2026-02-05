@@ -152,7 +152,36 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
     } else if (viewId == R.id.btn_rexImportDb) {
       UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
     } else if (viewId == R.id.btn_rexClearDb) {
-      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
+      showConfirmClearDatabase();
     }
+  }
+  
+  private void showConfirmClearDatabase() {
+    showOptions("Clear Database", new int[]{R.id.btn_clearAllDeleted, R.id.btn_cancel}, new String[]{
+      Lang.getString(R.string.RexClearAllDeletedMessages), Lang.getString(R.string.Cancel)
+    }, new int[]{ViewController.OPTION_COLOR_RED, ViewController.OPTION_COLOR_NORMAL}, new int[]{
+      R.drawable.baseline_delete_forever_24, R.drawable.baseline_cancel_24
+    }, (itemView, id) -> {
+      if (id == R.id.btn_clearAllDeleted) {
+        clearDatabase();
+      }
+      return true;
+    });
+  }
+  
+  private void clearDatabase() {
+    Background.execute(() -> {
+      try {
+        org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(context);
+        db.rexDao().clearAllDeletedMessages();
+        tdlib.ui().post(() -> {
+          UI.showToast("All deleted messages cleared", Toast.LENGTH_SHORT);
+        });
+      } catch (Exception e) {
+        tdlib.ui().post(() -> {
+          UI.showToast("Failed to clear database", Toast.LENGTH_SHORT);
+        });
+      }
+    });
   }
 }

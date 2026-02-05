@@ -7655,31 +7655,70 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   private void saveMessageToDatabase(TdApi.Message msg) {
     try {
       org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(UI.getAppContext());
+      org.thunderdog.challegram.rex.RexConfig config = org.thunderdog.challegram.rex.RexConfig.INSTANCE;
       
-      // Extract text from message content
+      // Extract text and media info from message content
       String text = null;
+      String mediaPath = null;
+      int contentType = 0;
+      
       if (msg.content != null) {
+        contentType = msg.content.getConstructor();
+        
         if (msg.content.getConstructor() == TdApi.MessageText.CONSTRUCTOR) {
           text = ((TdApi.MessageText) msg.content).text.text;
         } else if (msg.content.getConstructor() == TdApi.MessagePhoto.CONSTRUCTOR) {
           TdApi.MessagePhoto photo = (TdApi.MessagePhoto) msg.content;
           text = "[Photo]" + (photo.caption != null && !photo.caption.text.isEmpty() ? ": " + photo.caption.text : "");
+          // Save photo file if attachments are enabled
+          if (config.getSaveAttachments() && photo.photo.sizes.length > 0) {
+            TdApi.PhotoSize largestSize = photo.photo.sizes[photo.photo.sizes.length - 1];
+            if (largestSize.photo.local.isDownloadingCompleted) {
+              mediaPath = largestSize.photo.local.path;
+            }
+          }
         } else if (msg.content.getConstructor() == TdApi.MessageVideo.CONSTRUCTOR) {
           TdApi.MessageVideo video = (TdApi.MessageVideo) msg.content;
           text = "[Video]" + (video.caption != null && !video.caption.text.isEmpty() ? ": " + video.caption.text : "");
+          // Save video file if attachments are enabled
+          if (config.getSaveAttachments() && video.video.video.local.isDownloadingCompleted) {
+            mediaPath = video.video.video.local.path;
+          }
         } else if (msg.content.getConstructor() == TdApi.MessageDocument.CONSTRUCTOR) {
           TdApi.MessageDocument doc = (TdApi.MessageDocument) msg.content;
           text = "[Document: " + doc.document.fileName + "]" + (doc.caption != null && !doc.caption.text.isEmpty() ? ": " + doc.caption.text : "");
+          // Save document file if attachments are enabled
+          if (config.getSaveAttachments() && doc.document.document.local.isDownloadingCompleted) {
+            mediaPath = doc.document.document.local.path;
+          }
         } else if (msg.content.getConstructor() == TdApi.MessageAudio.CONSTRUCTOR) {
           TdApi.MessageAudio audio = (TdApi.MessageAudio) msg.content;
-          text = "[Audio: " + audio.audio.title + "]";
+          text = "[Audio: " + (audio.audio.title != null && !audio.audio.title.isEmpty() ? audio.audio.title : audio.audio.fileName) + "]";
+          // Save audio file if attachments are enabled
+          if (config.getSaveAttachments() && audio.audio.audio.local.isDownloadingCompleted) {
+            mediaPath = audio.audio.audio.local.path;
+          }
         } else if (msg.content.getConstructor() == TdApi.MessageVoiceNote.CONSTRUCTOR) {
+          TdApi.MessageVoiceNote voice = (TdApi.MessageVoiceNote) msg.content;
           text = "[Voice Message]";
+          // Save voice file if attachments are enabled
+          if (config.getSaveAttachments() && voice.voiceNote.voice.local.isDownloadingCompleted) {
+            mediaPath = voice.voiceNote.voice.local.path;
+          }
         } else if (msg.content.getConstructor() == TdApi.MessageSticker.CONSTRUCTOR) {
           TdApi.MessageSticker sticker = (TdApi.MessageSticker) msg.content;
           text = "[Sticker: " + sticker.sticker.emoji + "]";
+          // Save sticker file if attachments are enabled
+          if (config.getSaveAttachments() && sticker.sticker.sticker.local.isDownloadingCompleted) {
+            mediaPath = sticker.sticker.sticker.local.path;
+          }
         } else if (msg.content.getConstructor() == TdApi.MessageAnimation.CONSTRUCTOR) {
-          text = "[GIF]";
+          TdApi.MessageAnimation anim = (TdApi.MessageAnimation) msg.content;
+          text = "[GIF]" + (anim.caption != null && !anim.caption.text.isEmpty() ? ": " + anim.caption.text : "");
+          // Save animation file if attachments are enabled
+          if (config.getSaveAttachments() && anim.animation.animation.local.isDownloadingCompleted) {
+            mediaPath = anim.animation.animation.local.path;
+          }
         } else {
           text = "[" + msg.content.getClass().getSimpleName() + "]";
         }
@@ -7695,7 +7734,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
         }
       }
       
-      // Create SavedMessage object
+      // Create SavedMessage object with content type and media path
       org.thunderdog.challegram.rex.db.SavedMessage savedMsg = new org.thunderdog.challegram.rex.db.SavedMessage(
         0, // id will be auto-generated
         msg.chatId,
@@ -7703,7 +7742,9 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
         senderId,
         text,
         msg.date,
-        false // not marked as deleted yet
+        false, // not marked as deleted yet
+        contentType,
+        mediaPath
       );
       
       // Insert or update in database
@@ -7716,6 +7757,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
       
     } catch (Exception e) {
       // Silently fail to avoid crashes
+      android.util.Log.e("REX", "Failed to save message to database", e);
     }
   }
   // --- END REX MOD ---

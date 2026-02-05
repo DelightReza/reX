@@ -5706,6 +5706,7 @@
   <string name="RexExportDatabase">Export Database</string>
   <string name="RexImportDatabase">Import Database</string>
   <string name="RexClearDatabase">Clear Database</string>
+  <string name="RexClearAllDeletedMessages">Clear All Deleted Messages</string>
   <string name="RexSpyFeaturesDescription">Enable individual features to save messages, edits, and data.</string>
   <string name="RexSpyModeDescription">Save messages before they are deleted or edited by others.</string>
   <string name="RexSaveAttachmentsDescription">Download and save media attachments automatically.</string>

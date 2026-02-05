@@ -1478,6 +1478,7 @@
   
   <!-- Message Options IDs -->
   <item type="id" name="btn_rexKeepLocally" />
+  <item type="id" name="btn_clearAllDeleted" />
 
 
 </resources>
