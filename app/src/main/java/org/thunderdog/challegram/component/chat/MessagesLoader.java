@@ -1724,7 +1724,7 @@ public class MessagesLoader implements Client.ResultHandler {
                 }
                 
                 // Create TGMessage and mark as ghost
-                TGMessage tgMsg = TGMessage.valueOf(manager, msg, chatAdmins);
+                TGMessage tgMsg = TGMessage.valueOf(manager, msg, chat, messageThread, (LongSparseArray<TdApi.ChatAdministrator>) null);
                 if (tgMsg != null) {
                   org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.markAsGhost(msg.id);
                   ghostItems.add(tgMsg);
