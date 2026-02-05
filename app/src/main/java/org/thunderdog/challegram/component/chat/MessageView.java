@@ -438,42 +438,7 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
   @Override
   public void onDraw (Canvas c) {
     msg.draw(this, c, avatarReceiver, replyReceiver, replyTextMediaReceiver, previewReceiver, contentReceiver, gifReceiver, complexReceiver);
-    
-    // --- REX MOD: Draw [DELETED] badge for ghost messages ---
-    if (org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.isGhost(msg.getId())) {
-      // Draw translucent background
-      android.graphics.Paint bgPaint = new android.graphics.Paint();
-      bgPaint.setColor(android.graphics.Color.argb(180, 255, 0, 0)); // Red with transparency
-      bgPaint.setStyle(android.graphics.Paint.Style.FILL);
-      
-      // Draw [DELETED] text
-      android.graphics.Paint textPaint = new android.graphics.Paint();
-      textPaint.setColor(android.graphics.Color.WHITE);
-      textPaint.setTextSize(Screen.dp(12));
-      textPaint.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-      textPaint.setAntiAlias(true);
-      
-      String deletedText = "[DELETED]";
-      float textWidth = textPaint.measureText(deletedText);
-      float x = getWidth() - textWidth - Screen.dp(12);
-      float y = Screen.dp(20);
-      
-      // Draw background rectangle
-      float padding = Screen.dp(4);
-      c.drawRoundRect(
-        x - padding,
-        y - Screen.dp(12) - padding,
-        x + textWidth + padding,
-        y + padding,
-        Screen.dp(3),
-        Screen.dp(3),
-        bgPaint
-      );
-      
-      // Draw text
-      c.drawText(deletedText, x, y, textPaint);
-    }
-    // --- END REX MOD ---
+    // REX MOD: Deleted icon is now drawn by TGMessage using Counter, not here
   }
 
   public AvatarReceiver getAvatarReceiver () {
