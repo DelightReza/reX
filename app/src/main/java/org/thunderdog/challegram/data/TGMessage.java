@@ -2549,7 +2549,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
     // --- END REX MOD ---
     
     // --- REX MOD: Draw edit history indicator ---
-    if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.isSpyEnabled()) {
+    if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveEditHistory()) {
       // Lazy-load edit count only once
       if (cachedEditCount == -1) {
         android.content.Context ctx = view.getContext();
