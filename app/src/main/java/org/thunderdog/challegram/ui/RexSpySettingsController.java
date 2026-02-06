@@ -144,9 +144,9 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
       RexConfig.INSTANCE.setSaveAttachments(!RexConfig.INSTANCE.getSaveAttachments());
       adapter.updateValuedSettingById(R.id.btn_rexSaveAttachments);
     } else if (viewId == R.id.btn_rexAttachmentsFolder) {
-      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
+      showAttachmentsFolderOptions();
     } else if (viewId == R.id.btn_rexMaxFolderSize) {
-      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
+      showMaxFolderSizeOptions();
     } else if (viewId == R.id.btn_rexViewSaved) {
       navigateTo(new RexDeletedMessagesController(context, tdlib));
     } else if (viewId == R.id.btn_rexExportDb) {
@@ -184,6 +184,113 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
           UI.showToast("Failed to clear database", Toast.LENGTH_SHORT);
         });
       }
+    });
+  }
+  
+  private void showAttachmentsFolderOptions() {
+    showOptions(Lang.getString(R.string.RexAttachmentsFolder), new int[]{
+      R.id.btn_rexFolderDownload, 
+      R.id.btn_rexFolderCustom, 
+      R.id.btn_cancel
+    }, new String[]{
+      "Download/reX",
+      Lang.getString(R.string.RexCustomPath),
+      Lang.getString(R.string.Cancel)
+    }, new int[]{
+      OptionColor.NORMAL, 
+      OptionColor.NORMAL, 
+      OptionColor.NORMAL
+    }, new int[]{
+      R.drawable.baseline_folder_24,
+      R.drawable.baseline_create_new_folder_24,
+      R.drawable.baseline_cancel_24
+    }, (itemView, id) -> {
+      if (id == R.id.btn_rexFolderDownload) {
+        // Use default Download/reX path
+        String defaultPath = android.os.Environment.getExternalStoragePublicDirectory(
+          android.os.Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + "/reX";
+        // Create .nomedia file
+        java.io.File folder = new java.io.File(defaultPath);
+        if (!folder.exists()) {
+          folder.mkdirs();
+        }
+        java.io.File nomedia = new java.io.File(folder, ".nomedia");
+        try {
+          nomedia.createNewFile();
+        } catch (java.io.IOException e) {
+          // Ignore
+        }
+        RexConfig.INSTANCE.setAttachmentsFolder(defaultPath);
+        UI.showToast("Folder set to: Download/reX", Toast.LENGTH_SHORT);
+      } else if (id == R.id.btn_rexFolderCustom) {
+        // TODO: Show file picker dialog for custom path
+        // For now, just show a toast
+        UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
+      }
+      return true;
+    });
+  }
+  
+  private void showMaxFolderSizeOptions() {
+    showOptions(Lang.getString(R.string.RexMaxFolderSize), new int[]{
+      R.id.btn_rexSize300MB,
+      R.id.btn_rexSize1GB,
+      R.id.btn_rexSize2GB,
+      R.id.btn_rexSize5GB,
+      R.id.btn_rexSize16GB,
+      R.id.btn_rexSizeNoLimit,
+      R.id.btn_cancel
+    }, new String[]{
+      "300 " + Lang.getString(R.string.RexMB),
+      "1 " + Lang.getString(R.string.RexGB),
+      "2 " + Lang.getString(R.string.RexGB),
+      "5 " + Lang.getString(R.string.RexGB),
+      "16 " + Lang.getString(R.string.RexGB),
+      Lang.getString(R.string.RexNoLimit),
+      Lang.getString(R.string.Cancel)
+    }, new int[]{
+      OptionColor.NORMAL,
+      OptionColor.NORMAL,
+      OptionColor.NORMAL,
+      OptionColor.NORMAL,
+      OptionColor.NORMAL,
+      OptionColor.NORMAL,
+      OptionColor.NORMAL
+    }, new int[]{
+      R.drawable.baseline_data_usage_24,
+      R.drawable.baseline_data_usage_24,
+      R.drawable.baseline_data_usage_24,
+      R.drawable.baseline_data_usage_24,
+      R.drawable.baseline_data_usage_24,
+      R.drawable.baseline_all_inclusive_24,
+      R.drawable.baseline_cancel_24
+    }, (itemView, id) -> {
+      if (id == R.id.btn_rexSize300MB) {
+        RexConfig.INSTANCE.setMaxFolderSize(300);
+        adapter.updateValuedSettingById(R.id.btn_rexMaxFolderSize);
+        UI.showToast("Max size set to 300 MB", Toast.LENGTH_SHORT);
+      } else if (id == R.id.btn_rexSize1GB) {
+        RexConfig.INSTANCE.setMaxFolderSize(1024);
+        adapter.updateValuedSettingById(R.id.btn_rexMaxFolderSize);
+        UI.showToast("Max size set to 1 GB", Toast.LENGTH_SHORT);
+      } else if (id == R.id.btn_rexSize2GB) {
+        RexConfig.INSTANCE.setMaxFolderSize(2048);
+        adapter.updateValuedSettingById(R.id.btn_rexMaxFolderSize);
+        UI.showToast("Max size set to 2 GB", Toast.LENGTH_SHORT);
+      } else if (id == R.id.btn_rexSize5GB) {
+        RexConfig.INSTANCE.setMaxFolderSize(5120);
+        adapter.updateValuedSettingById(R.id.btn_rexMaxFolderSize);
+        UI.showToast("Max size set to 5 GB", Toast.LENGTH_SHORT);
+      } else if (id == R.id.btn_rexSize16GB) {
+        RexConfig.INSTANCE.setMaxFolderSize(16384);
+        adapter.updateValuedSettingById(R.id.btn_rexMaxFolderSize);
+        UI.showToast("Max size set to 16 GB", Toast.LENGTH_SHORT);
+      } else if (id == R.id.btn_rexSizeNoLimit) {
+        RexConfig.INSTANCE.setMaxFolderSize(0);
+        adapter.updateValuedSettingById(R.id.btn_rexMaxFolderSize);
+        UI.showToast("No size limit", Toast.LENGTH_SHORT);
+      }
+      return true;
     });
   }
 }

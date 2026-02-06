@@ -1718,6 +1718,7 @@ public class MessagesLoader implements Client.ResultHandler {
                     );
                   } else if (deleted.getContentType() == TdApi.MessagePhoto.CONSTRUCTOR) {
                     TdApi.File photoFile = new TdApi.File();
+                    photoFile.remote = new TdApi.RemoteFile("", "", false, false, 0);
                     if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
                       photoFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, 0, 0);
                     } else {
@@ -1729,6 +1730,7 @@ public class MessagesLoader implements Client.ResultHandler {
                     msg.content = new TdApi.MessagePhoto(photo, new TdApi.FormattedText(caption, new TdApi.TextEntity[0]), false, false, false);
                   } else if (deleted.getContentType() == TdApi.MessageVideo.CONSTRUCTOR) {
                     TdApi.File videoFile = new TdApi.File();
+                    videoFile.remote = new TdApi.RemoteFile("", "", false, false, 0);
                     if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
                       videoFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, 0, 0);
                     } else {
@@ -1739,6 +1741,7 @@ public class MessagesLoader implements Client.ResultHandler {
                     msg.content = new TdApi.MessageVideo(video, new TdApi.AlternativeVideo[0], new TdApi.VideoStoryboard[0], null, 0, new TdApi.FormattedText(caption, new TdApi.TextEntity[0]), false, false, false);
                   } else if (deleted.getContentType() == TdApi.MessageDocument.CONSTRUCTOR) {
                     TdApi.File docFile = new TdApi.File();
+                    docFile.remote = new TdApi.RemoteFile("", "", false, false, 0);
                     if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
                       docFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, 0, 0);
                     } else {
@@ -1753,6 +1756,7 @@ public class MessagesLoader implements Client.ResultHandler {
                     msg.content = new TdApi.MessageDocument(document, new TdApi.FormattedText(caption, new TdApi.TextEntity[0]));
                   } else if (deleted.getContentType() == TdApi.MessageAudio.CONSTRUCTOR) {
                     TdApi.File audioFile = new TdApi.File();
+                    audioFile.remote = new TdApi.RemoteFile("", "", false, false, 0);
                     if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
                       audioFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, 0, 0);
                     } else {
@@ -1763,6 +1767,7 @@ public class MessagesLoader implements Client.ResultHandler {
                     msg.content = new TdApi.MessageAudio(audio, new TdApi.FormattedText("", new TdApi.TextEntity[0]));
                   } else if (deleted.getContentType() == TdApi.MessageVoiceNote.CONSTRUCTOR) {
                     TdApi.File voiceFile = new TdApi.File();
+                    voiceFile.remote = new TdApi.RemoteFile("", "", false, false, 0);
                     if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
                       voiceFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, 0, 0);
                     } else {
@@ -1772,6 +1777,7 @@ public class MessagesLoader implements Client.ResultHandler {
                     msg.content = new TdApi.MessageVoiceNote(voiceNote, new TdApi.FormattedText("", new TdApi.TextEntity[0]), false);
                   } else if (deleted.getContentType() == TdApi.MessageSticker.CONSTRUCTOR) {
                     TdApi.File stickerFile = new TdApi.File();
+                    stickerFile.remote = new TdApi.RemoteFile("", "", false, false, 0);
                     if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
                       stickerFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, 0, 0);
                     } else {
@@ -1782,6 +1788,7 @@ public class MessagesLoader implements Client.ResultHandler {
                     msg.content = new TdApi.MessageSticker(sticker, false);
                   } else if (deleted.getContentType() == TdApi.MessageAnimation.CONSTRUCTOR) {
                     TdApi.File animFile = new TdApi.File();
+                    animFile.remote = new TdApi.RemoteFile("", "", false, false, 0);
                     if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
                       animFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, 0, 0);
                     } else {
