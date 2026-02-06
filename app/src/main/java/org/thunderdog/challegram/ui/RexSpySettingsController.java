@@ -172,7 +172,7 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
   }
   
   private void clearDatabase() {
-    Background.execute(() -> {
+    Background.instance().post(() -> {
       try {
         org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(context);
         db.rexDao().clearAllDeletedMessages();
