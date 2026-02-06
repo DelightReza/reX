@@ -7631,18 +7631,26 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
     // --- REX MOD: Save deleted messages if spy features enabled ---
     if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveDeletedMessages()) {
       try {
+        android.util.Log.d("REX", "Save deleted messages is enabled, processing " + update.messageIds.length + " messages");
         for (long messageId : update.messageIds) {
           TdApi.Message msg = getMessageLocally(update.chatId, messageId, 100);
           if (msg != null) {
+            android.util.Log.d("REX", "Found message " + messageId + " to save");
             // Save to database before deletion
             saveMessageToDatabase(msg);
             // Mark as ghost in memory cache
             org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.markAsGhost(messageId);
+            android.util.Log.d("REX", "Successfully saved and marked message " + messageId + " as ghost");
+          } else {
+            android.util.Log.w("REX", "Message " + messageId + " not found locally, cannot save");
           }
         }
       } catch (Exception e) {
-        // Silently fail to avoid crashes
+        // Log error for debugging
+        android.util.Log.e("REX", "Error saving deleted messages", e);
       }
+    } else {
+      android.util.Log.d("REX", "Save deleted messages is DISABLED");
     }
     // --- END REX MOD ---
 
@@ -7654,6 +7662,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   // --- REX MOD: Helper method to save message to database ---
   private void saveMessageToDatabase(TdApi.Message msg) {
     try {
+      android.util.Log.d("REX", "saveMessageToDatabase called for message " + msg.id + " in chat " + msg.chatId);
       org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(UI.getAppContext());
       org.thunderdog.challegram.rex.RexConfig config = org.thunderdog.challegram.rex.RexConfig.INSTANCE;
       
@@ -7748,15 +7757,17 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
       );
       
       // Insert or update in database
+      android.util.Log.d("REX", "Inserting message to database: chatId=" + msg.chatId + ", msgId=" + msg.id + ", text=" + text);
       db.rexDao().insertMessage(savedMsg);
       
       // Now mark as deleted
       java.util.List<Long> msgIds = new java.util.ArrayList<>();
       msgIds.add(msg.id);
       db.rexDao().markAsDeleted(msg.chatId, msgIds);
+      android.util.Log.d("REX", "Successfully saved message " + msg.id + " to database");
       
     } catch (Exception e) {
-      // Silently fail to avoid crashes
+      // Log error for debugging
       android.util.Log.e("REX", "Failed to save message to database", e);
     }
   }
