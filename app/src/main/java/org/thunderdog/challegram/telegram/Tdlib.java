@@ -438,6 +438,9 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   private final Object dataLock = new Object();
   private final HashMap<Long, TdApi.Chat> chats = new HashMap<>();
   private final HashMap<Long, TdApi.ChatActiveStories> activeStories = new HashMap<>();
+  // --- REX MOD: Cache for saving deleted messages ---
+  private final java.util.concurrent.ConcurrentHashMap<Long, TdApi.Message> rexMessageCache = new java.util.concurrent.ConcurrentHashMap<>();
+  // --- END REX MOD ---
   private final SparseIntArray storyListChatCount = new SparseIntArray();
   private final SparseArrayCompat<StoryList> storyLists = new SparseArrayCompat<>();
   private final HashMap<String, TdApi.ForumTopicInfo> forumTopicInfos = new HashMap<>();
@@ -7455,6 +7458,21 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   }
 
   private void updateNewMessage (TdApi.UpdateNewMessage update, boolean isUpdate) {
+    // --- REX MOD: Cache message for deletion tracking ---
+    if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveDeletedMessages()) {
+      rexMessageCache.put(update.message.id, update.message);
+      // Limit cache size to prevent memory issues (keep last 1000 messages)
+      if (rexMessageCache.size() > 1000) {
+        // Remove oldest entries (this is approximate, but efficient)
+        java.util.Iterator<Long> iterator = rexMessageCache.keySet().iterator();
+        for (int i = 0; i < 100 && iterator.hasNext(); i++) {
+          iterator.next();
+          iterator.remove();
+        }
+      }
+    }
+    // --- END REX MOD ---
+    
     if (update.message.sendingState instanceof TdApi.MessageSendingStatePending && update.message.content.getConstructor() != TdApi.MessageChatSetMessageAutoDeleteTime.CONSTRUCTOR) {
       addRemoveSendingMessage(update.message.chatId, update.message.id, true);
       if (isUpdate)
@@ -7633,7 +7651,12 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
       try {
         android.util.Log.d("REX", "Save deleted messages is enabled, processing " + update.messageIds.length + " messages");
         for (long messageId : update.messageIds) {
-          TdApi.Message msg = getMessageLocally(update.chatId, messageId, 100);
+          // Try to get from our cache first (more reliable), then fall back to TDLib
+          TdApi.Message msg = rexMessageCache.remove(messageId);
+          if (msg == null) {
+            msg = getMessageLocally(update.chatId, messageId, 100);
+          }
+          
           if (msg != null) {
             android.util.Log.d("REX", "Found message " + messageId + " to save");
             // Save to database before deletion
@@ -7642,7 +7665,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
             org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.markAsGhost(messageId);
             android.util.Log.d("REX", "Successfully saved and marked message " + messageId + " as ghost");
           } else {
-            android.util.Log.w("REX", "Message " + messageId + " not found locally, cannot save");
+            android.util.Log.w("REX", "Message " + messageId + " not found in cache or locally, cannot save");
           }
         }
       } catch (Exception e) {
