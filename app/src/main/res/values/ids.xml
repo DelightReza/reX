@@ -1480,5 +1480,17 @@
   <item type="id" name="btn_rexKeepLocally" />
   <item type="id" name="btn_clearAllDeleted" />
 
+  <!-- Attachments Folder Options -->
+  <item type="id" name="btn_rexFolderDownload" />
+  <item type="id" name="btn_rexFolderCustom" />
+
+  <!-- Max Folder Size Options -->
+  <item type="id" name="btn_rexSize300MB" />
+  <item type="id" name="btn_rexSize1GB" />
+  <item type="id" name="btn_rexSize2GB" />
+  <item type="id" name="btn_rexSize5GB" />
+  <item type="id" name="btn_rexSize16GB" />
+  <item type="id" name="btn_rexSizeNoLimit" />
+
 
 </resources>

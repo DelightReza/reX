@@ -5702,6 +5702,7 @@
   <string name="RexSaveAttachments">Save Attachments</string>
   <string name="RexAttachmentsFolder">Attachments Folder</string>
   <string name="RexMaxFolderSize">Max Folder Size</string>
+  <string name="RexCustomPath">Custom Path</string>
   <string name="RexViewDeletedMessages">View Deleted Messages</string>
   <string name="RexExportDatabase">Export Database</string>
   <string name="RexImportDatabase">Import Database</string>
