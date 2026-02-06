@@ -28,6 +28,8 @@ object RexConfig {
     // --- GHOST MODE SETTINGS (Persistent) ---
     
     /** Enable/disable Ghost Mode globally */
+    @get:JvmName("isGhostMode")
+    @set:JvmName("setGhostMode")
     var isGhostMode: Boolean
         get() = prefs.getBoolean("ghost_enabled", false)
         set(v) = prefs.edit().putBoolean("ghost_enabled", v).apply()
