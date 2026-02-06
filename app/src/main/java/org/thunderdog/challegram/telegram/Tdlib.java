@@ -7664,6 +7664,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
             // Mark as ghost in memory cache
             org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.markAsGhost(messageId);
             android.util.Log.d("REX", "Successfully saved and marked message " + messageId + " as ghost");
+            android.util.Log.d("REX", "Ghost check: isGhost(" + messageId + ")=" + org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.isGhost(messageId));
           } else {
             android.util.Log.w("REX", "Message " + messageId + " not found in cache or locally, cannot save");
           }
@@ -7703,10 +7704,13 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
           TdApi.MessagePhoto photo = (TdApi.MessagePhoto) msg.content;
           text = "[Photo]" + (photo.caption != null && !photo.caption.text.isEmpty() ? ": " + photo.caption.text : "");
           // Save photo file if attachments are enabled
+          android.util.Log.d("REX", "Photo message - SaveAttachments=" + config.getSaveAttachments() + ", sizes=" + photo.photo.sizes.length);
           if (config.getSaveAttachments() && photo.photo.sizes.length > 0) {
             TdApi.PhotoSize largestSize = photo.photo.sizes[photo.photo.sizes.length - 1];
+            android.util.Log.d("REX", "Photo isDownloadingCompleted=" + largestSize.photo.local.isDownloadingCompleted + ", path=" + largestSize.photo.local.path);
             if (largestSize.photo.local.isDownloadingCompleted) {
               mediaPath = largestSize.photo.local.path;
+              android.util.Log.d("REX", "Saved photo mediaPath: " + mediaPath);
             }
           }
         } else if (msg.content.getConstructor() == TdApi.MessageVideo.CONSTRUCTOR) {
@@ -7780,7 +7784,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
       );
       
       // Insert or update in database
-      android.util.Log.d("REX", "Inserting message to database: chatId=" + msg.chatId + ", msgId=" + msg.id + ", text=" + text);
+      android.util.Log.d("REX", "Inserting message to database: chatId=" + msg.chatId + ", msgId=" + msg.id + ", text=" + text + ", mediaPath=" + mediaPath + ", contentType=" + contentType);
       db.rexDao().insertMessage(savedMsg);
       
       // Now mark as deleted

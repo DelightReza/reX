@@ -2188,7 +2188,9 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
       }
 
       // REX MOD: Draw deleted icon for ghost messages
-      if (org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.isGhost(getId())) {
+      boolean isGhostMessage = org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.isGhost(getId());
+      if (isGhostMessage) {
+        android.util.Log.d("REX", "Drawing delete icon for ghost message: " + getId());
         isDeleted.draw(c, right, top, Gravity.RIGHT, 1f, view, ColorId.NONE, isDeletedCounterLastDrawRect);
         right -= isDeleted.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN));
       }
