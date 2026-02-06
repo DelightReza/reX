@@ -4578,8 +4578,8 @@ public class MessagesController extends ViewController<MessagesController.Argume
     }
 
     // --- REX MOD ---
-    // Add reX submenu if Spy Mode is enabled
-    if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.isSpyEnabled()) {
+    // Add reX submenu if any spy feature is enabled
+    if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveDeletedMessages()) {
       ids.append(R.id.btn_rexChatMenu);
       strings.append(R.string.RexChatMenu);
     }
