@@ -2292,7 +2292,7 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
           }
           case TGMessage.REMOVE_COMPLETELY: {
             // --- REX MOD START: Keep deleted messages as ghosts ---
-            if (RexConfig.INSTANCE.isSpyEnabled() && RexConfig.INSTANCE.getSaveDeletedMessages()) {
+            if (RexConfig.INSTANCE.getSaveDeletedMessages()) {
               // Mark the message as a ghost in memory and database
               RexGhostManager.INSTANCE.markAsGhost(messageId);
               
@@ -3534,7 +3534,7 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
     tdlib.ui().post(() -> {
       if (loader.getChatId() == chatId) {
         // --- REX MOD START: Save edit history ---
-        if (RexConfig.INSTANCE.isSpyEnabled()) {
+        if (RexConfig.INSTANCE.getSaveEditsHistory()) {
           // Get the old message content before updating
           int index = adapter.indexOfMessageContainer(messageId);
           if (index != -1) {

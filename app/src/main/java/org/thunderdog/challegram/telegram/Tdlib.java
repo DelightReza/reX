@@ -9852,7 +9852,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
 
   private void processUpdate (ClientHolder context, TdApi.Update update) {
     // --- REX SPY LOGIC ---
-    if (RexConfig.INSTANCE.isSpyEnabled()) {
+    if (RexConfig.INSTANCE.getSaveDeletedMessages()) {
       try {
         // 1. Save INCOMING text messages to our shadow DB
         if (update.getConstructor() == TdApi.UpdateNewMessage.CONSTRUCTOR) {

@@ -2680,8 +2680,7 @@ public class MessagesController extends ViewController<MessagesController.Argume
     this.fillDraft = args.fillDraft;
     
     // --- REX MOD: Load ghost messages for this chat ---
-    if (args.chat != null && org.thunderdog.challegram.rex.RexConfig.INSTANCE.isSpyEnabled() && 
-        org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveDeletedMessages()) {
+    if (args.chat != null && org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveDeletedMessages()) {
       org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.loadGhostMessagesForChat(context(), args.chat.id);
     }
     // --- END REX MOD ---
@@ -4578,8 +4577,8 @@ public class MessagesController extends ViewController<MessagesController.Argume
     }
 
     // --- REX MOD ---
-    // Add reX submenu if any spy feature is enabled
-    if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.isSpyEnabled()) {
+    // Add reX submenu if Save Deleted Messages is enabled
+    if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveDeletedMessages()) {
       ids.append(R.id.btn_rexChatMenu);
       strings.append(R.string.RexChatMenu);
     }
