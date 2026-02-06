@@ -5702,5 +5702,16 @@
   <string name="RexEditHistory">Edit History</string>
   <string name="RexNoEditHistory">No edit history for this message.</string>
   <string name="RexEditHistoryDescription">Previous versions of this message will appear here.</string>
+  
+  <!-- reX Native Keep-Alive Service -->
+  <string name="NativeKeepAlive">Native Keep-Alive</string>
+  <string name="NativeKeepAliveTitle">Telegram X is running</string>
+  <string name="NativeKeepAliveText">Keeping connection alive for notifications</string>
+  <string name="NativeKeepAliveDescription">Keeps the app connected in the background to receive notifications without Google Services. Requires battery optimization exemption.</string>
+  <string name="NativeKeepAliveEnabled">Native Keep-Alive enabled</string>
+  <string name="NativeKeepAliveDisabled">Native Keep-Alive disabled</string>
+  <string name="BatteryOptimizationRequired">Battery Optimization Exemption Required</string>
+  <string name="BatteryOptimizationRequiredDescription">To ensure the Keep-Alive service works reliably, please allow Telegram X to ignore battery optimization.</string>
+  <string name="RequestBatteryOptimization">Request Battery Exemption</string>
 
 </resources>

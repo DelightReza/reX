@@ -78,6 +78,15 @@ object RexConfig {
         get() = prefs.getBoolean("save_restricted", true)
         set(v) = prefs.edit().putBoolean("save_restricted", v).apply()
 
+    // --- NATIVE PUSH SERVICE (KEEP-ALIVE) SETTINGS (Persistent) ---
+    
+    /** Enable/disable Native Keep-Alive Service */
+    @get:JvmName("getUseNativeKeepAlive")
+    @set:JvmName("setUseNativeKeepAlive")
+    var useNativeKeepAlive: Boolean
+        get() = prefs.getBoolean("use_native_keepalive", false)
+        set(v) = prefs.edit().putBoolean("use_native_keepalive", v).apply()
+
     // --- VOLATILE RUNTIME STATE ---
     
     /** 
