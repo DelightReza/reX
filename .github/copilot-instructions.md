@@ -52,5 +52,6 @@ Act as a Senior Android Developer. Generate the code required to implement a **F
     *   Press `Ctrl+Enter` (or your Copilot trigger key).
     *   Repeat for the Manifest and the Receiver.
 
+### Tips for the Output
 *   **Android 14 Compatibility:** Copilot might forget the `foregroundServiceType` in the manifest if not explicitly prompted. The prompt above includes it (`dataSync`), which is critical for the app not to crash on newer Pixels/Samsungs.
 *   **TDLib Lifecycle:** You don't need to instruct Copilot to talk to TDLib directly. Just by keeping the `Service` alive, the existing TDLib instance in Telegram X will stay connected.
