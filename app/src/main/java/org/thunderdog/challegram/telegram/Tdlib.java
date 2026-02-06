@@ -7651,14 +7651,11 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
       try {
         android.util.Log.d("REX", "Save deleted messages is enabled, processing " + update.messageIds.length + " messages");
         for (long messageId : update.messageIds) {
-          // Try to get from our cache first (more reliable), then fall back to TDLib
+          // Try to get from our cache first (most reliable)
           TdApi.Message msg = rexMessageCache.remove(messageId);
-          if (msg == null) {
-            msg = getMessageLocally(update.chatId, messageId, 100);
-          }
           
           if (msg != null) {
-            android.util.Log.d("REX", "Found message " + messageId + " to save");
+            android.util.Log.d("REX", "Found message " + messageId + " in cache to save");
             // Save to database before deletion
             saveMessageToDatabase(msg);
             // Mark as ghost in memory cache
@@ -7666,7 +7663,24 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
             android.util.Log.d("REX", "Successfully saved and marked message " + messageId + " as ghost");
             android.util.Log.d("REX", "Ghost check: isGhost(" + messageId + ")=" + org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.isGhost(messageId));
           } else {
-            android.util.Log.w("REX", "Message " + messageId + " not found in cache or locally, cannot save");
+            // Not in cache - try to fetch from server asynchronously
+            android.util.Log.d("REX", "Message " + messageId + " not in cache, attempting server fetch...");
+            final long finalMessageId = messageId;
+            final long chatId = update.chatId;
+            
+            // Fetch from server in background
+            getMessage(chatId, finalMessageId, message -> {
+              if (message != null) {
+                android.util.Log.d("REX", "Successfully fetched message " + finalMessageId + " from server");
+                // Save to database
+                saveMessageToDatabase(message);
+                // Mark as ghost in memory cache
+                org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.markAsGhost(finalMessageId);
+                android.util.Log.d("REX", "Successfully saved and marked fetched message " + finalMessageId + " as ghost");
+              } else {
+                android.util.Log.w("REX", "Message " + finalMessageId + " could not be fetched from server (already deleted)");
+              }
+            });
           }
         }
       } catch (Exception e) {
