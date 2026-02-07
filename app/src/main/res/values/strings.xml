@@ -5702,5 +5702,11 @@
   <string name="RexEditHistory">Edit History</string>
   <string name="RexNoEditHistory">No edit history for this message.</string>
   <string name="RexEditHistoryDescription">Previous versions of this message will appear here.</string>
+  
+  <!-- reX Keep Alive Service -->
+  <string name="RexKeepAlive">Native Keep Alive</string>
+  <string name="RexKeepAliveDescription">Keeps the app running in the background using a foreground service. Useful for devices without Google Play Services.</string>
+  <string name="RexKeepAliveNotification">Telegram X is running in the background</string>
+  <string name="RexKeepAliveDisableBatteryOptimization">To ensure reliable background operation, please disable battery optimization for Telegram X.</string>
 
 </resources>

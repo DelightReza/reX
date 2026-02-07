@@ -15,6 +15,7 @@ import android.view.View;
 import org.thunderdog.challegram.R;
 import org.thunderdog.challegram.component.base.SettingView;
 import org.thunderdog.challegram.core.Lang;
+import org.thunderdog.challegram.helper.KeepAliveHelper;
 import org.thunderdog.challegram.telegram.Tdlib;
 import org.thunderdog.challegram.v.CustomRecyclerView;
 
@@ -43,7 +44,10 @@ public class RexSettingsController extends RecyclerViewController<Void> implemen
     adapter = new SettingsAdapter(this) {
       @Override
       protected void setValuedSetting(ListItem item, SettingView view, boolean isUpdate) {
-        // No valued settings in main category menu
+        final int itemId = item.getId();
+        if (itemId == R.id.btn_rexKeepAlive) {
+          view.getToggler().setRadioEnabled(KeepAliveHelper.isKeepAliveEnabled(context), isUpdate);
+        }
       }
     };
 
@@ -58,6 +62,13 @@ public class RexSettingsController extends RecyclerViewController<Void> implemen
     items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexCustomization, R.drawable.baseline_tune_24, R.string.RexCustomization));
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
     items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.RexSettingsDescription));
+    
+    // Keep Alive Section
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Background Service"));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexKeepAlive, R.drawable.baseline_sync_24, R.string.RexKeepAlive));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.RexKeepAliveDescription));
 
     adapter.setItems(items, false);
     recyclerView.setAdapter(adapter);
@@ -72,6 +83,10 @@ public class RexSettingsController extends RecyclerViewController<Void> implemen
       navigateTo(new RexSpySettingsController(context, tdlib));
     } else if (viewId == R.id.btn_rexCustomization) {
       navigateTo(new RexCustomizationController(context, tdlib));
+    } else if (viewId == R.id.btn_rexKeepAlive) {
+      boolean currentlyEnabled = KeepAliveHelper.isKeepAliveEnabled(context);
+      KeepAliveHelper.setKeepAliveEnabled(context, !currentlyEnabled);
+      adapter.updateValuedSettingById(R.id.btn_rexKeepAlive);
     }
   }
 }

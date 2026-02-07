@@ -1441,4 +1441,5 @@
   <item type="id" name="btn_rexSaveDeleted" />
   <item type="id" name="btn_rexSaveRestricted" />
   <item type="id" name="btn_rexViewSaved" />
+  <item type="id" name="btn_rexKeepAlive" />
 </resources>
