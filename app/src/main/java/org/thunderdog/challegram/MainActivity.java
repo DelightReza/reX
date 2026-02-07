@@ -1521,7 +1521,7 @@ public class MainActivity extends BaseActivity implements GlobalAccountListener,
 
       AlertDialog.Builder builder = new AlertDialog.Builder(this, Theme.dialogTheme());
       builder.setTitle(Lang.getString(R.string.TGXKeepAlivePromptTitle));
-      builder.setMessage(Lang.getMarkdownString(this, R.string.TGXKeepAlivePromptMessage));
+      builder.setMessage(Lang.getString(R.string.TGXKeepAlivePromptMessage));
       
       // "Enable Now" button
       builder.setPositiveButton(Lang.getString(R.string.TGXKeepAlivePromptEnable), (dialog, which) -> {

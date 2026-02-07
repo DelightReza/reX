@@ -43,7 +43,8 @@ import com.google.android.play.core.integrity.IntegrityTokenRequest;
 import com.google.android.play.core.integrity.IntegrityTokenResponse;
 import com.google.android.recaptcha.RecaptchaAction;
 import com.google.android.recaptcha.RecaptchaTasksClient;
-import com.google.firebase.FirebaseOptions;
+// Firebase removed for FOSS compliance
+// import com.google.firebase.FirebaseOptions;
 
 import org.drinkless.tdlib.Client;
 import org.drinkless.tdlib.TdApi;
@@ -9043,19 +9044,9 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
       onError.runWithData(new ApplicationVerificationException("PLAYINTEGRITY_FAILED_SDK_TOO_LOW_" + Build.VERSION.SDK_INT));
       return;
     }
-    long projectId = 0;
-    try {
-      FirebaseOptions options = FirebaseOptions.fromResource(UI.getAppContext());
-      String projectIdRaw = options != null ? options.getGcmSenderId() : "";
-      if (!StringUtils.isEmpty(projectIdRaw)) {
-        projectId = Long.parseLong(projectIdRaw);
-      } else {
-        throw new IllegalStateException();
-      }
-    } catch (Exception e) {
-      onError.runWithData(new ApplicationVerificationException("PLAYINTEGRITY_FAILED_EXCEPTION_NOPROJECT"));
-      return;
-    }
+    // Firebase removed for FOSS compliance - Play Integrity unavailable without Firebase config
+    onError.runWithData(new ApplicationVerificationException("PLAYINTEGRITY_UNAVAILABLE_NO_FIREBASE"));
+    return;
     try {
       IntegrityTokenRequest request = IntegrityTokenRequest.builder()
         .setNonce(nonce)
