@@ -3503,7 +3503,6 @@
   <string name="NotificationsGuideCategoryLimitErrorChat">**Telegram X** was unable to display some notifications from %1$s due to notification categories system limit.\n\nPlease make sure:\n• All system updates are installed\n• Telegram X is up-to-date\n• There are no notification restrictions in system settings.\n\nIf the steps above do not help, you might want to ask @tgandroidtests for troubleshooting tips for your device, or re-install Telegram X, which should help resolving this error, but requires logging in to your account again.</string>
   <string name="TurnSyncOnApp">Turn on data sync</string>
   <string name="TurnSyncOnSystem">Turn on data sync</string>
-  <string name="InstallGooglePlayServices">Get Google Play Services</string>
   <string name="EnableKeepAliveService">Enable Keep-Alive Service</string>
   <string name="ShareNotificationError">Share Error Report</string>
   <string name="FirebaseErrorResolve">Tap to resolve issue</string>
@@ -5338,9 +5337,6 @@
 
   <string name="Experiment_NoEdgeToEdge">Disable Edge to Edge</string>
   <string name="Experiment_NoEdgeToEdgeInfo">Use this setting to compare behavior without edge-to-edge mode on Android 11–14.</string>
-
-  <string name="Experiment_ForceAltPushService">Force alternative Push Services</string>
-  <string name="Experiment_ForceAltPushServiceInfo">Prefer alternative push services provider, even if Google Play Services are installed and available. Restart application manually to apply changes.</string>
 
   <string name="PeerId">Peer ID</string>
   <string name="UserId">User ID</string>
