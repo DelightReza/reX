@@ -2264,6 +2264,8 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
               
               // Update visual appearance by requesting a rebind
               adapter.notifyItemChanged(index);
+              // Force view to redraw to show delete icon
+              item.requestLayout();
               
               if (!item.isOutgoing() && messageId > lastReadInboxMessageId) {
                 removedUnreadCount++;
@@ -2313,6 +2315,8 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
               
               // Update visual appearance by requesting a rebind
               adapter.notifyItemChanged(index);
+              // Force view to redraw to show delete icon
+              item.requestLayout();
               
               if (!item.isOutgoing() && messageId > lastReadInboxMessageId) {
                 removedUnreadCount++;
