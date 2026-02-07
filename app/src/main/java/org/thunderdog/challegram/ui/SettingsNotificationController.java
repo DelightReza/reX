@@ -52,6 +52,7 @@ import org.thunderdog.challegram.config.Config;
 import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.data.TD;
 import org.thunderdog.challegram.emoji.Emoji;
+import org.thunderdog.challegram.helper.KeepAliveHelper;
 import org.thunderdog.challegram.navigation.ActivityResultHandler;
 import org.thunderdog.challegram.navigation.MoreDelegate;
 import org.thunderdog.challegram.navigation.SettingsWrapBuilder;
@@ -1521,22 +1522,10 @@ public class SettingsNotificationController extends RecyclerViewController<Setti
           }
           break;
         }
-        case TdlibNotificationManager.Status.PUSH_SERVICE_ERROR: {
-          showOptions(new Options.Builder()
-            .item(new OptionItem(R.id.btn_retry, Lang.getString(R.string.FirebaseErrorResolveTryAgain), OptionColor.BLUE, R.drawable.baseline_sync_problem_24))
-            .item(new OptionItem(R.id.btn_share, Lang.getString(R.string.FirebaseErrorResolveShareError), OptionColor.NORMAL, R.drawable.baseline_forward_24))
-            .build(), (optionView, optionId) -> {
-            if (optionId == R.id.btn_retry) {
-              tdlib.context().checkDeviceToken(0, null);
-            } else if (optionId == R.id.btn_share) {
-              shareTokenError();
-            }
-            return true;
-          });
-          break;
-        }
+        case TdlibNotificationManager.Status.PUSH_SERVICE_ERROR:
         case TdlibNotificationManager.Status.PUSH_SERVICE_MISSING: {
-          Intents.openLink("https://play.google.com/store/apps/details?id=com.google.android.gms");
+          // Enable Keep-Alive service for FOSS builds (no proprietary push services)
+          KeepAliveHelper.setKeepAliveEnabled(context(), true);
           break;
         }
         default: {
