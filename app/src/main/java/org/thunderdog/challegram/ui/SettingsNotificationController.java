@@ -414,7 +414,7 @@ public class SettingsNotificationController extends RecyclerViewController<Setti
       case TdlibNotificationManager.Status.DISABLED_APP_SYNC:
         return R.string.TurnSyncOnApp;
       case TdlibNotificationManager.Status.PUSH_SERVICE_MISSING:
-        return R.string.InstallGooglePlayServices;
+        return R.string.EnableKeepAliveService;
       case TdlibNotificationManager.Status.INTERNAL_ERROR:
         return R.string.ShareNotificationError;
       case TdlibNotificationManager.Status.PUSH_SERVICE_ERROR:
