@@ -9047,6 +9047,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
     // Firebase removed for FOSS compliance - Play Integrity unavailable without Firebase config
     onError.runWithData(new ApplicationVerificationException("PLAYINTEGRITY_UNAVAILABLE_NO_FIREBASE"));
     return;
+    /* Play Integrity code removed - requires Firebase configuration
     try {
       IntegrityTokenRequest request = IntegrityTokenRequest.builder()
         .setNonce(nonce)
@@ -9068,6 +9069,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
     } catch (Exception e) {
       onError.runWithData(e);
     }
+    */
   }
 
   public void requestRecaptcha (long verificationId, String action, String recaptchaKeyId, ApplicationVerificationCallback callback) {
