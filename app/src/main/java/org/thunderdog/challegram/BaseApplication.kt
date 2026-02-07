@@ -53,7 +53,7 @@ class BaseApplication : MultiDexApplication(), Configuration.Provider {
     UI.initApp(applicationContext)
 
     if (!BuildConfig.EXPERIMENTAL) {
-      TelegramXExtension.configure(this, null)
+      TelegramXExtension.configure(this, NoOpDeviceTokenRetriever())
     }
   }
 
