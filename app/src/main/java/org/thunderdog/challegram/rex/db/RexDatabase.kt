@@ -24,7 +24,9 @@ data class SavedMessage(
     val senderId: Long,
     val text: String?,
     val timestamp: Int,
-    var isDeleted: Boolean = false
+    var isDeleted: Boolean = false,
+    val contentType: Int = 0, // TdApi content constructor
+    val mediaPath: String? = null // Path to saved media file
 )
 
 /**
@@ -67,6 +69,8 @@ class RexDatabase private constructor(context: Context) : SQLiteOpenHelper(conte
                 put(COL_TEXT, msg.text)
                 put(COL_TIMESTAMP, msg.timestamp)
                 put(COL_IS_DELETED, if (msg.isDeleted) 1 else 0)
+                put(COL_CONTENT_TYPE, msg.contentType)
+                put(COL_MEDIA_PATH, msg.mediaPath)
             }
             database.insertWithOnConflict(TABLE_SAVED_MESSAGES, null, values, SQLiteDatabase.CONFLICT_REPLACE)
         }
@@ -99,7 +103,9 @@ class RexDatabase private constructor(context: Context) : SQLiteOpenHelper(conte
                         senderId = it.getLong(it.getColumnIndexOrThrow(COL_SENDER_ID)),
                         text = it.getString(it.getColumnIndexOrThrow(COL_TEXT)),
                         timestamp = it.getInt(it.getColumnIndexOrThrow(COL_TIMESTAMP)),
-                        isDeleted = it.getInt(it.getColumnIndexOrThrow(COL_IS_DELETED)) == 1
+                        isDeleted = it.getInt(it.getColumnIndexOrThrow(COL_IS_DELETED)) == 1,
+                        contentType = it.getInt(it.getColumnIndexOrThrow(COL_CONTENT_TYPE)),
+                        mediaPath = it.getString(it.getColumnIndexOrThrow(COL_MEDIA_PATH))
                     ))
                 }
             }
@@ -123,11 +129,23 @@ class RexDatabase private constructor(context: Context) : SQLiteOpenHelper(conte
                         senderId = it.getLong(it.getColumnIndexOrThrow(COL_SENDER_ID)),
                         text = it.getString(it.getColumnIndexOrThrow(COL_TEXT)),
                         timestamp = it.getInt(it.getColumnIndexOrThrow(COL_TIMESTAMP)),
-                        isDeleted = it.getInt(it.getColumnIndexOrThrow(COL_IS_DELETED)) == 1
+                        isDeleted = it.getInt(it.getColumnIndexOrThrow(COL_IS_DELETED)) == 1,
+                        contentType = it.getInt(it.getColumnIndexOrThrow(COL_CONTENT_TYPE)),
+                        mediaPath = it.getString(it.getColumnIndexOrThrow(COL_MEDIA_PATH))
                     ))
                 }
             }
             return messages
+        }
+        
+        fun clearDeletedMessages(chatId: Long) {
+            val database = db.writableDatabase
+            database.delete(TABLE_SAVED_MESSAGES, "$COL_CHAT_ID = ? AND $COL_IS_DELETED = 1", arrayOf(chatId.toString()))
+        }
+        
+        fun clearAllDeletedMessages() {
+            val database = db.writableDatabase
+            database.delete(TABLE_SAVED_MESSAGES, "$COL_IS_DELETED = 1", null)
         }
 
         fun insertEdit(edit: EditHistory) {
@@ -177,7 +195,7 @@ class RexDatabase private constructor(context: Context) : SQLiteOpenHelper(conte
 
     companion object {
         private const val DATABASE_NAME = "rex_database.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 3 // Increased for new columns
 
         private const val TABLE_SAVED_MESSAGES = "rex_saved_messages"
         private const val TABLE_EDIT_HISTORY = "edit_history"
@@ -189,6 +207,8 @@ class RexDatabase private constructor(context: Context) : SQLiteOpenHelper(conte
         private const val COL_TEXT = "text"
         private const val COL_TIMESTAMP = "timestamp"
         private const val COL_IS_DELETED = "isDeleted"
+        private const val COL_CONTENT_TYPE = "contentType"
+        private const val COL_MEDIA_PATH = "mediaPath"
         private const val COL_ORIGINAL_MESSAGE_ID = "originalMessageId"
         private const val COL_OLD_TEXT = "oldText"
 
@@ -200,7 +220,9 @@ class RexDatabase private constructor(context: Context) : SQLiteOpenHelper(conte
                 $COL_SENDER_ID INTEGER NOT NULL,
                 $COL_TEXT TEXT,
                 $COL_TIMESTAMP INTEGER NOT NULL,
-                $COL_IS_DELETED INTEGER NOT NULL DEFAULT 0
+                $COL_IS_DELETED INTEGER NOT NULL DEFAULT 0,
+                $COL_CONTENT_TYPE INTEGER NOT NULL DEFAULT 0,
+                $COL_MEDIA_PATH TEXT
             )
         """
 

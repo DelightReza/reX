@@ -5674,23 +5674,53 @@
   <string name="RexSettingsDescription">Configure reX features and privacy settings.</string>
   
   <!-- reX Ghost Mode -->
-  <string name="RexGhostModeSettings">Ghost Mode Settings</string>
-  <string name="RexEnableGhostMode">Enable Ghost Mode</string>
-  <string name="RexNoReadReceipts">No Read Receipts</string>
-  <string name="RexNoTypingIndicator">No Typing Indicator</string>
-  <string name="RexNoOnlineStatus">No Online Status</string>
+  <string name="RexGhostModeSettings">Ghost essentials</string>
+  <string name="RexEnableGhostMode">Ghost Mode</string>
+  <string name="RexNoReadReceipts">Don\'t Read Messages</string>
+  <string name="RexNoReadStories">Don\'t Read Stories</string>
+  <string name="RexNoTypingIndicator">Don\'t Send Typing</string>
+  <string name="RexNoOnlineStatus">Don\'t Send Online</string>
+  <string name="RexGoOfflineAuto">Go Offline Automatically</string>
+  <string name="RexReadOnInteract">Read on Interact</string>
+  <string name="RexScheduleMessages">Schedule Messages</string>
+  <string name="RexSendWithoutSound">Send without Sound</string>
+  <string name="RexStoryGhostAlert">Story Ghost Mode Alert</string>
   <string name="RexGhostModeDescription">Hide your online status, read receipts, and typing indicators from others.</string>
+  <string name="RexReadOnInteractDescription">Mark as read when sending a message/reaction.</string>
+  <string name="RexScheduleMessagesDescription">Delay outgoing messages by ~12s to hide online status.</string>
+  <string name="RexSendWithoutSoundDescription">Send messages silently by default.</string>
+  <string name="RexStoryGhostAlertDescription">Show alert before opening stories.</string>
   
   <!-- reX Spy/Anti-Delete -->
-  <string name="RexSpySettings">Spy/Anti-Delete Settings</string>
+  <string name="RexSpySettings">Spy essentials</string>
   <string name="RexEnableSpyMode">Enable Spy Mode</string>
   <string name="RexSaveDeletedMessages">Save Deleted Messages</string>
+  <string name="RexSaveEditsHistory">Save Edits History</string>
+  <string name="RexSaveInBotDialogs">Save in Bot Dialogs</string>
+  <string name="RexSaveReadDate">Save Read Date</string>
+  <string name="RexSaveLastSeenDate">Save Last Seen Date</string>
+  <string name="RexSaveAttachments">Save Attachments</string>
+  <string name="RexAttachmentsFolder">Attachments Folder</string>
+  <string name="RexMaxFolderSize">Max Folder Size</string>
+  <string name="RexCustomPath">Custom Path</string>
   <string name="RexViewDeletedMessages">View Deleted Messages</string>
+  <string name="RexExportDatabase">Export Database</string>
+  <string name="RexImportDatabase">Import Database</string>
+  <string name="RexClearDatabase">Clear Database</string>
+  <string name="RexClearAllDeletedMessages">Clear All Deleted Messages</string>
+  <string name="RexSpyFeaturesDescription">Enable individual features to save messages, edits, and data.</string>
   <string name="RexSpyModeDescription">Save messages before they are deleted or edited by others.</string>
+  <string name="RexSaveAttachmentsDescription">Download and save media attachments automatically.</string>
+  <string name="RexMaxFolderSizeDescription">Delete oldest files if limit exceeded.</string>
   
   <!-- reX Customization -->
   <string name="RexCustomizationSettings">Customization Settings</string>
   <string name="RexSaveRestrictedContent">Save Restricted Content</string>
+  <string name="RexDisableColorfulReplies">Disable Colorful Replies</string>
+  <string name="RexTranslucentDeletedMessages">Translucent Deleted Messages</string>
+  <string name="RexDeletedMarkIcon">Deleted Mark Icon</string>
+  <string name="RexDeletedMarkColor">Deleted Mark Color</string>
+  <string name="RexDrawerOptions">Drawer Options</string>
   <string name="RexCustomizationDescription">Enable advanced features and customization options.</string>
   
   <!-- reX Deleted Messages Viewer -->
@@ -5702,5 +5732,29 @@
   <string name="RexEditHistory">Edit History</string>
   <string name="RexNoEditHistory">No edit history for this message.</string>
   <string name="RexEditHistoryDescription">Previous versions of this message will appear here.</string>
+
+  <!-- reX Chat Menu -->
+  <string name="RexChatMenu">reX</string>
+  <string name="RexViewDeleted">View Deleted</string>
+  <string name="RexReadExclusion">Read Exclusion</string>
+  <string name="RexTypeExclusion">Type Exclusion</string>
+  <string name="RexClearDeleted">Clear Deleted</string>
+  
+  <!-- reX Message Options -->
+  <string name="RexKeepLocally">Keep Locally</string>
+  <string name="RexKeepLocallyDescription">Delete from chat but keep a local copy</string>
+  
+  <!-- reX Placeholders and UI Text -->
+  <string name="RexSavedData">Saved Data</string>
+  <string name="RexDatabase">Database</string>
+  <string name="RexAttachments">Attachments</string>
+  <string name="RexVisual">Visual</string>
+  <string name="RexDrawer">Drawer</string>
+  <string name="RexNoLimit">No Limit</string>
+  <string name="RexMB">MB</string>
+  <string name="RexGB">GB</string>
+  <string name="RexTodoNotImplemented">This feature is not yet implemented</string>
+  <string name="RexViewDeletedDescription">Browse all deleted messages saved by Spy Mode.</string>
+  <string name="RexDrawerOptionsDescription">Customize drawer item order and visibility.</string>
 
 </resources>

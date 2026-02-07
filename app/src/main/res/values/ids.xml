@@ -1432,13 +1432,65 @@
   <item type="id" name="btn_rexGhostSettings" />
   <item type="id" name="btn_rexSpySettings" />
   <item type="id" name="btn_rexCustomization" />
+  
+  <!-- Ghost Mode IDs -->
   <item type="id" name="btn_rexGhostMode" />
   <item type="id" name="btn_rexGhostNoRead" />
+  <item type="id" name="btn_rexGhostNoStories" />
   <item type="id" name="btn_rexGhostNoOnline" />
   <item type="id" name="btn_rexGhostNoTyping" />
+  <item type="id" name="btn_rexGoOfflineAuto" />
+  <item type="id" name="btn_rexReadOnInteract" />
+  <item type="id" name="btn_rexScheduleMessages" />
+  <item type="id" name="btn_rexSendWithoutSound" />
+  <item type="id" name="btn_rexStoryGhostAlert" />
+  
+  <!-- Spy Mode IDs -->
   <item type="id" name="btn_rexSpyMode" />
   <item type="id" name="btn_rexSpyEnabled" />
   <item type="id" name="btn_rexSaveDeleted" />
-  <item type="id" name="btn_rexSaveRestricted" />
+  <item type="id" name="btn_rexSaveEdits" />
+  <item type="id" name="btn_rexSaveBotDialogs" />
+  <item type="id" name="btn_rexSaveReadDate" />
+  <item type="id" name="btn_rexSaveLastSeen" />
+  <item type="id" name="btn_rexSaveAttachments" />
+  <item type="id" name="btn_rexAttachmentsFolder" />
+  <item type="id" name="btn_rexMaxFolderSize" />
   <item type="id" name="btn_rexViewSaved" />
+  <item type="id" name="btn_rexExportDb" />
+  <item type="id" name="btn_rexImportDb" />
+  <item type="id" name="btn_rexClearDb" />
+  
+  <!-- Customization IDs -->
+  <item type="id" name="btn_rexSaveRestricted" />
+  <item type="id" name="btn_rexDisableColorfulReplies" />
+  <item type="id" name="btn_rexTranslucentDeleted" />
+  <item type="id" name="btn_rexDeletedMarkIcon" />
+  <item type="id" name="btn_rexDeletedMarkColor" />
+  <item type="id" name="btn_rexDrawerOptions" />
+  
+  <!-- Chat Menu IDs -->
+  <item type="id" name="btn_rexChatMenu" />
+  <item type="id" name="btn_rexViewDeleted" />
+  <item type="id" name="btn_rexReadExclusion" />
+  <item type="id" name="btn_rexTypeExclusion" />
+  <item type="id" name="btn_rexClearDeleted" />
+  
+  <!-- Message Options IDs -->
+  <item type="id" name="btn_rexKeepLocally" />
+  <item type="id" name="btn_clearAllDeleted" />
+
+  <!-- Attachments Folder Options -->
+  <item type="id" name="btn_rexFolderDownload" />
+  <item type="id" name="btn_rexFolderCustom" />
+
+  <!-- Max Folder Size Options -->
+  <item type="id" name="btn_rexSize300MB" />
+  <item type="id" name="btn_rexSize1GB" />
+  <item type="id" name="btn_rexSize2GB" />
+  <item type="id" name="btn_rexSize5GB" />
+  <item type="id" name="btn_rexSize16GB" />
+  <item type="id" name="btn_rexSizeNoLimit" />
+
+
 </resources>

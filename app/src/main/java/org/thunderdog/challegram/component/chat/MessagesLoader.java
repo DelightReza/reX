@@ -1684,6 +1684,189 @@ public class MessagesLoader implements Client.ResultHandler {
         }
       }
 
+      // --- REX MOD: Load ghost messages from database and merge them ---
+      if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveDeletedMessages()) {
+        try {
+          org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(org.thunderdog.challegram.tool.UI.getAppContext());
+          java.util.List<org.thunderdog.challegram.rex.db.SavedMessage> ghostMessages = db.rexDao().getDeletedMessages(chatId);
+          
+          if (!ghostMessages.isEmpty()) {
+            // Convert deleted messages back to TdApi.Message and TGMessage
+            java.util.Set<Long> existingIds = new java.util.HashSet<>();
+            for (TGMessage msg : items) {
+              existingIds.add(msg.getId());
+            }
+            
+            java.util.List<TGMessage> ghostItems = new java.util.ArrayList<>();
+            for (org.thunderdog.challegram.rex.db.SavedMessage deleted : ghostMessages) {
+              if (!existingIds.contains(deleted.getMessageId())) {
+                // Create a TdApi.Message from database with proper content type
+                TdApi.Message msg = new TdApi.Message();
+                msg.id = deleted.getMessageId();
+                msg.chatId = deleted.getChatId();
+                msg.senderId = new TdApi.MessageSenderUser(deleted.getSenderId());
+                msg.date = deleted.getTimestamp();
+                msg.isOutgoing = false;
+                
+                // Recreate content based on saved content type
+                try {
+                  if (deleted.getContentType() == TdApi.MessageText.CONSTRUCTOR) {
+                    msg.content = new TdApi.MessageText(
+                      new TdApi.FormattedText(deleted.getText() != null ? deleted.getText() : "", new TdApi.TextEntity[0]),
+                      null,
+                      null
+                    );
+                  } else if (deleted.getContentType() == TdApi.MessagePhoto.CONSTRUCTOR) {
+                    TdApi.File photoFile = new TdApi.File();
+                    photoFile.remote = new TdApi.RemoteFile("", "", false, false, 0);
+                    if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
+                      // Get actual file size
+                      long fileSize = 0;
+                      try {
+                        java.io.File file = new java.io.File(deleted.getMediaPath());
+                        if (file.exists()) {
+                          fileSize = file.length();
+                        }
+                      } catch (Exception e) {
+                        android.util.Log.w("REX", "Could not get file size for: " + deleted.getMediaPath(), e);
+                      }
+                      photoFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, (int)fileSize, (int)fileSize);
+                      photoFile.id = 0;
+                      photoFile.size = (long)fileSize;
+                      photoFile.expectedSize = (long)fileSize;
+                    } else {
+                      photoFile.local = new TdApi.LocalFile("", false, false, false, false, 0, 0, 0);
+                      photoFile.id = 0;
+                      photoFile.size = 0;
+                      photoFile.expectedSize = 0;
+                    }
+                    TdApi.PhotoSize photoSize = new TdApi.PhotoSize("m", photoFile, 640, 480, new int[0]);
+                    TdApi.Photo photo = new TdApi.Photo(false, null, new TdApi.PhotoSize[]{photoSize});
+                    String caption = deleted.getText() != null ? deleted.getText().replace("[Photo]", "").replace(": ", "") : "";
+                    msg.content = new TdApi.MessagePhoto(photo, new TdApi.FormattedText(caption, new TdApi.TextEntity[0]), false, false, false);
+                  } else if (deleted.getContentType() == TdApi.MessageVideo.CONSTRUCTOR) {
+                    TdApi.File videoFile = new TdApi.File();
+                    videoFile.remote = new TdApi.RemoteFile("", "", false, false, 0);
+                    if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
+                      // Get actual file size
+                      long fileSize = 0;
+                      try {
+                        java.io.File file = new java.io.File(deleted.getMediaPath());
+                        if (file.exists()) {
+                          fileSize = file.length();
+                        }
+                      } catch (Exception e) {
+                        android.util.Log.w("REX", "Could not get file size for: " + deleted.getMediaPath(), e);
+                      }
+                      videoFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, (int)fileSize, (int)fileSize);
+                      videoFile.id = 0;
+                      videoFile.size = (long)fileSize;
+                      videoFile.expectedSize = (long)fileSize;
+                    } else {
+                      videoFile.local = new TdApi.LocalFile("", false, false, false, false, 0, 0, 0);
+                      videoFile.id = 0;
+                      videoFile.size = 0;
+                      videoFile.expectedSize = 0;
+                    }
+                    TdApi.Video video = new TdApi.Video(0, 640, 480, "video.mp4", "video/mp4", false, false, null, null, videoFile);
+                    String caption = deleted.getText() != null ? deleted.getText().replace("[Video]", "").replace(": ", "") : "";
+                    msg.content = new TdApi.MessageVideo(video, new TdApi.AlternativeVideo[0], new TdApi.VideoStoryboard[0], null, 0, new TdApi.FormattedText(caption, new TdApi.TextEntity[0]), false, false, false);
+                  } else if (deleted.getContentType() == TdApi.MessageDocument.CONSTRUCTOR) {
+                    TdApi.File docFile = new TdApi.File();
+                    docFile.remote = new TdApi.RemoteFile("", "", false, false, 0);
+                    if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
+                      docFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, 0, 0);
+                    } else {
+                      docFile.local = new TdApi.LocalFile("", false, false, false, false, 0, 0, 0);
+                    }
+                    String fileName = "document";
+                    if (deleted.getText() != null && deleted.getText().contains(": ")) {
+                      fileName = deleted.getText().substring(deleted.getText().indexOf(": ") + 2, deleted.getText().lastIndexOf("]"));
+                    }
+                    TdApi.Document document = new TdApi.Document(fileName, "application/octet-stream", null, null, docFile);
+                    String caption = deleted.getText() != null && deleted.getText().contains("]: ") ? deleted.getText().substring(deleted.getText().indexOf("]: ") + 3) : "";
+                    msg.content = new TdApi.MessageDocument(document, new TdApi.FormattedText(caption, new TdApi.TextEntity[0]));
+                  } else if (deleted.getContentType() == TdApi.MessageAudio.CONSTRUCTOR) {
+                    TdApi.File audioFile = new TdApi.File();
+                    audioFile.remote = new TdApi.RemoteFile("", "", false, false, 0);
+                    if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
+                      audioFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, 0, 0);
+                    } else {
+                      audioFile.local = new TdApi.LocalFile("", false, false, false, false, 0, 0, 0);
+                    }
+                    String title = deleted.getText() != null ? deleted.getText().replace("[Audio: ", "").replace("]", "") : "Audio";
+                    TdApi.Audio audio = new TdApi.Audio(0, title, "", "", "audio/mp3", null, null, null, audioFile);
+                    msg.content = new TdApi.MessageAudio(audio, new TdApi.FormattedText("", new TdApi.TextEntity[0]));
+                  } else if (deleted.getContentType() == TdApi.MessageVoiceNote.CONSTRUCTOR) {
+                    TdApi.File voiceFile = new TdApi.File();
+                    voiceFile.remote = new TdApi.RemoteFile("", "", false, false, 0);
+                    if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
+                      voiceFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, 0, 0);
+                    } else {
+                      voiceFile.local = new TdApi.LocalFile("", false, false, false, false, 0, 0, 0);
+                    }
+                    TdApi.VoiceNote voiceNote = new TdApi.VoiceNote(0, new byte[0], "audio/ogg", null, voiceFile);
+                    msg.content = new TdApi.MessageVoiceNote(voiceNote, new TdApi.FormattedText("", new TdApi.TextEntity[0]), false);
+                  } else if (deleted.getContentType() == TdApi.MessageSticker.CONSTRUCTOR) {
+                    TdApi.File stickerFile = new TdApi.File();
+                    stickerFile.remote = new TdApi.RemoteFile("", "", false, false, 0);
+                    if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
+                      stickerFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, 0, 0);
+                    } else {
+                      stickerFile.local = new TdApi.LocalFile("", false, false, false, false, 0, 0, 0);
+                    }
+                    String emoji = deleted.getText() != null ? deleted.getText().replace("[Sticker: ", "").replace("]", "") : "😀";
+                    TdApi.Sticker sticker = new TdApi.Sticker(0, 0, 512, 512, emoji, new TdApi.StickerFormatWebp(), new TdApi.StickerFullTypeRegular(), null, stickerFile);
+                    msg.content = new TdApi.MessageSticker(sticker, false);
+                  } else if (deleted.getContentType() == TdApi.MessageAnimation.CONSTRUCTOR) {
+                    TdApi.File animFile = new TdApi.File();
+                    animFile.remote = new TdApi.RemoteFile("", "", false, false, 0);
+                    if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
+                      animFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, 0, 0);
+                    } else {
+                      animFile.local = new TdApi.LocalFile("", false, false, false, false, 0, 0, 0);
+                    }
+                    TdApi.Animation animation = new TdApi.Animation(0, 320, 240, "animation.gif", "image/gif", false, null, null, animFile);
+                    String caption = deleted.getText() != null ? deleted.getText().replace("[GIF]", "").replace(": ", "") : "";
+                    msg.content = new TdApi.MessageAnimation(animation, new TdApi.FormattedText(caption, new TdApi.TextEntity[0]), false, false, false);
+                  } else {
+                    // Fallback to text
+                    msg.content = new TdApi.MessageText(
+                      new TdApi.FormattedText(deleted.getText() != null ? deleted.getText() : "[Deleted Media]", new TdApi.TextEntity[0]),
+                      null,
+                      null
+                    );
+                  }
+                } catch (Exception e) {
+                  // Fallback to simple text if content reconstruction fails
+                  msg.content = new TdApi.MessageText(
+                    new TdApi.FormattedText(deleted.getText() != null ? deleted.getText() : "[Deleted Media]", new TdApi.TextEntity[0]),
+                    null,
+                    null
+                  );
+                }
+                
+                // Create TGMessage and mark as ghost
+                TGMessage tgMsg = TGMessage.valueOf(manager, msg, chat, messageThread, (LongSparseArray<TdApi.ChatAdministrator>) null);
+                if (tgMsg != null) {
+                  org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.markAsGhost(msg.id);
+                  ghostItems.add(tgMsg);
+                }
+              }
+            }
+            
+            // Merge ghost messages into items list, sorted by ID
+            if (!ghostItems.isEmpty()) {
+              items.addAll(ghostItems);
+              java.util.Collections.sort(items, (a, b) -> Long.compare(b.getId(), a.getId()));
+            }
+          }
+        } catch (Exception e) {
+          android.util.Log.e("REX", "Failed to load ghost messages", e);
+        }
+      }
+      // --- END REX MOD ---
+
       final int chunkSize = scrollItemIndexFinal == -1 ? CHUNK_SIZE_SMALL : CHUNK_SIZE_SEARCH;
       boolean willTryAgain = (loadingMode == MODE_INITIAL || loadingMode == MODE_REPEAT_INITIAL) && items.size() < chunkSize && items.size() > 0;
       manager.displayMessages(items, loadingMode, scrollPosition, scrollItemView, scrollMessageId, scrollHighlightMode, willTryAgain && loadingLocal, canLoadTop);

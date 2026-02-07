@@ -438,6 +438,7 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
   @Override
   public void onDraw (Canvas c) {
     msg.draw(this, c, avatarReceiver, replyReceiver, replyTextMediaReceiver, previewReceiver, contentReceiver, gifReceiver, complexReceiver);
+    // REX MOD: Deleted icon is now drawn by TGMessage using Counter, not here
   }
 
   public AvatarReceiver getAvatarReceiver () {
@@ -857,7 +858,7 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
     }
 
     // 3. Save View-Once Message
-    if (!isMore && isSent && RexConfig.INSTANCE.isSpyEnabled()) {
+    if (!isMore && isSent && RexConfig.INSTANCE.getSaveDeletedMessages()) {
       TdApi.Message message = msg.getNewestMessage();
       if (message.selfDestructType != null) {
         // This is a view-once or self-destructing message
@@ -868,7 +869,7 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
     }
 
     // 4. Burn Message (Ghost Mode - local deletion) - Only for self-destruct messages
-    if (!isMore && isSent && RexConfig.INSTANCE.isSpyEnabled()) {
+    if (!isMore && isSent && RexConfig.INSTANCE.getSaveDeletedMessages()) {
       TdApi.Message message = msg.getNewestMessage();
       // Only show burn option for self-destructing messages (view-once)
       if (message.selfDestructType != null) {
@@ -879,7 +880,7 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
     }
 
     // 5. View Edit History
-    if (!isMore && isSent && RexConfig.INSTANCE.isSpyEnabled()) {
+    if (!isMore && isSent && RexConfig.INSTANCE.getSaveEditsHistory()) {
       TdApi.Message message = msg.getNewestMessage();
       // Check if this message has edit history
       // First try cached value, if not cached (-1), query database

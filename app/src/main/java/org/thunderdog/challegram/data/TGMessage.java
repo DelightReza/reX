@@ -245,6 +245,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   private Counter shrinkedReactionsCounter, reactionsCounter;
   private final ReactionsCounterDrawable reactionsCounterDrawable;
   private final Counter isChannelHeaderCounter;
+  private final Counter isDeleted; // REX MOD: Counter for deleted messages
 
   private boolean translatedCounterForceShow;
   private final Counter isTranslatedCounter;
@@ -256,6 +257,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   private final RectF isTranslatedCounterLastDrawRect = new RectF();
   private final RectF isRestrictedCounterLastDrawRect = new RectF();
   private final RectF isEditedCounterLastDrawRect = new RectF();
+  private final RectF isDeletedCounterLastDrawRect = new RectF(); // REX MOD: Draw rect for deleted counter
 
 
   // forward values
@@ -447,6 +449,16 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
       .drawable(R.drawable.baseline_edit_12, 12f, 0f, Gravity.CENTER_HORIZONTAL)
       .build();
     this.isEdited.showHide(true, false);
+    // REX MOD: Initialize deleted counter
+    this.isDeleted = new Counter.Builder()
+      .noBackground()
+      .allBold(false)
+      .callback(this)
+      .drawable(R.drawable.baseline_delete_12, 12f, 0f, Gravity.CENTER_HORIZONTAL)
+      .colorSet(() -> Theme.getColor(ColorId.messageNegativeLine)) // Red color for delete icon
+      .build();
+    this.isDeleted.showHide(true, false);
+    // END REX MOD
     this.isRestricted = new Counter.Builder()
       .noBackground()
       .allBold(false)
@@ -2175,6 +2187,15 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
         }
       }
 
+      // REX MOD: Draw deleted icon for ghost messages
+      boolean isGhostMessage = org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.isGhost(getId());
+      if (isGhostMessage) {
+        android.util.Log.d("REX", "Drawing delete icon for ghost message: " + getId());
+        isDeleted.draw(c, right, top, Gravity.RIGHT, 1f, view, ColorId.messageNegativeLine, isDeletedCounterLastDrawRect);
+        right -= isDeleted.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN));
+      }
+      // END REX MOD
+
       if (shouldShowMessageRestrictedWarning()) {
         if (isRestrictedByTelegram()) {
           isRestricted.draw(c, right, top, Gravity.RIGHT, 1f, view, ColorId.NONE, isRestrictedCounterLastDrawRect);
@@ -2530,7 +2551,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
     // --- END REX MOD ---
     
     // --- REX MOD: Draw edit history indicator ---
-    if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.isSpyEnabled()) {
+    if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveEditsHistory()) {
       // Lazy-load edit count only once
       if (cachedEditCount == -1) {
         android.content.Context ctx = view.getContext();

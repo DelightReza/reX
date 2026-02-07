@@ -438,6 +438,9 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   private final Object dataLock = new Object();
   private final HashMap<Long, TdApi.Chat> chats = new HashMap<>();
   private final HashMap<Long, TdApi.ChatActiveStories> activeStories = new HashMap<>();
+  // --- REX MOD: Cache for saving deleted messages ---
+  private final java.util.concurrent.ConcurrentHashMap<Long, TdApi.Message> rexMessageCache = new java.util.concurrent.ConcurrentHashMap<>();
+  // --- END REX MOD ---
   private final SparseIntArray storyListChatCount = new SparseIntArray();
   private final SparseArrayCompat<StoryList> storyLists = new SparseArrayCompat<>();
   private final HashMap<String, TdApi.ForumTopicInfo> forumTopicInfos = new HashMap<>();
@@ -1743,8 +1746,37 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
       }
 
       // 4. Block Story Views
-      if (constructor == TdApi.OpenStory.CONSTRUCTOR) {
-        return; // Block
+      if (RexConfig.INSTANCE.getGhostNoStories()) {
+        if (constructor == TdApi.OpenStory.CONSTRUCTOR) {
+          return; // Block
+        }
+        if (constructor == TdApi.SetStoryReaction.CONSTRUCTOR) {
+          return; // Block story reactions too
+        }
+      }
+    }
+    
+    // --- REX READ ON INTERACT ---
+    // Mark messages as read when sending a message or reaction
+    if (RexConfig.INSTANCE.getReadOnInteract()) {
+      int constructor = function.getConstructor();
+      
+      if (constructor == TdApi.SendMessage.CONSTRUCTOR) {
+        TdApi.SendMessage msg = (TdApi.SendMessage) function;
+        // Send ViewMessages for this chat before sending message
+        RexConfig.INSTANCE.setForceReadRequest(true);
+        client.send(new TdApi.ViewMessages(msg.chatId, new long[0], new TdApi.MessageSourceOther(), true), result -> {
+          // Reset flag after request completes
+          RexConfig.INSTANCE.setForceReadRequest(false);
+        });
+      } else if (constructor == TdApi.AddMessageReaction.CONSTRUCTOR) {
+        TdApi.AddMessageReaction reaction = (TdApi.AddMessageReaction) function;
+        // Send ViewMessages for this chat before adding reaction
+        RexConfig.INSTANCE.setForceReadRequest(true);
+        client.send(new TdApi.ViewMessages(reaction.chatId, new long[0], new TdApi.MessageSourceOther(), true), result -> {
+          // Reset flag after request completes
+          RexConfig.INSTANCE.setForceReadRequest(false);
+        });
       }
     }
     // --- END REX INTERCEPTOR ---
@@ -7426,6 +7458,21 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   }
 
   private void updateNewMessage (TdApi.UpdateNewMessage update, boolean isUpdate) {
+    // --- REX MOD: Cache message for deletion tracking ---
+    if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveDeletedMessages()) {
+      rexMessageCache.put(update.message.id, update.message);
+      // Limit cache size to prevent memory issues (keep last 1000 messages)
+      if (rexMessageCache.size() > 1000) {
+        // Remove oldest entries (this is approximate, but efficient)
+        java.util.Iterator<Long> iterator = rexMessageCache.keySet().iterator();
+        for (int i = 0; i < 100 && iterator.hasNext(); i++) {
+          iterator.next();
+          iterator.remove();
+        }
+      }
+    }
+    // --- END REX MOD ---
+    
     if (update.message.sendingState instanceof TdApi.MessageSendingStatePending && update.message.content.getConstructor() != TdApi.MessageChatSetMessageAutoDeleteTime.CONSTRUCTOR) {
       addRemoveSendingMessage(update.message.chatId, update.message.id, true);
       if (isUpdate)
@@ -7599,10 +7646,173 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
 
     Arrays.sort(update.messageIds);
 
+    // --- REX MOD: Save deleted messages if spy features enabled ---
+    if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveDeletedMessages()) {
+      try {
+        android.util.Log.d("REX", "Save deleted messages is enabled, processing " + update.messageIds.length + " messages");
+        for (long messageId : update.messageIds) {
+          // Try to get from our cache first (most reliable)
+          TdApi.Message msg = rexMessageCache.remove(messageId);
+          
+          if (msg != null) {
+            android.util.Log.d("REX", "Found message " + messageId + " in cache to save");
+            // Save to database before deletion
+            saveMessageToDatabase(msg);
+            // Mark as ghost in memory cache
+            org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.markAsGhost(messageId);
+            android.util.Log.d("REX", "Successfully saved and marked message " + messageId + " as ghost");
+            android.util.Log.d("REX", "Ghost check: isGhost(" + messageId + ")=" + org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.isGhost(messageId));
+          } else {
+            // Not in cache - try to fetch from server asynchronously
+            android.util.Log.d("REX", "Message " + messageId + " not in cache, attempting server fetch...");
+            final long finalMessageId = messageId;
+            final long chatId = update.chatId;
+            
+            // Fetch from server in background
+            getMessage(chatId, finalMessageId, message -> {
+              if (message != null) {
+                android.util.Log.d("REX", "Successfully fetched message " + finalMessageId + " from server");
+                // Save to database
+                saveMessageToDatabase(message);
+                // Mark as ghost in memory cache
+                org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.markAsGhost(finalMessageId);
+                android.util.Log.d("REX", "Successfully saved and marked fetched message " + finalMessageId + " as ghost");
+              } else {
+                android.util.Log.w("REX", "Message " + finalMessageId + " could not be fetched from server (already deleted)");
+              }
+            });
+          }
+        }
+      } catch (Exception e) {
+        // Log error for debugging
+        android.util.Log.e("REX", "Error saving deleted messages", e);
+      }
+    } else {
+      android.util.Log.d("REX", "Save deleted messages is DISABLED");
+    }
+    // --- END REX MOD ---
+
     listeners.updateMessagesDeleted(update);
 
     context.global().notifyUpdateMessagesDeleted(this, update);
   }
+
+  // --- REX MOD: Helper method to save message to database ---
+  private void saveMessageToDatabase(TdApi.Message msg) {
+    try {
+      android.util.Log.d("REX", "saveMessageToDatabase called for message " + msg.id + " in chat " + msg.chatId);
+      org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(UI.getAppContext());
+      org.thunderdog.challegram.rex.RexConfig config = org.thunderdog.challegram.rex.RexConfig.INSTANCE;
+      
+      // Extract text and media info from message content
+      String text = null;
+      String mediaPath = null;
+      int contentType = 0;
+      
+      if (msg.content != null) {
+        contentType = msg.content.getConstructor();
+        
+        if (msg.content.getConstructor() == TdApi.MessageText.CONSTRUCTOR) {
+          text = ((TdApi.MessageText) msg.content).text.text;
+        } else if (msg.content.getConstructor() == TdApi.MessagePhoto.CONSTRUCTOR) {
+          TdApi.MessagePhoto photo = (TdApi.MessagePhoto) msg.content;
+          text = "[Photo]" + (photo.caption != null && !photo.caption.text.isEmpty() ? ": " + photo.caption.text : "");
+          // Save photo file if attachments are enabled
+          android.util.Log.d("REX", "Photo message - SaveAttachments=" + config.getSaveAttachments() + ", sizes=" + photo.photo.sizes.length);
+          if (config.getSaveAttachments() && photo.photo.sizes.length > 0) {
+            TdApi.PhotoSize largestSize = photo.photo.sizes[photo.photo.sizes.length - 1];
+            android.util.Log.d("REX", "Photo isDownloadingCompleted=" + largestSize.photo.local.isDownloadingCompleted + ", path=" + largestSize.photo.local.path);
+            if (largestSize.photo.local.isDownloadingCompleted) {
+              mediaPath = largestSize.photo.local.path;
+              android.util.Log.d("REX", "Saved photo mediaPath: " + mediaPath);
+            }
+          }
+        } else if (msg.content.getConstructor() == TdApi.MessageVideo.CONSTRUCTOR) {
+          TdApi.MessageVideo video = (TdApi.MessageVideo) msg.content;
+          text = "[Video]" + (video.caption != null && !video.caption.text.isEmpty() ? ": " + video.caption.text : "");
+          // Save video file if attachments are enabled
+          if (config.getSaveAttachments() && video.video.video.local.isDownloadingCompleted) {
+            mediaPath = video.video.video.local.path;
+          }
+        } else if (msg.content.getConstructor() == TdApi.MessageDocument.CONSTRUCTOR) {
+          TdApi.MessageDocument doc = (TdApi.MessageDocument) msg.content;
+          text = "[Document: " + doc.document.fileName + "]" + (doc.caption != null && !doc.caption.text.isEmpty() ? ": " + doc.caption.text : "");
+          // Save document file if attachments are enabled
+          if (config.getSaveAttachments() && doc.document.document.local.isDownloadingCompleted) {
+            mediaPath = doc.document.document.local.path;
+          }
+        } else if (msg.content.getConstructor() == TdApi.MessageAudio.CONSTRUCTOR) {
+          TdApi.MessageAudio audio = (TdApi.MessageAudio) msg.content;
+          text = "[Audio: " + (audio.audio.title != null && !audio.audio.title.isEmpty() ? audio.audio.title : audio.audio.fileName) + "]";
+          // Save audio file if attachments are enabled
+          if (config.getSaveAttachments() && audio.audio.audio.local.isDownloadingCompleted) {
+            mediaPath = audio.audio.audio.local.path;
+          }
+        } else if (msg.content.getConstructor() == TdApi.MessageVoiceNote.CONSTRUCTOR) {
+          TdApi.MessageVoiceNote voice = (TdApi.MessageVoiceNote) msg.content;
+          text = "[Voice Message]";
+          // Save voice file if attachments are enabled
+          if (config.getSaveAttachments() && voice.voiceNote.voice.local.isDownloadingCompleted) {
+            mediaPath = voice.voiceNote.voice.local.path;
+          }
+        } else if (msg.content.getConstructor() == TdApi.MessageSticker.CONSTRUCTOR) {
+          TdApi.MessageSticker sticker = (TdApi.MessageSticker) msg.content;
+          text = "[Sticker: " + sticker.sticker.emoji + "]";
+          // Save sticker file if attachments are enabled
+          if (config.getSaveAttachments() && sticker.sticker.sticker.local.isDownloadingCompleted) {
+            mediaPath = sticker.sticker.sticker.local.path;
+          }
+        } else if (msg.content.getConstructor() == TdApi.MessageAnimation.CONSTRUCTOR) {
+          TdApi.MessageAnimation anim = (TdApi.MessageAnimation) msg.content;
+          text = "[GIF]" + (anim.caption != null && !anim.caption.text.isEmpty() ? ": " + anim.caption.text : "");
+          // Save animation file if attachments are enabled
+          if (config.getSaveAttachments() && anim.animation.animation.local.isDownloadingCompleted) {
+            mediaPath = anim.animation.animation.local.path;
+          }
+        } else {
+          text = "[" + msg.content.getClass().getSimpleName() + "]";
+        }
+      }
+      
+      // Get sender ID
+      long senderId = 0;
+      if (msg.senderId != null) {
+        if (msg.senderId.getConstructor() == TdApi.MessageSenderUser.CONSTRUCTOR) {
+          senderId = ((TdApi.MessageSenderUser) msg.senderId).userId;
+        } else if (msg.senderId.getConstructor() == TdApi.MessageSenderChat.CONSTRUCTOR) {
+          senderId = ((TdApi.MessageSenderChat) msg.senderId).chatId;
+        }
+      }
+      
+      // Create SavedMessage object with content type and media path
+      org.thunderdog.challegram.rex.db.SavedMessage savedMsg = new org.thunderdog.challegram.rex.db.SavedMessage(
+        0, // id will be auto-generated
+        msg.chatId,
+        msg.id,
+        senderId,
+        text,
+        msg.date,
+        false, // not marked as deleted yet
+        contentType,
+        mediaPath
+      );
+      
+      // Insert or update in database
+      android.util.Log.d("REX", "Inserting message to database: chatId=" + msg.chatId + ", msgId=" + msg.id + ", text=" + text + ", mediaPath=" + mediaPath + ", contentType=" + contentType);
+      db.rexDao().insertMessage(savedMsg);
+      
+      // Now mark as deleted
+      java.util.List<Long> msgIds = new java.util.ArrayList<>();
+      msgIds.add(msg.id);
+      db.rexDao().markAsDeleted(msg.chatId, msgIds);
+      android.util.Log.d("REX", "Successfully saved message " + msg.id + " to database");
+      
+    } catch (Exception e) {
+      // Log error for debugging
+      android.util.Log.e("REX", "Failed to save message to database", e);
+    }
+  }
+  // --- END REX MOD ---
 
   // Updates: SAVED MESSAGES
 
@@ -9694,7 +9904,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
 
   private void processUpdate (ClientHolder context, TdApi.Update update) {
     // --- REX SPY LOGIC ---
-    if (RexConfig.INSTANCE.isSpyEnabled()) {
+    if (RexConfig.INSTANCE.getSaveDeletedMessages()) {
       try {
         // 1. Save INCOMING text messages to our shadow DB
         if (update.getConstructor() == TdApi.UpdateNewMessage.CONSTRUCTOR) {
@@ -9719,7 +9929,9 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
               senderId,
               text,
               msg.date,
-              false
+              false,
+              msg.content.getConstructor(), // contentType
+              null // mediaPath - text messages don't have media
             );
             RexDatabase.Companion.get(UI.getContext()).rexDao().insertMessage(saved);
           }

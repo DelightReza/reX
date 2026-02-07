@@ -645,13 +645,15 @@ public class SettingsController extends ViewController<Void> implements
     items.add(new ListItem(ListItem.TYPE_SEPARATOR));
     items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_tweakSettings, R.drawable.baseline_extension_24, R.string.TweakSettings));
     items.add(new ListItem(ListItem.TYPE_SEPARATOR));
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexSettings, R.drawable.baseline_extension_24, "reX Settings"));
-    items.add(new ListItem(ListItem.TYPE_SEPARATOR));
     if (Settings.instance().chatFoldersEnabled()) {
       items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_chatFolders, R.drawable.baseline_folder_copy_24, R.string.ChatFolders));
       items.add(new ListItem(ListItem.TYPE_SEPARATOR));
     }
     items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_languageSettings, R.drawable.baseline_language_24, R.string.Language));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR));
+    // --- REX MOD ---
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexSettings, R.drawable.baseline_settings_24, R.string.RexSettings));
+    // --- END REX ---
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
 
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));

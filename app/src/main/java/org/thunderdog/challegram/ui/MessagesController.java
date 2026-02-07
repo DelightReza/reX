@@ -2287,8 +2287,49 @@ public class MessagesController extends ViewController<MessagesController.Argume
       if (chat != null) {
         tdlib.ui().toggleMute(this, chat.id, false, null);
       }
+    // --- REX MOD ---
+    } else if (id == R.id.btn_rexChatMenu) {
+      showRexChatMenu();
+    } else if (id == R.id.btn_rexViewDeleted) {
+      // Open deleted messages viewer for this chat
+      RexDeletedMessagesController controller = new RexDeletedMessagesController(context, tdlib);
+      // TODO: Pass chat ID to filter deleted messages for this chat
+      navigateTo(controller);
+    } else if (id == R.id.btn_rexReadExclusion) {
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
+    } else if (id == R.id.btn_rexTypeExclusion) {
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
+    } else if (id == R.id.btn_rexClearDeleted) {
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
+    // --- END REX ---
     }
   }
+
+  // --- REX MOD ---
+  /**
+   * Show reX submenu with chat-specific options
+   */
+  private void showRexChatMenu() {
+    if (chat == null) return;
+    
+    IntList ids = new IntList(4);
+    StringList strings = new StringList(4);
+    
+    ids.append(R.id.btn_rexViewDeleted);
+    strings.append(R.string.RexViewDeleted);
+    
+    ids.append(R.id.btn_rexReadExclusion);
+    strings.append(R.string.RexReadExclusion);
+    
+    ids.append(R.id.btn_rexTypeExclusion);
+    strings.append(R.string.RexTypeExclusion);
+    
+    ids.append(R.id.btn_rexClearDeleted);
+    strings.append(R.string.RexClearDeleted);
+    
+    showMore(ids.get(), strings.get(), 0);
+  }
+  // --- END REX ---
 
   private void reportChat (@Nullable MessageWithProperties[] messages, final @Nullable Runnable after) {
     TdApi.Message[] array;
@@ -2639,8 +2680,7 @@ public class MessagesController extends ViewController<MessagesController.Argume
     this.fillDraft = args.fillDraft;
     
     // --- REX MOD: Load ghost messages for this chat ---
-    if (args.chat != null && org.thunderdog.challegram.rex.RexConfig.INSTANCE.isSpyEnabled() && 
-        org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveDeletedMessages()) {
+    if (args.chat != null && org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveDeletedMessages()) {
       org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.loadGhostMessagesForChat(context(), args.chat.id);
     }
     // --- END REX MOD ---
@@ -4536,6 +4576,14 @@ public class MessagesController extends ViewController<MessagesController.Argume
       }
     }
 
+    // --- REX MOD ---
+    // Add reX submenu if Save Deleted Messages is enabled
+    if (org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveDeletedMessages()) {
+      ids.append(R.id.btn_rexChatMenu);
+      strings.append(R.string.RexChatMenu);
+    }
+    // --- END REX ---
+
     showMore(ids.get(), strings.get(), 0);
   }
 
@@ -5855,7 +5903,9 @@ public class MessagesController extends ViewController<MessagesController.Argume
           senderId,
           text,
           message.date,
-          false // isDeleted
+          false, // isDeleted
+          message.content.getConstructor(), // contentType
+          null // mediaPath (will be saved after download)
         );
         RexDatabase.get(context()).rexDao().insertMessage(savedMsg);
         
@@ -5923,7 +5973,9 @@ public class MessagesController extends ViewController<MessagesController.Argume
           senderId,
           text,
           message.date,
-          false // isDeleted
+          false, // isDeleted
+          message.content.getConstructor(), // contentType
+          null // mediaPath
         );
         RexDatabase.get(context()).rexDao().insertMessage(savedMsg);
         // Mark as ghost message

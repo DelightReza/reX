@@ -11,12 +11,14 @@ package org.thunderdog.challegram.ui;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.Toast;
 
 import org.thunderdog.challegram.R;
 import org.thunderdog.challegram.component.base.SettingView;
 import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.rex.RexConfig;
 import org.thunderdog.challegram.telegram.Tdlib;
+import org.thunderdog.challegram.tool.UI;
 import org.thunderdog.challegram.v.CustomRecyclerView;
 
 import java.util.ArrayList;
@@ -47,6 +49,10 @@ public class RexCustomizationController extends RecyclerViewController<Void> imp
         final int itemId = item.getId();
         if (itemId == R.id.btn_rexSaveRestricted) {
           view.getToggler().setRadioEnabled(RexConfig.INSTANCE.isSaveRestricted(), isUpdate);
+        } else if (itemId == R.id.btn_rexDisableColorfulReplies) {
+          view.getToggler().setRadioEnabled(RexConfig.INSTANCE.getDisableColorfulReplies(), isUpdate);
+        } else if (itemId == R.id.btn_rexTranslucentDeleted) {
+          view.getToggler().setRadioEnabled(RexConfig.INSTANCE.getTranslucentDeletedMessages(), isUpdate);
         }
       }
     };
@@ -59,6 +65,27 @@ public class RexCustomizationController extends RecyclerViewController<Void> imp
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
     items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.RexCustomizationDescription));
 
+    // Visual customizations
+    items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.RexVisual));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexDisableColorfulReplies, 0, R.string.RexDisableColorfulReplies));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexTranslucentDeleted, 0, R.string.RexTranslucentDeletedMessages));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexDeletedMarkIcon, 0, R.string.RexDeletedMarkIcon));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexDeletedMarkColor, 0, R.string.RexDeletedMarkColor));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+
+    // Drawer options
+    items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, R.string.RexDrawer));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexDrawerOptions, 0, R.string.RexDrawerOptions));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.RexDrawerOptionsDescription));
+
     adapter.setItems(items, false);
     recyclerView.setAdapter(adapter);
   }
@@ -69,6 +96,18 @@ public class RexCustomizationController extends RecyclerViewController<Void> imp
     if (viewId == R.id.btn_rexSaveRestricted) {
       RexConfig.INSTANCE.setSaveRestricted(!RexConfig.INSTANCE.isSaveRestricted());
       adapter.updateValuedSettingById(R.id.btn_rexSaveRestricted);
+    } else if (viewId == R.id.btn_rexDisableColorfulReplies) {
+      RexConfig.INSTANCE.setDisableColorfulReplies(!RexConfig.INSTANCE.getDisableColorfulReplies());
+      adapter.updateValuedSettingById(R.id.btn_rexDisableColorfulReplies);
+    } else if (viewId == R.id.btn_rexTranslucentDeleted) {
+      RexConfig.INSTANCE.setTranslucentDeletedMessages(!RexConfig.INSTANCE.getTranslucentDeletedMessages());
+      adapter.updateValuedSettingById(R.id.btn_rexTranslucentDeleted);
+    } else if (viewId == R.id.btn_rexDeletedMarkIcon) {
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
+    } else if (viewId == R.id.btn_rexDeletedMarkColor) {
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
+    } else if (viewId == R.id.btn_rexDrawerOptions) {
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
     }
   }
 }

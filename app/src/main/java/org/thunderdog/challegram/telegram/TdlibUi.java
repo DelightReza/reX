@@ -633,24 +633,64 @@ public class TdlibUi extends Handler {
         }
       }
 
-      context.showOptions(null,
-        new int[] {R.id.menu_btn_delete, R.id.btn_cancel},
-        new String[] {deleteActionMsg, Lang.getString(R.string.Cancel)},
-        new int[] {ViewController.OptionColor.RED, ViewController.OptionColor.NORMAL},
-        new int[] {R.drawable.baseline_delete_24, R.drawable.baseline_cancel_24},
-        (itemView, id) -> {
-          if (id == R.id.menu_btn_delete) {
-            LongSparseArray<long[]> messageIds = TdExt.toMessageIdsMap(messages);
-            for (int i = 0; i < messageIds.size(); i++) {
-              tdlib.deleteMessages(messageIds.keyAt(i), messageIds.valueAt(i), false);
+      // --- REX MOD: Add "Keep Locally" option if Spy Mode is enabled ---
+      boolean canKeepLocally = org.thunderdog.challegram.rex.RexConfig.INSTANCE.getSaveDeletedMessages();
+      
+      if (canKeepLocally) {
+        context.showOptions(null,
+          new int[] {R.id.menu_btn_delete, R.id.btn_rexKeepLocally, R.id.btn_cancel},
+          new String[] {deleteActionMsg, Lang.getString(R.string.RexKeepLocally), Lang.getString(R.string.Cancel)},
+          new int[] {ViewController.OptionColor.RED, ViewController.OptionColor.NORMAL, ViewController.OptionColor.NORMAL},
+          new int[] {R.drawable.baseline_delete_24, R.drawable.baseline_visibility_24, R.drawable.baseline_cancel_24},
+          (itemView, id) -> {
+            if (id == R.id.menu_btn_delete) {
+              LongSparseArray<long[]> messageIds = TdExt.toMessageIdsMap(messages);
+              for (int i = 0; i < messageIds.size(); i++) {
+                tdlib.deleteMessages(messageIds.keyAt(i), messageIds.valueAt(i), false);
+              }
+              if (after != null) {
+                after.run();
+              }
+            } else if (id == R.id.btn_rexKeepLocally) {
+              // Save messages to local database before deletion
+              for (MessageWithProperties msg : messages) {
+                org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.markAsGhost(msg.message.id);
+              }
+              
+              // Delete from server
+              LongSparseArray<long[]> messageIds = TdExt.toMessageIdsMap(messages);
+              for (int i = 0; i < messageIds.size(); i++) {
+                tdlib.deleteMessages(messageIds.keyAt(i), messageIds.valueAt(i), false);
+              }
+              if (after != null) {
+                after.run();
+              }
             }
-            if (after != null) {
-              after.run();
-            }
+            return true;
           }
-          return true;
-        }
-      );
+        );
+      } else {
+        // Original code without reX option
+        context.showOptions(null,
+          new int[] {R.id.menu_btn_delete, R.id.btn_cancel},
+          new String[] {deleteActionMsg, Lang.getString(R.string.Cancel)},
+          new int[] {ViewController.OptionColor.RED, ViewController.OptionColor.NORMAL},
+          new int[] {R.drawable.baseline_delete_24, R.drawable.baseline_cancel_24},
+          (itemView, id) -> {
+            if (id == R.id.menu_btn_delete) {
+              LongSparseArray<long[]> messageIds = TdExt.toMessageIdsMap(messages);
+              for (int i = 0; i < messageIds.size(); i++) {
+                tdlib.deleteMessages(messageIds.keyAt(i), messageIds.valueAt(i), false);
+              }
+              if (after != null) {
+                after.run();
+              }
+            }
+            return true;
+          }
+        );
+      }
+      // --- END REX MOD ---
     }
   }
 
