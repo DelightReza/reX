@@ -1,0 +1,589 @@
+package org.telegram.p023ui.Components;
+
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.view.View;
+import androidx.annotation.Keep;
+import java.util.Locale;
+import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ImageLocation;
+import org.telegram.messenger.ImageReceiver;
+import org.telegram.p023ui.ActionBar.Theme;
+import org.telegram.p023ui.Components.MediaActionDrawable;
+import org.telegram.tgnet.TLObject;
+import org.telegram.tgnet.TLRPC;
+import p017j$.util.Objects;
+
+/* loaded from: classes3.dex */
+public class RadialProgress2 {
+    private int backgroundStroke;
+    private float circleCheckProgress;
+    private int circleColor;
+    private int circleColorKey;
+    private int circleCrossfadeColorKey;
+    private float circleCrossfadeColorProgress;
+    private Paint circleMiniPaint;
+    public Paint circlePaint;
+    private int circlePressedColor;
+    private int circlePressedColorKey;
+    private int circleRadius;
+    private boolean drawBackground;
+    private boolean drawMiniIcon;
+    public int iconColor;
+    public int iconColorKey;
+    private int iconPressedColor;
+    private int iconPressedColorKey;
+    public float iconScale;
+    private boolean isPressed;
+    private boolean isPressedMini;
+    private int maxIconSize;
+    public MediaActionDrawable mediaActionDrawable;
+    private Bitmap miniDrawBitmap;
+    private Canvas miniDrawCanvas;
+    private float miniIconScale;
+    private MediaActionDrawable miniMediaActionDrawable;
+    private Paint miniProgressBackgroundPaint;
+    private float overlayImageAlpha;
+    public ImageReceiver overlayImageView;
+    private Paint overlayPaint;
+    private float overrideAlpha;
+    public float overrideCircleAlpha;
+    private View parent;
+    private int progressColor;
+    public RectF progressRect;
+    private Theme.ResourcesProvider resourcesProvider;
+
+    public RadialProgress2(View view) {
+        this(view, null);
+    }
+
+    public RadialProgress2(final View view, Theme.ResourcesProvider resourcesProvider) {
+        this.progressRect = new RectF();
+        this.progressColor = -1;
+        this.overlayPaint = new Paint(1);
+        this.circlePaint = new Paint(1);
+        this.circleMiniPaint = new Paint(1);
+        this.miniIconScale = 1.0f;
+        this.circleColorKey = -1;
+        this.circleCrossfadeColorKey = -1;
+        this.circleCheckProgress = 1.0f;
+        this.circlePressedColorKey = -1;
+        this.iconColorKey = -1;
+        this.iconPressedColorKey = -1;
+        this.overrideCircleAlpha = 1.0f;
+        this.drawBackground = true;
+        this.overrideAlpha = 1.0f;
+        this.overlayImageAlpha = 1.0f;
+        this.iconScale = 1.0f;
+        this.resourcesProvider = resourcesProvider;
+        this.miniProgressBackgroundPaint = new Paint(1);
+        this.parent = view;
+        ImageReceiver imageReceiver = new ImageReceiver(view);
+        this.overlayImageView = imageReceiver;
+        imageReceiver.setInvalidateAll(true);
+        MediaActionDrawable mediaActionDrawable = new MediaActionDrawable();
+        this.mediaActionDrawable = mediaActionDrawable;
+        Objects.requireNonNull(view);
+        mediaActionDrawable.setDelegate(new MediaActionDrawable.MediaActionDrawableDelegate() { // from class: org.telegram.ui.Components.RadialProgress2$$ExternalSyntheticLambda0
+            @Override // org.telegram.ui.Components.MediaActionDrawable.MediaActionDrawableDelegate
+            public final void invalidate() {
+                view.invalidate();
+            }
+        });
+        MediaActionDrawable mediaActionDrawable2 = new MediaActionDrawable();
+        this.miniMediaActionDrawable = mediaActionDrawable2;
+        mediaActionDrawable2.setDelegate(new MediaActionDrawable.MediaActionDrawableDelegate() { // from class: org.telegram.ui.Components.RadialProgress2$$ExternalSyntheticLambda0
+            @Override // org.telegram.ui.Components.MediaActionDrawable.MediaActionDrawableDelegate
+            public final void invalidate() {
+                view.invalidate();
+            }
+        });
+        this.miniMediaActionDrawable.setMini(true);
+        this.miniMediaActionDrawable.setIcon(4, false);
+        int iM1146dp = AndroidUtilities.m1146dp(22.0f);
+        this.circleRadius = iM1146dp;
+        this.overlayImageView.setRoundRadius(iM1146dp);
+        this.overlayPaint.setColor(1677721600);
+    }
+
+    public void setResourcesProvider(Theme.ResourcesProvider resourcesProvider) {
+        this.resourcesProvider = resourcesProvider;
+    }
+
+    @Keep
+    public void setAsMini() {
+        this.mediaActionDrawable.setMini(true);
+    }
+
+    @Keep
+    public void setCircleRadius(int i) {
+        this.circleRadius = i;
+        this.overlayImageView.setRoundRadius(i);
+    }
+
+    public int getRadius() {
+        return this.circleRadius;
+    }
+
+    public void setBackgroundDrawable(Theme.MessageDrawable messageDrawable) {
+        this.mediaActionDrawable.setBackgroundDrawable(messageDrawable);
+        this.miniMediaActionDrawable.setBackgroundDrawable(messageDrawable);
+    }
+
+    @Keep
+    public void setBackgroundGradientDrawable(LinearGradient linearGradient) {
+        this.mediaActionDrawable.setBackgroundGradientDrawable(linearGradient);
+        this.miniMediaActionDrawable.setBackgroundGradientDrawable(linearGradient);
+    }
+
+    public void setImageOverlay(TLRPC.PhotoSize photoSize, TLRPC.Document document, Object obj) {
+        Locale locale = Locale.US;
+        String.format(locale, "%d_%d", Integer.valueOf(this.circleRadius * 2), Integer.valueOf(this.circleRadius * 2));
+        this.overlayImageView.setImage(ImageLocation.getForDocument(photoSize, document), String.format(locale, "%d_%d", Integer.valueOf(this.circleRadius * 2), Integer.valueOf(this.circleRadius * 2)), null, null, obj, 1);
+    }
+
+    public void setImageOverlay(TLRPC.PhotoSize photoSize, TLRPC.PhotoSize photoSize2, TLRPC.Document document, Object obj) {
+        String str = String.format(Locale.US, "%d_%d", Integer.valueOf(this.circleRadius * 2), Integer.valueOf(this.circleRadius * 2));
+        this.overlayImageView.setImage(photoSize == null ? null : ImageLocation.getForDocument(photoSize, document), str, photoSize2 != null ? ImageLocation.getForDocument(photoSize2, document) : null, str, null, 0L, null, obj, 1);
+    }
+
+    public void setImageOverlay(String str) {
+        this.overlayImageView.setImage(str, str != null ? String.format(Locale.US, "%d_%d", Integer.valueOf(this.circleRadius * 2), Integer.valueOf(this.circleRadius * 2)) : null, null, null, -1L);
+    }
+
+    public void onAttachedToWindow() {
+        this.overlayImageView.onAttachedToWindow();
+    }
+
+    public void onDetachedFromWindow() {
+        this.overlayImageView.onDetachedFromWindow();
+    }
+
+    public void setColorKeys(int i, int i2, int i3, int i4) {
+        this.circleColorKey = i;
+        this.circlePressedColorKey = i2;
+        this.iconColorKey = i3;
+        this.iconPressedColorKey = i4;
+    }
+
+    @Keep
+    public void setColors(int i, int i2, int i3, int i4) {
+        this.circleColor = i;
+        this.circlePressedColor = i2;
+        this.iconColor = i3;
+        this.iconPressedColor = i4;
+        this.circleColorKey = -1;
+        this.circlePressedColorKey = -1;
+        this.iconColorKey = -1;
+        this.iconPressedColorKey = -1;
+    }
+
+    public void setCircleCrossfadeColor(int i, float f, float f2) {
+        this.circleCrossfadeColorKey = i;
+        this.circleCrossfadeColorProgress = f;
+        this.circleCheckProgress = f2;
+        this.miniIconScale = 1.0f;
+        if (i >= 0) {
+            initMiniIcons();
+        }
+    }
+
+    public void setDrawBackground(boolean z) {
+        this.drawBackground = z;
+    }
+
+    public void setProgressRect(int i, int i2, int i3, int i4) {
+        this.progressRect.set(i, i2, i3, i4);
+    }
+
+    public void setProgressRect(float f, float f2, float f3, float f4) {
+        this.progressRect.set(f, f2, f3, f4);
+    }
+
+    public RectF getProgressRect() {
+        return this.progressRect;
+    }
+
+    public void setProgressColor(int i) {
+        this.progressColor = i;
+    }
+
+    public void setMiniProgressBackgroundColor(int i) {
+        this.miniProgressBackgroundPaint.setColor(i);
+    }
+
+    public void setProgress(float f, boolean z) {
+        if (this.drawMiniIcon) {
+            this.miniMediaActionDrawable.setProgress(f, z);
+        } else {
+            this.mediaActionDrawable.setProgress(f, z);
+        }
+    }
+
+    public float getProgress() {
+        return (this.drawMiniIcon ? this.miniMediaActionDrawable : this.mediaActionDrawable).getProgress();
+    }
+
+    private void invalidateParent() {
+        int iM1146dp = AndroidUtilities.m1146dp(2.0f);
+        View view = this.parent;
+        RectF rectF = this.progressRect;
+        int i = ((int) rectF.left) - iM1146dp;
+        int i2 = ((int) rectF.top) - iM1146dp;
+        int i3 = iM1146dp * 2;
+        view.invalidate(i, i2, ((int) rectF.right) + i3, ((int) rectF.bottom) + i3);
+    }
+
+    public int getIcon() {
+        return this.mediaActionDrawable.getCurrentIcon();
+    }
+
+    public int getMiniIcon() {
+        return this.miniMediaActionDrawable.getCurrentIcon();
+    }
+
+    @Keep
+    public void setIcon(int i, boolean z, boolean z2) {
+        if (z && i == this.mediaActionDrawable.getCurrentIcon()) {
+            return;
+        }
+        this.mediaActionDrawable.setIcon(i, z2);
+        if (!z2) {
+            this.parent.invalidate();
+        } else {
+            invalidateParent();
+        }
+    }
+
+    public void setMiniIconScale(float f) {
+        this.miniIconScale = f;
+    }
+
+    public void setMiniIcon(int i, boolean z, boolean z2) {
+        if (i == 2 || i == 3 || i == 4) {
+            if (z && i == this.miniMediaActionDrawable.getCurrentIcon()) {
+                return;
+            }
+            this.miniMediaActionDrawable.setIcon(i, z2);
+            boolean z3 = i != 4 || this.miniMediaActionDrawable.getTransitionProgress() < 1.0f;
+            this.drawMiniIcon = z3;
+            if (z3) {
+                initMiniIcons();
+            }
+            if (!z2) {
+                this.parent.invalidate();
+            } else {
+                invalidateParent();
+            }
+        }
+    }
+
+    public void initMiniIcons() {
+        if (this.miniDrawBitmap == null) {
+            try {
+                this.miniDrawBitmap = Bitmap.createBitmap(AndroidUtilities.m1146dp(48.0f), AndroidUtilities.m1146dp(48.0f), Bitmap.Config.ARGB_8888);
+                this.miniDrawCanvas = new Canvas(this.miniDrawBitmap);
+            } catch (Throwable unused) {
+            }
+        }
+    }
+
+    public void setPressed(boolean z, boolean z2) {
+        if (z2) {
+            this.isPressedMini = z;
+        } else {
+            this.isPressed = z;
+        }
+        invalidateParent();
+    }
+
+    public void setOverrideAlpha(float f) {
+        this.overrideAlpha = f;
+    }
+
+    public float getOverrideAlpha() {
+        return this.overrideAlpha;
+    }
+
+    @Keep
+    public void draw(Canvas canvas) {
+        float transitionProgress;
+        float transitionProgress2;
+        int themedColor;
+        int iCeil;
+        int iCeil2;
+        float f;
+        boolean z;
+        int iSave;
+        float fCenterX;
+        float fCenterY;
+        int i;
+        int i2;
+        float transitionProgress3;
+        int iSave2;
+        Canvas canvas2;
+        Canvas canvas3;
+        Canvas canvas4;
+        int iArgb;
+        if ((this.mediaActionDrawable.getCurrentIcon() != 4 || this.mediaActionDrawable.getTransitionProgress() < 1.0f) && !this.progressRect.isEmpty()) {
+            int currentIcon = this.mediaActionDrawable.getCurrentIcon();
+            int previousIcon = this.mediaActionDrawable.getPreviousIcon();
+            if (this.backgroundStroke != 0) {
+                if (currentIcon == 3) {
+                    transitionProgress2 = this.mediaActionDrawable.getTransitionProgress();
+                    transitionProgress = 1.0f - transitionProgress2;
+                } else {
+                    transitionProgress = previousIcon == 3 ? this.mediaActionDrawable.getTransitionProgress() : 1.0f;
+                }
+            } else if ((currentIcon == 3 || currentIcon == 6 || currentIcon == 10 || currentIcon == 8 || currentIcon == 0) && previousIcon == 4) {
+                transitionProgress = this.mediaActionDrawable.getTransitionProgress();
+            } else {
+                if (currentIcon == 4) {
+                    transitionProgress2 = this.mediaActionDrawable.getTransitionProgress();
+                    transitionProgress = 1.0f - transitionProgress2;
+                }
+            }
+            if (this.isPressedMini && this.circleCrossfadeColorKey < 0) {
+                int i3 = this.iconPressedColorKey;
+                if (i3 >= 0) {
+                    this.miniMediaActionDrawable.setColor(getThemedColor(i3));
+                } else {
+                    this.miniMediaActionDrawable.setColor(this.iconPressedColor);
+                }
+                int i4 = this.circlePressedColorKey;
+                if (i4 >= 0) {
+                    this.circleMiniPaint.setColor(getThemedColor(i4));
+                } else {
+                    this.circleMiniPaint.setColor(this.circlePressedColor);
+                }
+            } else {
+                int i5 = this.iconColorKey;
+                if (i5 >= 0) {
+                    this.miniMediaActionDrawable.setColor(getThemedColor(i5));
+                } else {
+                    this.miniMediaActionDrawable.setColor(this.iconColor);
+                }
+                int i6 = this.circleColorKey;
+                if (i6 >= 0) {
+                    if (this.circleCrossfadeColorKey >= 0) {
+                        this.circleMiniPaint.setColor(AndroidUtilities.getOffsetColor(getThemedColor(i6), getThemedColor(this.circleCrossfadeColorKey), this.circleCrossfadeColorProgress, this.circleCheckProgress));
+                    } else {
+                        this.circleMiniPaint.setColor(getThemedColor(i6));
+                    }
+                } else {
+                    this.circleMiniPaint.setColor(this.circleColor);
+                }
+            }
+            if (this.isPressed) {
+                int i7 = this.iconPressedColorKey;
+                if (i7 >= 0) {
+                    MediaActionDrawable mediaActionDrawable = this.mediaActionDrawable;
+                    themedColor = getThemedColor(i7);
+                    mediaActionDrawable.setColor(themedColor);
+                    this.mediaActionDrawable.setBackColor(getThemedColor(this.circlePressedColorKey));
+                } else {
+                    MediaActionDrawable mediaActionDrawable2 = this.mediaActionDrawable;
+                    int i8 = this.iconPressedColor;
+                    mediaActionDrawable2.setColor(i8);
+                    this.mediaActionDrawable.setBackColor(this.circlePressedColor);
+                    themedColor = i8;
+                }
+                int i9 = this.circlePressedColorKey;
+                if (i9 >= 0) {
+                    this.circlePaint.setColor(getThemedColor(i9));
+                } else {
+                    this.circlePaint.setColor(this.circlePressedColor);
+                }
+            } else {
+                int i10 = this.iconColorKey;
+                if (i10 >= 0) {
+                    MediaActionDrawable mediaActionDrawable3 = this.mediaActionDrawable;
+                    themedColor = getThemedColor(i10);
+                    mediaActionDrawable3.setColor(themedColor);
+                    this.mediaActionDrawable.setBackColor(getThemedColor(this.circleColorKey));
+                } else {
+                    MediaActionDrawable mediaActionDrawable4 = this.mediaActionDrawable;
+                    int i11 = this.iconColor;
+                    mediaActionDrawable4.setColor(i11);
+                    this.mediaActionDrawable.setBackColor(this.circleColor);
+                    themedColor = i11;
+                }
+                int i12 = this.circleColorKey;
+                if (i12 >= 0) {
+                    this.circlePaint.setColor(getThemedColor(i12));
+                } else {
+                    this.circlePaint.setColor(this.circleColor);
+                }
+            }
+            if ((this.drawMiniIcon || this.circleCrossfadeColorKey >= 0) && this.miniDrawCanvas != null) {
+                this.miniDrawBitmap.eraseColor(0);
+            }
+            this.circlePaint.setAlpha((int) (this.circlePaint.getAlpha() * transitionProgress * this.overrideAlpha * this.overrideCircleAlpha));
+            this.circleMiniPaint.setAlpha((int) (this.circleMiniPaint.getAlpha() * transitionProgress * this.overrideAlpha));
+            if ((this.drawMiniIcon || this.circleCrossfadeColorKey >= 0) && this.miniDrawCanvas != null) {
+                iCeil = (int) Math.ceil(this.progressRect.width() / 2.0f);
+                iCeil2 = (int) Math.ceil(this.progressRect.height() / 2.0f);
+            } else {
+                iCeil = (int) this.progressRect.centerX();
+                iCeil2 = (int) this.progressRect.centerY();
+            }
+            if (this.overlayImageView.hasBitmapImage()) {
+                float currentAlpha = this.overlayImageView.getCurrentAlpha();
+                this.overlayPaint.setAlpha((int) (100.0f * currentAlpha * transitionProgress * this.overrideAlpha));
+                if (currentAlpha >= 1.0f) {
+                    iArgb = -1;
+                    z = false;
+                    f = 1.0f;
+                } else {
+                    int iRed = Color.red(themedColor);
+                    int iGreen = Color.green(themedColor);
+                    int iBlue = Color.blue(themedColor);
+                    f = 1.0f;
+                    iArgb = Color.argb(Color.alpha(themedColor) + ((int) ((255 - r6) * currentAlpha)), iRed + ((int) ((255 - iRed) * currentAlpha)), iGreen + ((int) ((255 - iGreen) * currentAlpha)), iBlue + ((int) ((255 - iBlue) * currentAlpha)));
+                    z = true;
+                }
+                this.mediaActionDrawable.setColor(iArgb);
+                ImageReceiver imageReceiver = this.overlayImageView;
+                int i13 = this.circleRadius;
+                imageReceiver.setImageCoords(iCeil - i13, iCeil2 - i13, i13 * 2, i13 * 2);
+            } else {
+                f = 1.0f;
+                z = true;
+            }
+            Canvas canvas5 = this.miniDrawCanvas;
+            if (canvas5 == null || this.circleCrossfadeColorKey < 0 || this.circleCheckProgress == f) {
+                iSave = TLObject.FLAG_31;
+            } else {
+                iSave = canvas5.save();
+                float f2 = f - ((f - this.circleCheckProgress) * 0.1f);
+                this.miniDrawCanvas.scale(f2, f2, iCeil, iCeil2);
+            }
+            if (z && this.drawBackground) {
+                if ((this.drawMiniIcon || this.circleCrossfadeColorKey >= 0) && (canvas4 = this.miniDrawCanvas) != null) {
+                    canvas4.drawCircle(iCeil, iCeil2, this.circleRadius, this.circlePaint);
+                } else if (currentIcon != 4 || transitionProgress != 0.0f) {
+                    if (this.backgroundStroke != 0) {
+                        canvas.drawCircle(iCeil, iCeil2, this.circleRadius - AndroidUtilities.m1146dp(3.5f), this.circlePaint);
+                    } else {
+                        canvas.drawCircle(iCeil, iCeil2, this.circleRadius, this.circlePaint);
+                    }
+                }
+            }
+            if (this.overlayImageView.hasBitmapImage()) {
+                this.overlayImageView.setAlpha(transitionProgress * this.overrideAlpha * this.overlayImageAlpha);
+                if ((this.drawMiniIcon || this.circleCrossfadeColorKey >= 0) && (canvas3 = this.miniDrawCanvas) != null) {
+                    this.overlayImageView.draw(canvas3);
+                    this.miniDrawCanvas.drawCircle(iCeil, iCeil2, this.circleRadius, this.overlayPaint);
+                } else {
+                    this.overlayImageView.draw(canvas);
+                    canvas.drawCircle(iCeil, iCeil2, this.circleRadius, this.overlayPaint);
+                }
+            }
+            int i14 = this.circleRadius;
+            int i15 = this.maxIconSize;
+            if (i15 > 0 && i14 > i15) {
+                i14 = i15;
+            }
+            if (this.iconScale != f) {
+                canvas.save();
+                float f3 = this.iconScale;
+                canvas.scale(f3, f3, iCeil, iCeil2);
+            }
+            this.mediaActionDrawable.setBounds(iCeil - i14, iCeil2 - i14, iCeil + i14, iCeil2 + i14);
+            this.mediaActionDrawable.setHasOverlayImage(this.overlayImageView.hasBitmapImage());
+            if (this.drawMiniIcon || this.circleCrossfadeColorKey >= 0) {
+                Canvas canvas6 = this.miniDrawCanvas;
+                if (canvas6 != null) {
+                    this.mediaActionDrawable.draw(canvas6);
+                } else {
+                    this.mediaActionDrawable.draw(canvas);
+                }
+            } else {
+                this.mediaActionDrawable.setOverrideAlpha(this.overrideAlpha);
+                this.mediaActionDrawable.draw(canvas);
+            }
+            if (iSave != Integer.MIN_VALUE && (canvas2 = this.miniDrawCanvas) != null) {
+                canvas2.restoreToCount(iSave);
+            }
+            if (this.drawMiniIcon || this.circleCrossfadeColorKey >= 0) {
+                if (Math.abs(this.progressRect.width() - AndroidUtilities.m1146dp(44.0f)) < AndroidUtilities.density) {
+                    float f4 = 16;
+                    fCenterX = this.progressRect.centerX() + AndroidUtilities.m1146dp(f4);
+                    fCenterY = this.progressRect.centerY() + AndroidUtilities.m1146dp(f4);
+                    i = 20;
+                    i2 = 0;
+                } else {
+                    fCenterX = this.progressRect.centerX() + AndroidUtilities.m1146dp(18.0f);
+                    fCenterY = this.progressRect.centerY() + AndroidUtilities.m1146dp(18.0f);
+                    i = 22;
+                    i2 = 2;
+                }
+                int i16 = i / 2;
+                if (this.drawMiniIcon) {
+                    transitionProgress3 = this.miniMediaActionDrawable.getCurrentIcon() != 4 ? 1.0f : f - this.miniMediaActionDrawable.getTransitionProgress();
+                    if (transitionProgress3 == 0.0f) {
+                        this.drawMiniIcon = false;
+                    }
+                } else {
+                    transitionProgress3 = 1.0f;
+                }
+                Canvas canvas7 = this.miniDrawCanvas;
+                if (canvas7 != null) {
+                    float f5 = i + 18 + i2;
+                    canvas7.drawCircle(AndroidUtilities.m1146dp(f5), AndroidUtilities.m1146dp(f5), AndroidUtilities.m1146dp(i16 + 1) * transitionProgress3 * this.miniIconScale, Theme.checkboxSquare_eraserPaint);
+                } else {
+                    this.miniProgressBackgroundPaint.setColor(this.progressColor);
+                    canvas.drawCircle(fCenterX, fCenterY, AndroidUtilities.m1146dp(12.0f), this.miniProgressBackgroundPaint);
+                }
+                if (this.miniDrawCanvas != null) {
+                    Bitmap bitmap = this.miniDrawBitmap;
+                    RectF rectF = this.progressRect;
+                    canvas.drawBitmap(bitmap, (int) rectF.left, (int) rectF.top, (Paint) null);
+                }
+                if (this.miniIconScale < f) {
+                    iSave2 = canvas.save();
+                    float f6 = this.miniIconScale;
+                    canvas.scale(f6, f6, fCenterX, fCenterY);
+                } else {
+                    iSave2 = TLObject.FLAG_31;
+                }
+                float f7 = i16;
+                canvas.drawCircle(fCenterX, fCenterY, (AndroidUtilities.m1146dp(f7) * transitionProgress3) + (AndroidUtilities.m1146dp(f) * (f - this.circleCheckProgress)), this.circleMiniPaint);
+                if (this.drawMiniIcon) {
+                    this.miniMediaActionDrawable.setBounds((int) (fCenterX - (AndroidUtilities.m1146dp(f7) * transitionProgress3)), (int) (fCenterY - (AndroidUtilities.m1146dp(f7) * transitionProgress3)), (int) (fCenterX + (AndroidUtilities.m1146dp(f7) * transitionProgress3)), (int) (fCenterY + (AndroidUtilities.m1146dp(f7) * transitionProgress3)));
+                    this.miniMediaActionDrawable.draw(canvas);
+                }
+                if (iSave2 != Integer.MIN_VALUE) {
+                    canvas.restoreToCount(iSave2);
+                }
+            }
+            if (this.iconScale != f) {
+                canvas.restore();
+            }
+        }
+    }
+
+    public int getCircleColorKey() {
+        return this.circleColorKey;
+    }
+
+    private int getThemedColor(int i) {
+        return Theme.getColor(i, this.resourcesProvider);
+    }
+
+    public void setMaxIconSize(int i) {
+        this.maxIconSize = i;
+    }
+
+    public void setOverlayImageAlpha(float f) {
+        this.overlayImageAlpha = f;
+    }
+
+    public float getTransitionProgress() {
+        return (this.drawMiniIcon ? this.miniMediaActionDrawable : this.mediaActionDrawable).getTransitionProgress();
+    }
+}

@@ -1,0 +1,647 @@
+package org.telegram.p023ui.Stories;
+
+import android.R;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.LinearGradient;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Shader;
+import android.graphics.drawable.Drawable;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.animation.LinearInterpolator;
+import android.widget.FrameLayout;
+import java.util.ArrayList;
+import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.VideoEditedInfo;
+import org.telegram.p023ui.ActionBar.BaseFragment;
+import org.telegram.p023ui.ActionBar.Theme;
+import org.telegram.p023ui.Components.AnimatedFloat;
+import org.telegram.p023ui.Components.ButtonBounce;
+import org.telegram.p023ui.Components.CubicBezierInterpolator;
+import org.telegram.p023ui.Components.Paint.Views.LocationMarker;
+import org.telegram.p023ui.Components.ScaleStateListAnimator;
+import org.telegram.p023ui.Components.Shaker$$ExternalSyntheticLambda0;
+import org.telegram.p023ui.EmojiAnimationsOverlay;
+import org.telegram.p023ui.Stories.recorder.HintView2;
+import org.telegram.p023ui.Stories.recorder.StoryEntry;
+import org.telegram.p023ui.Stories.recorder.Weather;
+import org.telegram.tgnet.TLObject;
+import org.telegram.tgnet.p022tl.TL_stories;
+import p017j$.util.Objects;
+
+/* loaded from: classes6.dex */
+public abstract class StoryMediaAreasView extends FrameLayout implements View.OnClickListener {
+    private final Path clipPath;
+    private final Paint cutPaint;
+    private HintView2 hintView;
+    private final FrameLayout hintsContainer;
+    private ArrayList lastMediaAreas;
+    private AreaView lastSelectedArea;
+    private boolean malicious;
+    Matrix matrix;
+    private Bitmap parentBitmap;
+    public final AnimatedFloat parentHighlightAlpha;
+    public final AnimatedFloat parentHighlightScaleAlpha;
+    private View parentView;
+    float[] point;
+    private final float[] radii;
+    private final Rect rect;
+    private final RectF rectF;
+    private Theme.ResourcesProvider resourcesProvider;
+    private AreaView selectedArea;
+    private boolean shined;
+
+    protected Bitmap getPlayingBitmap() {
+        return null;
+    }
+
+    protected abstract void onHintVisible(boolean z);
+
+    protected abstract void presentFragment(BaseFragment baseFragment);
+
+    public abstract void showEffect(StoryReactionWidgetView storyReactionWidgetView);
+
+    public StoryMediaAreasView(Context context, View view, Theme.ResourcesProvider resourcesProvider) {
+        super(context);
+        this.lastSelectedArea = null;
+        this.selectedArea = null;
+        this.hintView = null;
+        this.matrix = new Matrix();
+        this.point = new float[2];
+        this.rect = new Rect();
+        this.rectF = new RectF();
+        Paint paint = new Paint(1);
+        this.cutPaint = paint;
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
+        paint.setColor(-1);
+        this.clipPath = new Path();
+        this.radii = new float[8];
+        this.shined = false;
+        this.parentView = view;
+        this.resourcesProvider = resourcesProvider;
+        this.parentHighlightAlpha = new AnimatedFloat(view, 0L, 120L, new LinearInterpolator());
+        this.parentHighlightScaleAlpha = new AnimatedFloat(view, 0L, 360L, CubicBezierInterpolator.EASE_OUT_QUINT);
+        setClipChildren(false);
+        FrameLayout frameLayout = new FrameLayout(context);
+        this.hintsContainer = frameLayout;
+        addView(frameLayout);
+        setLayerType(2, null);
+    }
+
+    public static ArrayList getMediaAreasFor(StoryEntry storyEntry) {
+        if (storyEntry == null || storyEntry.mediaEntities == null) {
+            return null;
+        }
+        ArrayList arrayList = new ArrayList();
+        for (int i = 0; i < storyEntry.mediaEntities.size(); i++) {
+            if (((VideoEditedInfo.MediaEntity) storyEntry.mediaEntities.get(i)).mediaArea instanceof TL_stories.TL_mediaAreaSuggestedReaction) {
+                arrayList.add(((VideoEditedInfo.MediaEntity) storyEntry.mediaEntities.get(i)).mediaArea);
+            }
+        }
+        return arrayList;
+    }
+
+    public void set(TL_stories.StoryItem storyItem, EmojiAnimationsOverlay emojiAnimationsOverlay) {
+        set(storyItem, storyItem != null ? storyItem.media_areas : null, emojiAnimationsOverlay);
+    }
+
+    public void set(TL_stories.StoryItem storyItem, ArrayList arrayList, EmojiAnimationsOverlay emojiAnimationsOverlay) {
+        View areaView;
+        ArrayList arrayList2 = this.lastMediaAreas;
+        if (arrayList == arrayList2 && (arrayList == null || arrayList2 == null || arrayList.size() == this.lastMediaAreas.size())) {
+            return;
+        }
+        HintView2 hintView2 = this.hintView;
+        if (hintView2 != null) {
+            hintView2.hide();
+            this.hintView = null;
+        }
+        int i = 0;
+        while (i < getChildCount()) {
+            View childAt = getChildAt(i);
+            if (childAt != this.hintsContainer) {
+                removeView(childAt);
+                i--;
+            }
+            i++;
+        }
+        this.selectedArea = null;
+        this.parentHighlightScaleAlpha.set(0.0f, true);
+        invalidate();
+        onHintVisible(false);
+        this.malicious = false;
+        this.lastMediaAreas = arrayList;
+        if (arrayList == null) {
+            return;
+        }
+        this.shined = false;
+        for (int i2 = 0; i2 < arrayList.size(); i2++) {
+            TL_stories.MediaArea mediaArea = (TL_stories.MediaArea) arrayList.get(i2);
+            if (mediaArea != null && mediaArea.coordinates != null) {
+                if (mediaArea instanceof TL_stories.TL_mediaAreaSuggestedReaction) {
+                    StoryReactionWidgetView storyReactionWidgetView = new StoryReactionWidgetView(getContext(), this, (TL_stories.TL_mediaAreaSuggestedReaction) mediaArea, emojiAnimationsOverlay);
+                    if (storyItem != null) {
+                        storyReactionWidgetView.setViews(storyItem.views, false);
+                    }
+                    ScaleStateListAnimator.apply(storyReactionWidgetView);
+                    areaView = storyReactionWidgetView;
+                } else if (mediaArea instanceof TL_stories.TL_mediaAreaWeather) {
+                    TL_stories.TL_mediaAreaWeather tL_mediaAreaWeather = (TL_stories.TL_mediaAreaWeather) mediaArea;
+                    Weather.State state = new Weather.State();
+                    state.emoji = tL_mediaAreaWeather.emoji;
+                    state.temperature = (float) tL_mediaAreaWeather.temperature_c;
+                    LocationMarker locationMarker = new LocationMarker(getContext(), 1, AndroidUtilities.density, 0);
+                    locationMarker.setMaxWidth(AndroidUtilities.displaySize.x);
+                    locationMarker.setIsVideo(true);
+                    locationMarker.setCodeEmoji(UserConfig.selectedAccount, state.getEmoji());
+                    locationMarker.setText(state.getTemperature());
+                    locationMarker.setType(3, tL_mediaAreaWeather.color);
+                    areaView = new FitViewWidget(getContext(), locationMarker, mediaArea);
+                } else {
+                    areaView = new AreaView(getContext(), this.parentView, mediaArea);
+                }
+                areaView.setOnClickListener(this);
+                addView(areaView);
+                TL_stories.MediaAreaCoordinates mediaAreaCoordinates = mediaArea.coordinates;
+                double d = mediaAreaCoordinates.f1762w;
+                double d2 = mediaAreaCoordinates.f1761h;
+            }
+        }
+        this.malicious = false;
+        this.hintsContainer.bringToFront();
+    }
+
+    @Override // android.widget.FrameLayout, android.view.View
+    protected void onMeasure(int i, int i2) {
+        int size = View.MeasureSpec.getSize(i);
+        int size2 = View.MeasureSpec.getSize(i2);
+        for (int i3 = 0; i3 < getChildCount(); i3++) {
+            View childAt = getChildAt(i3);
+            FrameLayout frameLayout = this.hintsContainer;
+            if (childAt == frameLayout) {
+                frameLayout.measure(View.MeasureSpec.makeMeasureSpec(size, TLObject.FLAG_30), View.MeasureSpec.makeMeasureSpec(size2, TLObject.FLAG_30));
+            } else if (childAt instanceof AreaView) {
+                AreaView areaView = (AreaView) getChildAt(i3);
+                areaView.measure(View.MeasureSpec.makeMeasureSpec((int) Math.ceil((areaView.mediaArea.coordinates.f1762w / 100.0d) * size), TLObject.FLAG_30), View.MeasureSpec.makeMeasureSpec((int) Math.ceil((areaView.mediaArea.coordinates.f1761h / 100.0d) * size2), TLObject.FLAG_30));
+            } else if (childAt instanceof FitViewWidget) {
+                FitViewWidget fitViewWidget = (FitViewWidget) getChildAt(i3);
+                fitViewWidget.measure(View.MeasureSpec.makeMeasureSpec((int) Math.ceil((fitViewWidget.mediaArea.coordinates.f1762w / 100.0d) * size), TLObject.FLAG_30), View.MeasureSpec.makeMeasureSpec((int) Math.ceil((fitViewWidget.mediaArea.coordinates.f1761h / 100.0d) * size2), TLObject.FLAG_30));
+            }
+        }
+        setMeasuredDimension(size, size2);
+    }
+
+    /* JADX WARN: Removed duplicated region for block: B:54:0x0219  */
+    /* JADX WARN: Removed duplicated region for block: B:55:0x021c  */
+    /* JADX WARN: Removed duplicated region for block: B:58:0x0225  */
+    /* JADX WARN: Removed duplicated region for block: B:60:0x022a  */
+    /* JADX WARN: Removed duplicated region for block: B:63:0x024e  */
+    /* JADX WARN: Removed duplicated region for block: B:64:0x0251  */
+    /* JADX WARN: Removed duplicated region for block: B:67:0x025a  */
+    /* JADX WARN: Removed duplicated region for block: B:69:0x025f  */
+    /* JADX WARN: Removed duplicated region for block: B:72:0x027a  */
+    /* JADX WARN: Removed duplicated region for block: B:75:0x028b  */
+    /* JADX WARN: Removed duplicated region for block: B:76:0x028e  */
+    /* JADX WARN: Removed duplicated region for block: B:79:0x02a8  */
+    /* JADX WARN: Removed duplicated region for block: B:81:0x02ab  */
+    /* JADX WARN: Removed duplicated region for block: B:82:0x02ad  */
+    /* JADX WARN: Removed duplicated region for block: B:93:0x030c  */
+    /* JADX WARN: Removed duplicated region for block: B:94:0x030e  */
+    /* JADX WARN: Removed duplicated region for block: B:95:0x0322  */
+    @Override // android.view.View.OnClickListener
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    public void onClick(android.view.View r19) {
+        /*
+            Method dump skipped, instructions count: 870
+            To view this dump add '--comments-level debug' option
+        */
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.p023ui.Stories.StoryMediaAreasView.onClick(android.view.View):void");
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public /* synthetic */ void lambda$onClick$0() {
+        HintView2 hintView2 = this.hintView;
+        if (hintView2 != null) {
+            hintView2.hide();
+            this.hintView = null;
+        }
+        onHintVisible(false);
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public /* synthetic */ void lambda$onClick$1(HintView2 hintView2) {
+        this.hintsContainer.removeView(hintView2);
+        if (hintView2 == this.hintView) {
+            this.selectedArea = null;
+            invalidate();
+            onHintVisible(false);
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public /* synthetic */ void lambda$onClick$2(View view) {
+        onClick(this.selectedArea);
+    }
+
+    public void closeHint() {
+        HintView2 hintView2 = this.hintView;
+        if (hintView2 != null) {
+            hintView2.hide();
+            this.hintView = null;
+        }
+        this.selectedArea = null;
+        invalidate();
+        onHintVisible(false);
+    }
+
+    @Override // android.view.View
+    public boolean onTouchEvent(MotionEvent motionEvent) {
+        HintView2 hintView2;
+        if (getChildCount() == 0 || (hintView2 = this.hintView) == null || !hintView2.shown()) {
+            return false;
+        }
+        if (motionEvent.getAction() == 1) {
+            onClickAway();
+        }
+        super.onTouchEvent(motionEvent);
+        return true;
+    }
+
+    private void onClickAway() {
+        HintView2 hintView2 = this.hintView;
+        if (hintView2 != null) {
+            hintView2.hide();
+            this.hintView = null;
+        }
+        this.selectedArea = null;
+        invalidate();
+        onHintVisible(false);
+        if (this.malicious) {
+            for (int i = 0; i < getChildCount(); i++) {
+                View childAt = getChildAt(i);
+                if (childAt != this.hintsContainer) {
+                    childAt.setClickable(false);
+                }
+            }
+        }
+    }
+
+    @Override // android.widget.FrameLayout, android.view.ViewGroup, android.view.View
+    protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
+        for (int i5 = 0; i5 < getChildCount(); i5++) {
+            View childAt = getChildAt(i5);
+            if (childAt == this.hintsContainer) {
+                childAt.layout(0, 0, i3 - i, i4 - i2);
+            } else if (childAt instanceof AreaView) {
+                AreaView areaView = (AreaView) childAt;
+                int measuredWidth = areaView.getMeasuredWidth();
+                int measuredHeight = areaView.getMeasuredHeight();
+                areaView.layout((-measuredWidth) / 2, (-measuredHeight) / 2, measuredWidth / 2, measuredHeight / 2);
+                areaView.setTranslationX((float) ((areaView.mediaArea.coordinates.f1763x / 100.0d) * getMeasuredWidth()));
+                areaView.setTranslationY((float) ((areaView.mediaArea.coordinates.f1764y / 100.0d) * getMeasuredHeight()));
+                areaView.setRotation((float) areaView.mediaArea.coordinates.rotation);
+            } else if (childAt instanceof FitViewWidget) {
+                FitViewWidget fitViewWidget = (FitViewWidget) childAt;
+                int measuredWidth2 = fitViewWidget.getMeasuredWidth();
+                int measuredHeight2 = fitViewWidget.getMeasuredHeight();
+                fitViewWidget.layout((-measuredWidth2) / 2, (-measuredHeight2) / 2, measuredWidth2 / 2, measuredHeight2 / 2);
+                fitViewWidget.setTranslationX((float) ((fitViewWidget.mediaArea.coordinates.f1763x / 100.0d) * getMeasuredWidth()));
+                fitViewWidget.setTranslationY((float) ((fitViewWidget.mediaArea.coordinates.f1764y / 100.0d) * getMeasuredHeight()));
+                fitViewWidget.setRotation((float) fitViewWidget.mediaArea.coordinates.rotation);
+            }
+        }
+    }
+
+    @Override // android.view.ViewGroup
+    protected boolean drawChild(Canvas canvas, View view, long j) {
+        if (view == this.hintsContainer) {
+            drawHighlight(canvas);
+        } else if (view instanceof AreaView) {
+            canvas.save();
+            canvas.translate(view.getLeft(), view.getTop());
+            canvas.concat(view.getMatrix());
+            ((AreaView) view).customDraw(canvas);
+            canvas.restore();
+        }
+        return super.drawChild(canvas, view, j);
+    }
+
+    /* JADX WARN: Removed duplicated region for block: B:32:0x00dc  */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    private void drawHighlight(android.graphics.Canvas r18) {
+        /*
+            Method dump skipped, instructions count: 595
+            To view this dump add '--comments-level debug' option
+        */
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.p023ui.Stories.StoryMediaAreasView.drawHighlight(android.graphics.Canvas):void");
+    }
+
+    @Override // android.view.ViewGroup, android.view.View
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        Bitmap bitmap = this.parentBitmap;
+        if (bitmap != null) {
+            bitmap.recycle();
+            this.parentBitmap = null;
+        }
+    }
+
+    public void shine() {
+        if (this.shined) {
+            return;
+        }
+        this.shined = true;
+        for (int i = 0; i < getChildCount(); i++) {
+            View childAt = getChildAt(i);
+            if (childAt instanceof AreaView) {
+                ((AreaView) childAt).shine();
+            }
+        }
+    }
+
+    public boolean hasSelected() {
+        return this.selectedArea != null;
+    }
+
+    public boolean hasSelectedForScale() {
+        AreaView areaView = this.selectedArea;
+        if (areaView != null) {
+            return areaView.scaleOnTap || this.selectedArea.supportsBounds;
+        }
+        return false;
+    }
+
+    public boolean hasAreaAboveAt(float f, float f2) {
+        float f3;
+        float f4;
+        int i = 0;
+        while (i < getChildCount()) {
+            View childAt = getChildAt(i);
+            if (childAt instanceof StoryReactionWidgetView) {
+                f3 = f;
+                f4 = f2;
+                if (rotatedRectContainsPoint(childAt.getTranslationX(), childAt.getTranslationY(), childAt.getMeasuredWidth(), childAt.getMeasuredHeight(), childAt.getRotation(), f3, f4)) {
+                    return true;
+                }
+            } else {
+                f3 = f;
+                f4 = f2;
+            }
+            i++;
+            f = f3;
+            f2 = f4;
+        }
+        return false;
+    }
+
+    private static boolean rotatedRectContainsPoint(float f, float f2, float f3, float f4, float f5, float f6, float f7) {
+        float f8 = f6 - f;
+        double radians = Math.toRadians(-f5);
+        double d = f8;
+        double d2 = f7 - f2;
+        float fCos = (float) ((Math.cos(radians) * d) - (Math.sin(radians) * d2));
+        float fSin = (float) ((d * Math.sin(radians)) + (d2 * Math.cos(radians)));
+        return fCos >= (-f3) / 2.0f && fCos <= f3 / 2.0f && fSin >= (-f4) / 2.0f && fSin <= f4 / 2.0f;
+    }
+
+    public void onStoryItemUpdated(TL_stories.StoryItem storyItem, boolean z) {
+        if (storyItem == null) {
+            return;
+        }
+        for (int i = 0; i < getChildCount(); i++) {
+            if (getChildAt(i) instanceof StoryReactionWidgetView) {
+                ((StoryReactionWidgetView) getChildAt(i)).setViews(storyItem.views, z);
+            }
+        }
+    }
+
+    public boolean hasClickableViews(float f, float f2) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View childAt = getChildAt(i);
+            if (childAt != this.hintsContainer && (childAt instanceof StoryReactionWidgetView)) {
+                childAt.getMatrix().invert(this.matrix);
+                float[] fArr = this.point;
+                fArr[0] = f;
+                fArr[1] = f2;
+                this.matrix.mapPoints(fArr);
+                if (this.point[0] >= childAt.getLeft() && this.point[0] <= childAt.getRight() && this.point[1] >= childAt.getTop() && this.point[1] <= childAt.getBottom()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static class AreaView extends View {
+        public final ButtonBounce bounce;
+        private boolean bounceOnTap;
+        private final Path clipPath;
+        private LinearGradient gradient;
+        private final Matrix gradientMatrix;
+        private final Paint gradientPaint;
+        public final AnimatedFloat highlightAlpha;
+        public final TL_stories.MediaArea mediaArea;
+        private boolean ripple;
+        private final Drawable rippleDrawable;
+        private boolean scaleOnTap;
+        private final Runnable shineRunnable;
+        private boolean shining;
+        private long startTime;
+        private LinearGradient strokeGradient;
+        private final Paint strokeGradientPaint;
+        private boolean supportsBounds;
+        private boolean supportsShining;
+
+        public void customDraw(Canvas canvas) {
+        }
+
+        public AreaView(Context context, View view, TL_stories.MediaArea mediaArea) {
+            super(context);
+            boolean z = true;
+            this.gradientPaint = new Paint(1);
+            Paint paint = new Paint(1);
+            this.strokeGradientPaint = paint;
+            this.gradientMatrix = new Matrix();
+            Drawable drawableCreateSelectorDrawable = Theme.createSelectorDrawable(1174405119, 2);
+            this.rippleDrawable = drawableCreateSelectorDrawable;
+            this.bounce = new ButtonBounce(this);
+            this.supportsBounds = false;
+            this.supportsShining = false;
+            this.shining = false;
+            this.clipPath = new Path();
+            this.shineRunnable = new Runnable() { // from class: org.telegram.ui.Stories.StoryMediaAreasView$AreaView$$ExternalSyntheticLambda0
+                @Override // java.lang.Runnable
+                public final void run() {
+                    this.f$0.shineInternal();
+                }
+            };
+            this.mediaArea = mediaArea;
+            boolean z2 = mediaArea instanceof TL_stories.TL_mediaAreaGeoPoint;
+            this.supportsBounds = z2 || (mediaArea instanceof TL_stories.TL_mediaAreaVenue) || (mediaArea instanceof TL_stories.TL_mediaAreaUrl);
+            this.supportsShining = z2 || (mediaArea instanceof TL_stories.TL_mediaAreaVenue);
+            if (!z2 && !(mediaArea instanceof TL_stories.TL_mediaAreaVenue) && (mediaArea.coordinates.flags & 1) == 0) {
+                z = false;
+            }
+            this.scaleOnTap = z;
+            this.ripple = z;
+            this.bounceOnTap = z;
+            this.highlightAlpha = new AnimatedFloat(view, 0L, 120L, new LinearInterpolator());
+            paint.setStyle(Paint.Style.STROKE);
+            drawableCreateSelectorDrawable.setCallback(this);
+        }
+
+        @Override // android.view.View
+        public boolean dispatchTouchEvent(MotionEvent motionEvent) {
+            if (motionEvent.getAction() == 0) {
+                if (getParent() instanceof View) {
+                    ButtonBounce buttonBounce = this.bounce;
+                    View view = (View) getParent();
+                    Objects.requireNonNull(view);
+                    buttonBounce.setAdditionalInvalidate(new Shaker$$ExternalSyntheticLambda0(view));
+                }
+                this.bounce.setPressed(true);
+                this.rippleDrawable.setHotspot(motionEvent.getX(), motionEvent.getY());
+                this.rippleDrawable.setState(new int[]{R.attr.state_pressed, R.attr.state_enabled});
+            } else if (motionEvent.getAction() == 1 || motionEvent.getAction() == 3) {
+                this.bounce.setPressed(false);
+                this.rippleDrawable.setState(new int[0]);
+            }
+            super.dispatchTouchEvent(motionEvent);
+            return true;
+        }
+
+        public void drawAbove(Canvas canvas) {
+            if (this.ripple) {
+                float innerRadius = getInnerRadius();
+                RectF rectF = AndroidUtilities.rectTmp;
+                rectF.set(0.0f, 0.0f, getWidth(), getHeight());
+                this.clipPath.rewind();
+                this.clipPath.addRoundRect(rectF, innerRadius, innerRadius, Path.Direction.CW);
+                canvas.save();
+                canvas.clipPath(this.clipPath);
+                this.rippleDrawable.setBounds(0, 0, getWidth(), getHeight());
+                this.rippleDrawable.draw(canvas);
+                canvas.restore();
+            }
+        }
+
+        @Override // android.view.View
+        protected boolean verifyDrawable(Drawable drawable) {
+            return drawable == this.rippleDrawable || super.verifyDrawable(drawable);
+        }
+
+        public float getInnerRadius() {
+            TL_stories.MediaArea mediaArea;
+            TL_stories.MediaAreaCoordinates mediaAreaCoordinates;
+            if ((getParent() instanceof View) && (mediaArea = this.mediaArea) != null && (mediaAreaCoordinates = mediaArea.coordinates) != null) {
+                if ((mediaAreaCoordinates.flags & 1) != 0) {
+                    return (float) (((mediaAreaCoordinates.radius / 100.0d) * getWidth()) / getScaleX());
+                }
+                return getMeasuredHeight() * 0.2f;
+            }
+            return getMeasuredHeight() * 0.2f;
+        }
+
+        @Override // android.view.View
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            float innerRadius = getInnerRadius();
+            drawAbove(canvas);
+            if (this.supportsShining && this.shining && this.gradient != null) {
+                float measuredWidth = getMeasuredWidth() * 0.7f;
+                float fCurrentTimeMillis = (System.currentTimeMillis() - this.startTime) / 600.0f;
+                float measuredWidth2 = ((getMeasuredWidth() + measuredWidth) * fCurrentTimeMillis) - measuredWidth;
+                if (fCurrentTimeMillis >= 1.0f) {
+                    this.shining = false;
+                    return;
+                }
+                this.gradientMatrix.reset();
+                this.gradientMatrix.postScale(measuredWidth / 40.0f, 1.0f);
+                this.gradientMatrix.postTranslate(measuredWidth2, 0.0f);
+                this.gradient.setLocalMatrix(this.gradientMatrix);
+                this.gradientPaint.setShader(this.gradient);
+                RectF rectF = AndroidUtilities.rectTmp;
+                rectF.set(0.0f, 0.0f, getWidth(), getHeight());
+                canvas.drawRoundRect(rectF, innerRadius, innerRadius, this.gradientPaint);
+                this.strokeGradient.setLocalMatrix(this.gradientMatrix);
+                this.strokeGradientPaint.setShader(this.strokeGradient);
+                float fDpf2 = AndroidUtilities.dpf2(1.5f);
+                this.strokeGradientPaint.setStrokeWidth(fDpf2);
+                float f = fDpf2 / 2.0f;
+                rectF.inset(f, f);
+                float f2 = innerRadius - f;
+                canvas.drawRoundRect(rectF, f2, f2, this.strokeGradientPaint);
+                invalidate();
+            }
+        }
+
+        public void shine() {
+            if (this.supportsShining) {
+                AndroidUtilities.cancelRunOnUIThread(this.shineRunnable);
+                AndroidUtilities.runOnUIThread(this.shineRunnable, 400L);
+            }
+        }
+
+        /* JADX INFO: Access modifiers changed from: private */
+        public void shineInternal() {
+            if (this.supportsShining) {
+                this.shining = true;
+                this.startTime = System.currentTimeMillis();
+                Shader.TileMode tileMode = Shader.TileMode.CLAMP;
+                this.gradient = new LinearGradient(0.0f, 0.0f, 40.0f, 0.0f, new int[]{16777215, 771751935, 771751935, 16777215}, new float[]{0.0f, 0.4f, 0.6f, 1.0f}, tileMode);
+                this.strokeGradient = new LinearGradient(0.0f, 0.0f, 40.0f, 0.0f, new int[]{16777215, 553648127, 553648127, 16777215}, new float[]{0.0f, 0.4f, 0.6f, 1.0f}, tileMode);
+                invalidate();
+            }
+        }
+    }
+
+    public static class FitViewWidget extends FrameLayout {
+        public final View child;
+        public final TL_stories.MediaArea mediaArea;
+
+        public FitViewWidget(Context context, View view, TL_stories.MediaArea mediaArea) {
+            super(context);
+            this.mediaArea = mediaArea;
+            this.child = view;
+            addView(view);
+        }
+
+        @Override // android.widget.FrameLayout, android.view.View
+        protected void onMeasure(int i, int i2) {
+            this.child.measure(i, i2);
+            int measuredWidth = (this.child.getMeasuredWidth() - this.child.getPaddingLeft()) - this.child.getPaddingRight();
+            int measuredHeight = (this.child.getMeasuredHeight() - this.child.getPaddingTop()) - this.child.getPaddingBottom();
+            float f = measuredWidth;
+            float f2 = f / 2.0f;
+            this.child.setPivotX(r2.getPaddingLeft() + f2);
+            float f3 = measuredHeight;
+            float f4 = f3 / 2.0f;
+            this.child.setPivotY(r2.getPaddingTop() + f4);
+            int size = View.MeasureSpec.getSize(i);
+            int size2 = View.MeasureSpec.getSize(i2);
+            setMeasuredDimension(size, size2);
+            float f5 = size;
+            float f6 = size2;
+            float fMin = Math.min(f5 / f, f6 / f3);
+            this.child.setTranslationX((f5 / 2.0f) - (f2 + r1.getPaddingLeft()));
+            this.child.setTranslationY((f6 / 2.0f) - (f4 + r8.getPaddingTop()));
+            this.child.setScaleX(fMin);
+            this.child.setScaleY(fMin);
+        }
+    }
+}

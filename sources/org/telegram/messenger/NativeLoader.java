@@ -1,0 +1,110 @@
+package org.telegram.messenger;
+
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.os.Build;
+import java.io.File;
+
+/* loaded from: classes.dex */
+public class NativeLoader {
+    private static final String LIB_NAME = "tmessages.49";
+    private static final String LIB_SO_NAME = "libtmessages.49.so";
+    private static final int LIB_VERSION = 49;
+    private static final String LOCALE_LIB_SO_NAME = "libtmessages.49loc.so";
+    public static StringBuilder log = new StringBuilder();
+    private static volatile boolean nativeLoaded = false;
+
+    private static native void init(String str, boolean z);
+
+    private static File getNativeLibraryDir(Context context) {
+        File file;
+        if (context != null) {
+            try {
+                file = new File((String) ApplicationInfo.class.getField("nativeLibraryDir").get(context.getApplicationInfo()));
+            } catch (Throwable th) {
+                th.printStackTrace();
+            }
+        } else {
+            file = null;
+        }
+        if (file == null) {
+            file = new File(context.getApplicationInfo().dataDir, "lib");
+        }
+        if (file.isDirectory()) {
+            return file;
+        }
+        return null;
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    /* JADX WARN: Removed duplicated region for block: B:66:0x00d8 A[EXC_TOP_SPLITTER, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:76:0x00ce A[EXC_TOP_SPLITTER, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:85:? A[SYNTHETIC] */
+    @android.annotation.SuppressLint({"UnsafeDynamicallyLoadedCode", "SetWorldReadable"})
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    private static boolean loadFromZip(android.content.Context r5, java.io.File r6, java.io.File r7, java.lang.String r8) throws java.lang.Throwable {
+        /*
+            Method dump skipped, instructions count: 225
+            To view this dump add '--comments-level debug' option
+        */
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.NativeLoader.loadFromZip(android.content.Context, java.io.File, java.io.File, java.lang.String):boolean");
+    }
+
+    /* JADX WARN: Removed duplicated region for block: B:32:0x0082 A[Catch: all -> 0x001d, TryCatch #4 {all -> 0x001d, blocks: (B:9:0x000a, B:11:0x0016, B:19:0x0024, B:21:0x0057, B:23:0x005b, B:26:0x0063, B:30:0x007e, B:32:0x0082, B:33:0x00b1, B:29:0x006e), top: B:48:0x000a, outer: #2, inners: #0, #1 }] */
+    /* JADX WARN: Removed duplicated region for block: B:36:0x00b8 A[RETURN] */
+    @android.annotation.SuppressLint({"UnsafeDynamicallyLoadedCode"})
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    public static synchronized void initNativeLibs(android.content.Context r8) {
+        /*
+            Method dump skipped, instructions count: 237
+            To view this dump add '--comments-level debug' option
+        */
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.messenger.NativeLoader.initNativeLibs(android.content.Context):void");
+    }
+
+    public static String getAbiFolder() {
+        String str;
+        String str2 = "mips";
+        String str3 = "armeabi";
+        try {
+            str = Build.CPU_ABI;
+        } catch (Exception e) {
+            FileLog.m1160e(e);
+        }
+        if (str.equalsIgnoreCase("x86_64")) {
+            str2 = "x86_64";
+        } else if (str.equalsIgnoreCase("arm64-v8a")) {
+            str2 = "arm64-v8a";
+        } else {
+            if (!str.equalsIgnoreCase("armeabi-v7a")) {
+                if (str.equalsIgnoreCase("armeabi")) {
+                    str2 = "armeabi";
+                } else if (str.equalsIgnoreCase("x86")) {
+                    str2 = "x86";
+                } else if (!str.equalsIgnoreCase("mips")) {
+                    if (BuildVars.LOGS_ENABLED) {
+                        FileLog.m1158e("Unsupported arch: " + str);
+                    }
+                    str2 = "armeabi";
+                }
+                String property = System.getProperty("os.arch");
+                return (property == null && property.contains("686")) ? "x86" : str3;
+            }
+            str2 = "armeabi-v7a";
+        }
+        str3 = str2;
+        String property2 = System.getProperty("os.arch");
+        if (property2 == null) {
+        }
+    }
+
+    public static boolean loaded() {
+        return nativeLoaded;
+    }
+}

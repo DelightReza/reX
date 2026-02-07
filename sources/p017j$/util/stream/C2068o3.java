@@ -1,0 +1,88 @@
+package p017j$.util.stream;
+
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
+import p017j$.com.android.tools.p018r8.AbstractC1636a;
+import p017j$.time.C1726t;
+import p017j$.util.InterfaceC1789b0;
+import p017j$.util.Objects;
+import p017j$.util.Spliterator;
+
+/* renamed from: j$.util.stream.o3 */
+/* loaded from: classes2.dex */
+public final class C2068o3 extends AbstractC2007d3 implements Spliterator.OfInt {
+    @Override // p017j$.util.Spliterator
+    public final /* synthetic */ void forEachRemaining(Consumer consumer) {
+        AbstractC1636a.m514j(this, consumer);
+    }
+
+    @Override // p017j$.util.Spliterator
+    public final /* synthetic */ boolean tryAdvance(Consumer consumer) {
+        return AbstractC1636a.m528x(this, consumer);
+    }
+
+    @Override // p017j$.util.stream.AbstractC2007d3
+    /* renamed from: e */
+    public final AbstractC2007d3 mo955e(Spliterator spliterator) {
+        return new C2068o3(this.f1227b, spliterator, this.f1226a);
+    }
+
+    @Override // p017j$.util.stream.AbstractC2007d3
+    /* renamed from: d */
+    public final void mo954d() {
+        C1958U2 c1958u2 = new C1958U2();
+        this.f1233h = c1958u2;
+        Objects.requireNonNull(c1958u2);
+        this.f1230e = this.f1227b.mo1018u0(new C2063n3(c1958u2, 1));
+        this.f1231f = new C1726t(15, this);
+    }
+
+    @Override // p017j$.util.stream.AbstractC2007d3, p017j$.util.Spliterator
+    public final Spliterator.OfInt trySplit() {
+        return (Spliterator.OfInt) super.trySplit();
+    }
+
+    @Override // p017j$.util.stream.AbstractC2007d3, p017j$.util.Spliterator
+    public final Spliterator trySplit() {
+        return (Spliterator.OfInt) super.trySplit();
+    }
+
+    @Override // p017j$.util.stream.AbstractC2007d3, p017j$.util.Spliterator
+    public final InterfaceC1789b0 trySplit() {
+        return (Spliterator.OfInt) super.trySplit();
+    }
+
+    @Override // p017j$.util.InterfaceC1789b0
+    public final boolean tryAdvance(IntConsumer intConsumer) {
+        int i;
+        Objects.requireNonNull(intConsumer);
+        boolean zM1035a = m1035a();
+        if (zM1035a) {
+            C1958U2 c1958u2 = (C1958U2) this.f1233h;
+            long j = this.f1232g;
+            int iM1004o = c1958u2.m1004o(j);
+            if (c1958u2.f1214c == 0 && iM1004o == 0) {
+                i = ((int[]) c1958u2.f1149e)[(int) j];
+            } else {
+                i = ((int[][]) c1958u2.f1150f)[iM1004o][(int) (j - c1958u2.f1215d[iM1004o])];
+            }
+            intConsumer.accept(i);
+        }
+        return zM1035a;
+    }
+
+    @Override // p017j$.util.InterfaceC1789b0
+    public final void forEachRemaining(IntConsumer intConsumer) {
+        if (this.f1233h == null && !this.f1234i) {
+            Objects.requireNonNull(intConsumer);
+            m1037c();
+            Objects.requireNonNull(intConsumer);
+            C2063n3 c2063n3 = new C2063n3(intConsumer, 0);
+            this.f1227b.mo1017t0(this.f1229d, c2063n3);
+            this.f1234i = true;
+            return;
+        }
+        while (tryAdvance(intConsumer)) {
+        }
+    }
+}

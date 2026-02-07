@@ -1,0 +1,253 @@
+package org.telegram.p023ui.Components;
+
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.drawable.Drawable;
+import android.text.TextPaint;
+import android.view.View;
+import android.view.accessibility.AccessibilityNodeInfo;
+import androidx.annotation.Keep;
+import org.telegram.messenger.AndroidUtilities;
+
+/* loaded from: classes6.dex */
+public class CheckBox extends View {
+    private static Paint backgroundPaint;
+    private static Paint eraser;
+    private static Paint eraser2;
+    private static Paint paint;
+    private boolean attachedToWindow;
+    private Canvas bitmapCanvas;
+    private ObjectAnimator checkAnimator;
+    private Bitmap checkBitmap;
+    private Canvas checkCanvas;
+    private Drawable checkDrawable;
+    private int checkOffset;
+    private String checkedText;
+    private int color;
+    private boolean drawBackground;
+    private Bitmap drawBitmap;
+    private boolean hasBorder;
+    private boolean isCheckAnimation;
+    private boolean isChecked;
+    private float progress;
+    private int size;
+    private TextPaint textPaint;
+
+    public CheckBox(Context context, int i) {
+        super(context);
+        this.isCheckAnimation = true;
+        this.size = 22;
+        if (paint == null) {
+            paint = new Paint(1);
+            Paint paint2 = new Paint(1);
+            eraser = paint2;
+            paint2.setColor(0);
+            Paint paint3 = eraser;
+            PorterDuff.Mode mode = PorterDuff.Mode.CLEAR;
+            paint3.setXfermode(new PorterDuffXfermode(mode));
+            Paint paint4 = new Paint(1);
+            eraser2 = paint4;
+            paint4.setColor(0);
+            Paint paint5 = eraser2;
+            Paint.Style style = Paint.Style.STROKE;
+            paint5.setStyle(style);
+            eraser2.setXfermode(new PorterDuffXfermode(mode));
+            Paint paint6 = new Paint(1);
+            backgroundPaint = paint6;
+            paint6.setColor(-1);
+            backgroundPaint.setStyle(style);
+        }
+        eraser2.setStrokeWidth(AndroidUtilities.m1146dp(28.0f));
+        backgroundPaint.setStrokeWidth(AndroidUtilities.m1146dp(2.0f));
+        TextPaint textPaint = new TextPaint(1);
+        this.textPaint = textPaint;
+        textPaint.setTextSize(AndroidUtilities.m1146dp(18.0f));
+        this.textPaint.setTypeface(AndroidUtilities.bold());
+        this.checkDrawable = context.getResources().getDrawable(i).mutate();
+    }
+
+    @Override // android.view.View
+    public void setVisibility(int i) {
+        super.setVisibility(i);
+        if (i == 0 && this.drawBitmap == null) {
+            try {
+                int iM1146dp = AndroidUtilities.m1146dp(this.size);
+                int iM1146dp2 = AndroidUtilities.m1146dp(this.size);
+                Bitmap.Config config = Bitmap.Config.ARGB_4444;
+                this.drawBitmap = Bitmap.createBitmap(iM1146dp, iM1146dp2, config);
+                this.bitmapCanvas = new Canvas(this.drawBitmap);
+                this.checkBitmap = Bitmap.createBitmap(AndroidUtilities.m1146dp(this.size), AndroidUtilities.m1146dp(this.size), config);
+                this.checkCanvas = new Canvas(this.checkBitmap);
+            } catch (Throwable unused) {
+            }
+        }
+    }
+
+    @Keep
+    public void setProgress(float f) {
+        if (this.progress == f) {
+            return;
+        }
+        this.progress = f;
+        invalidate();
+    }
+
+    public void setDrawBackground(boolean z) {
+        this.drawBackground = z;
+    }
+
+    public void setHasBorder(boolean z) {
+        this.hasBorder = z;
+    }
+
+    public void setCheckOffset(int i) {
+        this.checkOffset = i;
+    }
+
+    public void setSize(int i) {
+        this.size = i;
+        if (i == 40) {
+            this.textPaint.setTextSize(AndroidUtilities.m1146dp(24.0f));
+        }
+    }
+
+    public void setStrokeWidth(int i) {
+        backgroundPaint.setStrokeWidth(i);
+    }
+
+    @Keep
+    public float getProgress() {
+        return this.progress;
+    }
+
+    public void setColor(int i, int i2) {
+        this.color = i;
+        this.checkDrawable.setColorFilter(new PorterDuffColorFilter(i2, PorterDuff.Mode.MULTIPLY));
+        this.textPaint.setColor(i2);
+        invalidate();
+    }
+
+    @Override // android.view.View
+    public void setBackgroundColor(int i) {
+        this.color = i;
+        invalidate();
+    }
+
+    public void setCheckColor(int i) {
+        this.checkDrawable.setColorFilter(new PorterDuffColorFilter(i, PorterDuff.Mode.MULTIPLY));
+        this.textPaint.setColor(i);
+        invalidate();
+    }
+
+    private void cancelCheckAnimator() {
+        ObjectAnimator objectAnimator = this.checkAnimator;
+        if (objectAnimator != null) {
+            objectAnimator.cancel();
+            this.checkAnimator = null;
+        }
+    }
+
+    private void animateToCheckedState(boolean z) {
+        this.isCheckAnimation = z;
+        ObjectAnimator objectAnimatorOfFloat = ObjectAnimator.ofFloat(this, "progress", z ? 1.0f : 0.0f);
+        this.checkAnimator = objectAnimatorOfFloat;
+        objectAnimatorOfFloat.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Components.CheckBox.1
+            @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
+            public void onAnimationEnd(Animator animator) {
+                if (animator.equals(CheckBox.this.checkAnimator)) {
+                    CheckBox.this.checkAnimator = null;
+                }
+                if (CheckBox.this.isChecked) {
+                    return;
+                }
+                CheckBox.this.checkedText = null;
+            }
+        });
+        this.checkAnimator.setDuration(300L);
+        this.checkAnimator.start();
+    }
+
+    @Override // android.view.View
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        this.attachedToWindow = true;
+    }
+
+    @Override // android.view.View
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        this.attachedToWindow = false;
+    }
+
+    @Override // android.view.View
+    protected void onLayout(boolean z, int i, int i2, int i3, int i4) {
+        super.onLayout(z, i, i2, i3, i4);
+    }
+
+    public void setChecked(boolean z, boolean z2) {
+        setChecked(-1, z, z2);
+    }
+
+    public void setNum(int i) {
+        if (i >= 0) {
+            this.checkedText = "" + (i + 1);
+        } else if (this.checkAnimator == null) {
+            this.checkedText = null;
+        }
+        invalidate();
+    }
+
+    public void setChecked(int i, boolean z, boolean z2) {
+        if (i >= 0) {
+            this.checkedText = "" + (i + 1);
+            invalidate();
+        }
+        if (z == this.isChecked) {
+            return;
+        }
+        this.isChecked = z;
+        if (this.attachedToWindow && z2) {
+            animateToCheckedState(z);
+        } else {
+            cancelCheckAnimator();
+            setProgress(z ? 1.0f : 0.0f);
+        }
+    }
+
+    public boolean isChecked() {
+        return this.isChecked;
+    }
+
+    /* JADX WARN: Removed duplicated region for block: B:34:0x0084  */
+    /* JADX WARN: Removed duplicated region for block: B:37:0x00ca  */
+    /* JADX WARN: Removed duplicated region for block: B:40:0x010d  */
+    /* JADX WARN: Removed duplicated region for block: B:45:0x013b  */
+    @Override // android.view.View
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+    protected void onDraw(android.graphics.Canvas r12) {
+        /*
+            Method dump skipped, instructions count: 418
+            To view this dump add '--comments-level debug' option
+        */
+        throw new UnsupportedOperationException("Method not decompiled: org.telegram.p023ui.Components.CheckBox.onDraw(android.graphics.Canvas):void");
+    }
+
+    @Override // android.view.View
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
+        super.onInitializeAccessibilityNodeInfo(accessibilityNodeInfo);
+        accessibilityNodeInfo.setClassName("android.widget.CheckBox");
+        accessibilityNodeInfo.setCheckable(true);
+        accessibilityNodeInfo.setChecked(this.isChecked);
+    }
+}

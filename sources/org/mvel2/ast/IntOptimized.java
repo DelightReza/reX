@@ -1,0 +1,5 @@
+package org.mvel2.ast;
+
+/* loaded from: classes4.dex */
+public interface IntOptimized {
+}

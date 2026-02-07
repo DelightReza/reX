@@ -1,0 +1,18 @@
+package com.google.android.gms.internal.mlkit_common;
+
+import org.telegram.tgnet.ConnectionsManager;
+
+/* loaded from: classes4.dex */
+public abstract class zzaa {
+    static int zza(int i, int i2) {
+        if (i2 < 0) {
+            throw new AssertionError("cannot store more than MAX_VALUE elements");
+        }
+        int i3 = i + (i >> 1) + 1;
+        if (i3 < i2) {
+            int iHighestOneBit = Integer.highestOneBit(i2 - 1);
+            i3 = iHighestOneBit + iHighestOneBit;
+        }
+        return i3 < 0 ? ConnectionsManager.DEFAULT_DATACENTER_ID : i3;
+    }
+}

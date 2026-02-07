@@ -1,0 +1,40 @@
+package com.google.android.gms.internal.vision;
+
+import android.os.IBinder;
+import android.os.Parcel;
+import com.google.android.gms.dynamic.IObjectWrapper;
+import com.google.android.gms.vision.barcode.Barcode;
+
+/* loaded from: classes4.dex */
+public final class zzo extends zzb implements zzl {
+    zzo(IBinder iBinder) {
+        super(iBinder, "com.google.android.gms.vision.barcode.internal.client.INativeBarcodeDetector");
+    }
+
+    @Override // com.google.android.gms.internal.vision.zzl
+    public final Barcode[] zza(IObjectWrapper iObjectWrapper, zzs zzsVar) {
+        Parcel parcelM317a_ = m317a_();
+        zzd.zza(parcelM317a_, iObjectWrapper);
+        zzd.zza(parcelM317a_, zzsVar);
+        Parcel parcelZza = zza(1, parcelM317a_);
+        Barcode[] barcodeArr = (Barcode[]) parcelZza.createTypedArray(Barcode.CREATOR);
+        parcelZza.recycle();
+        return barcodeArr;
+    }
+
+    @Override // com.google.android.gms.internal.vision.zzl
+    public final Barcode[] zzb(IObjectWrapper iObjectWrapper, zzs zzsVar) {
+        Parcel parcelM317a_ = m317a_();
+        zzd.zza(parcelM317a_, iObjectWrapper);
+        zzd.zza(parcelM317a_, zzsVar);
+        Parcel parcelZza = zza(2, parcelM317a_);
+        Barcode[] barcodeArr = (Barcode[]) parcelZza.createTypedArray(Barcode.CREATOR);
+        parcelZza.recycle();
+        return barcodeArr;
+    }
+
+    @Override // com.google.android.gms.internal.vision.zzl
+    public final void zza() {
+        zzb(3, m317a_());
+    }
+}

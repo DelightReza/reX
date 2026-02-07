@@ -1,0 +1,302 @@
+package org.telegram.p023ui.Delegates;
+
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
+import android.graphics.Canvas;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import java.util.List;
+import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.C2369R;
+import org.telegram.messenger.LocaleController;
+import org.telegram.p023ui.ActionBar.BaseFragment;
+import org.telegram.p023ui.ActionBar.Theme;
+import org.telegram.p023ui.ActionBar.ThemeDescription;
+import org.telegram.p023ui.Components.AvatarsImageView;
+import org.telegram.p023ui.Components.BlurredFrameLayout;
+import org.telegram.p023ui.Components.LayoutHelper;
+import org.telegram.p023ui.Components.MemberRequestsBottomSheet;
+import org.telegram.p023ui.Components.SizeNotifierFrameLayout;
+import org.telegram.tgnet.TLObject;
+import org.telegram.tgnet.TLRPC;
+
+/* loaded from: classes3.dex */
+public class ChatActivityMemberRequestsDelegate {
+    private AvatarsImageView avatarsView;
+    private MemberRequestsBottomSheet bottomSheet;
+    private final Callback callback;
+    private TLRPC.ChatFull chatInfo;
+    private int closePendingRequestsCount = -1;
+    private ImageView closeView;
+    private final int currentAccount;
+    private final TLRPC.Chat currentChat;
+    private final BaseFragment fragment;
+    private ValueAnimator pendingRequestsAnimator;
+    private int pendingRequestsCount;
+    private float pendingRequestsEnterOffset;
+    private TextView requestsCountTextView;
+    private LinearLayout requestsDataLayout;
+    public BlurredFrameLayout root;
+    private final SizeNotifierFrameLayout sizeNotifierFrameLayout;
+
+    /* loaded from: classes6.dex */
+    public interface Callback {
+        void onEnterOffsetChanged();
+    }
+
+    public ChatActivityMemberRequestsDelegate(BaseFragment baseFragment, SizeNotifierFrameLayout sizeNotifierFrameLayout, TLRPC.Chat chat, Callback callback) {
+        this.fragment = baseFragment;
+        this.sizeNotifierFrameLayout = sizeNotifierFrameLayout;
+        this.currentChat = chat;
+        this.currentAccount = baseFragment.getCurrentAccount();
+        this.callback = callback;
+    }
+
+    public View getView() {
+        if (this.root == null) {
+            BlurredFrameLayout blurredFrameLayout = new BlurredFrameLayout(this.fragment.getParentActivity(), this.sizeNotifierFrameLayout) { // from class: org.telegram.ui.Delegates.ChatActivityMemberRequestsDelegate.1
+                @Override // android.view.View
+                protected void onDraw(Canvas canvas) {
+                    super.onDraw(canvas);
+                    canvas.drawLine(0.0f, getMeasuredHeight() - AndroidUtilities.m1146dp(2.0f), getMeasuredWidth(), getMeasuredHeight() - AndroidUtilities.m1146dp(2.0f), Theme.dividerPaint);
+                }
+            };
+            this.root = blurredFrameLayout;
+            blurredFrameLayout.drawBlur = true;
+            blurredFrameLayout.setBackgroundResource(C2369R.drawable.blockpanel);
+            BlurredFrameLayout blurredFrameLayout2 = this.root;
+            BaseFragment baseFragment = this.fragment;
+            int i = Theme.key_chat_topPanelBackground;
+            blurredFrameLayout2.backgroundColor = baseFragment.getThemedColor(i);
+            this.root.backgroundPaddingBottom = AndroidUtilities.m1146dp(2.0f);
+            Drawable drawableMutate = this.root.getBackground().mutate();
+            int themedColor = this.fragment.getThemedColor(i);
+            PorterDuff.Mode mode = PorterDuff.Mode.MULTIPLY;
+            drawableMutate.setColorFilter(new PorterDuffColorFilter(themedColor, mode));
+            this.root.setVisibility(8);
+            this.pendingRequestsEnterOffset = -getViewHeight();
+            View view = new View(this.fragment.getParentActivity());
+            view.setBackground(Theme.getSelectorDrawable(false));
+            view.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Delegates.ChatActivityMemberRequestsDelegate$$ExternalSyntheticLambda0
+                @Override // android.view.View.OnClickListener
+                public final void onClick(View view2) {
+                    this.f$0.lambda$getView$0(view2);
+                }
+            });
+            this.root.addView(view, LayoutHelper.createFrame(-1, -1.0f, 51, 0.0f, 0.0f, 0.0f, 2.0f));
+            LinearLayout linearLayout = new LinearLayout(this.fragment.getParentActivity());
+            this.requestsDataLayout = linearLayout;
+            linearLayout.setOrientation(0);
+            this.root.addView(this.requestsDataLayout, LayoutHelper.createFrame(-1, -1.0f, 48, 0.0f, 0.0f, 100.0f, 2.0f));
+            AvatarsImageView avatarsImageView = new AvatarsImageView(this.fragment.getParentActivity(), false) { // from class: org.telegram.ui.Delegates.ChatActivityMemberRequestsDelegate.2
+                @Override // org.telegram.p023ui.Components.AvatarsImageView, android.view.View
+                protected void onMeasure(int i2, int i3) {
+                    super.onMeasure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.m1146dp(this.avatarsDrawable.count == 0 ? 0 : ((r2 - 1) * 20) + 24), TLObject.FLAG_30), i3);
+                }
+            };
+            this.avatarsView = avatarsImageView;
+            avatarsImageView.setAvatarsTextSize(AndroidUtilities.m1146dp(18.0f));
+            this.avatarsView.reset();
+            this.requestsDataLayout.addView(this.avatarsView, LayoutHelper.createFrame(-2, -1.0f, 48, 8.0f, 0.0f, 10.0f, 0.0f));
+            TextView textView = new TextView(this.fragment.getParentActivity());
+            this.requestsCountTextView = textView;
+            textView.setEllipsize(TextUtils.TruncateAt.END);
+            this.requestsCountTextView.setGravity(16);
+            this.requestsCountTextView.setSingleLine();
+            this.requestsCountTextView.setText((CharSequence) null);
+            this.requestsCountTextView.setTextColor(this.fragment.getThemedColor(Theme.key_chat_topPanelTitle));
+            this.requestsCountTextView.setTypeface(AndroidUtilities.bold());
+            this.requestsDataLayout.addView(this.requestsCountTextView, LayoutHelper.createFrame(-1, -1.0f, 48, 0.0f, 0.0f, 0.0f, 0.0f));
+            ImageView imageView = new ImageView(this.fragment.getParentActivity());
+            this.closeView = imageView;
+            imageView.setBackground(Theme.createSelectorDrawable(this.fragment.getThemedColor(Theme.key_inappPlayerClose) & 436207615, 1, AndroidUtilities.m1146dp(14.0f)));
+            this.closeView.setColorFilter(new PorterDuffColorFilter(this.fragment.getThemedColor(Theme.key_chat_topPanelClose), mode));
+            this.closeView.setContentDescription(LocaleController.getString(C2369R.string.Close));
+            this.closeView.setImageResource(C2369R.drawable.miniplayer_close);
+            this.closeView.setScaleType(ImageView.ScaleType.CENTER);
+            this.closeView.setOnClickListener(new View.OnClickListener() { // from class: org.telegram.ui.Delegates.ChatActivityMemberRequestsDelegate$$ExternalSyntheticLambda1
+                @Override // android.view.View.OnClickListener
+                public final void onClick(View view2) {
+                    this.f$0.lambda$getView$1(view2);
+                }
+            });
+            this.root.addView(this.closeView, LayoutHelper.createFrame(36, -1.0f, 21, 0.0f, 0.0f, 2.0f, 1.0f));
+            TLRPC.ChatFull chatFull = this.chatInfo;
+            if (chatFull != null) {
+                setPendingRequests(chatFull.requests_pending, chatFull.recent_requesters, false);
+            }
+        }
+        return this.root;
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public /* synthetic */ void lambda$getView$0(View view) {
+        showBottomSheet();
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public /* synthetic */ void lambda$getView$1(View view) {
+        this.fragment.getMessagesController().setChatPendingRequestsOnClose(this.currentChat.f1571id, this.pendingRequestsCount);
+        this.closePendingRequestsCount = this.pendingRequestsCount;
+        animatePendingRequests(false, true);
+    }
+
+    public void setLeftMargin(float f) {
+        LinearLayout linearLayout = this.requestsDataLayout;
+        if (linearLayout != null) {
+            linearLayout.setTranslationX(f);
+        }
+    }
+
+    public void setChatInfo(TLRPC.ChatFull chatFull, boolean z) {
+        this.chatInfo = chatFull;
+        if (chatFull != null) {
+            setPendingRequests(chatFull.requests_pending, chatFull.recent_requesters, z);
+        }
+    }
+
+    public int getViewHeight() {
+        return AndroidUtilities.m1146dp(40.0f);
+    }
+
+    public float getViewEnterOffset() {
+        return this.pendingRequestsEnterOffset;
+    }
+
+    public void onBackToScreen() {
+        MemberRequestsBottomSheet memberRequestsBottomSheet = this.bottomSheet;
+        if (memberRequestsBottomSheet == null || !memberRequestsBottomSheet.isNeedRestoreDialog()) {
+            return;
+        }
+        showBottomSheet();
+    }
+
+    private void showBottomSheet() {
+        if (this.bottomSheet == null) {
+            this.bottomSheet = new MemberRequestsBottomSheet(this.fragment, this.currentChat.f1571id) { // from class: org.telegram.ui.Delegates.ChatActivityMemberRequestsDelegate.3
+                @Override // org.telegram.p023ui.Components.UsersAlertBase, org.telegram.p023ui.ActionBar.BottomSheet, android.app.Dialog, android.content.DialogInterface, org.telegram.ui.ActionBar.BaseFragment.AttachedSheet
+                /* renamed from: dismiss */
+                public void lambda$new$0() {
+                    if (ChatActivityMemberRequestsDelegate.this.bottomSheet != null && !ChatActivityMemberRequestsDelegate.this.bottomSheet.isNeedRestoreDialog()) {
+                        ChatActivityMemberRequestsDelegate.this.bottomSheet = null;
+                    }
+                    super.lambda$new$0();
+                }
+            };
+        }
+        this.fragment.showDialog(this.bottomSheet);
+    }
+
+    private void setPendingRequests(int i, List list, boolean z) {
+        if (this.root == null) {
+            return;
+        }
+        if (i <= 0) {
+            if (this.currentChat != null) {
+                this.fragment.getMessagesController().setChatPendingRequestsOnClose(this.currentChat.f1571id, 0);
+                this.closePendingRequestsCount = 0;
+            }
+            animatePendingRequests(false, z);
+            this.pendingRequestsCount = 0;
+            return;
+        }
+        if (this.pendingRequestsCount != i) {
+            this.pendingRequestsCount = i;
+            this.requestsCountTextView.setText(LocaleController.formatPluralString("JoinUsersRequests", i, new Object[0]));
+            animatePendingRequests(true, z);
+            if (list == null || list.isEmpty()) {
+                return;
+            }
+            int iMin = Math.min(3, list.size());
+            for (int i2 = 0; i2 < iMin; i2++) {
+                TLRPC.User user = this.fragment.getMessagesController().getUser((Long) list.get(i2));
+                if (user != null) {
+                    this.avatarsView.setObject(i2, this.currentAccount, user);
+                }
+            }
+            this.avatarsView.setCount(iMin);
+            this.avatarsView.commitTransition(true);
+        }
+    }
+
+    private void animatePendingRequests(final boolean z, boolean z2) {
+        if (z == (this.root.getVisibility() == 0)) {
+            return;
+        }
+        if (z) {
+            if (this.closePendingRequestsCount == -1 && this.currentChat != null) {
+                this.closePendingRequestsCount = this.fragment.getMessagesController().getChatPendingRequestsOnClosed(this.currentChat.f1571id);
+            }
+            int i = this.pendingRequestsCount;
+            int i2 = this.closePendingRequestsCount;
+            if (i == i2) {
+                return;
+            }
+            if (i2 != 0 && this.currentChat != null) {
+                this.fragment.getMessagesController().setChatPendingRequestsOnClose(this.currentChat.f1571id, 0);
+            }
+        }
+        ValueAnimator valueAnimator = this.pendingRequestsAnimator;
+        if (valueAnimator != null) {
+            valueAnimator.cancel();
+        }
+        if (z2) {
+            ValueAnimator valueAnimatorOfFloat = ValueAnimator.ofFloat(z ? 0.0f : 1.0f, z ? 1.0f : 0.0f);
+            this.pendingRequestsAnimator = valueAnimatorOfFloat;
+            valueAnimatorOfFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() { // from class: org.telegram.ui.Delegates.ChatActivityMemberRequestsDelegate$$ExternalSyntheticLambda2
+                @Override // android.animation.ValueAnimator.AnimatorUpdateListener
+                public final void onAnimationUpdate(ValueAnimator valueAnimator2) {
+                    this.f$0.lambda$animatePendingRequests$2(valueAnimator2);
+                }
+            });
+            this.pendingRequestsAnimator.addListener(new AnimatorListenerAdapter() { // from class: org.telegram.ui.Delegates.ChatActivityMemberRequestsDelegate.4
+                @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
+                public void onAnimationStart(Animator animator) {
+                    if (z) {
+                        ChatActivityMemberRequestsDelegate.this.root.setVisibility(0);
+                    }
+                }
+
+                @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
+                public void onAnimationEnd(Animator animator) {
+                    if (!z) {
+                        ChatActivityMemberRequestsDelegate.this.root.setVisibility(8);
+                    }
+                    if (ChatActivityMemberRequestsDelegate.this.callback != null) {
+                        ChatActivityMemberRequestsDelegate.this.callback.onEnterOffsetChanged();
+                    }
+                }
+            });
+            this.pendingRequestsAnimator.setDuration(200L);
+            this.pendingRequestsAnimator.start();
+            return;
+        }
+        this.root.setVisibility(z ? 0 : 8);
+        this.pendingRequestsEnterOffset = z ? 0.0f : -getViewHeight();
+        Callback callback = this.callback;
+        if (callback != null) {
+            callback.onEnterOffsetChanged();
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public /* synthetic */ void lambda$animatePendingRequests$2(ValueAnimator valueAnimator) {
+        this.pendingRequestsEnterOffset = (-getViewHeight()) * (1.0f - ((Float) valueAnimator.getAnimatedValue()).floatValue());
+        Callback callback = this.callback;
+        if (callback != null) {
+            callback.onEnterOffsetChanged();
+        }
+    }
+
+    public void fillThemeDescriptions(List list) {
+        list.add(new ThemeDescription(this.requestsCountTextView, ThemeDescription.FLAG_TEXTCOLOR, null, null, null, null, Theme.key_chat_topPanelTitle));
+        list.add(new ThemeDescription(this.closeView, ThemeDescription.FLAG_IMAGECOLOR, null, null, null, null, Theme.key_chat_topPanelClose));
+    }
+}

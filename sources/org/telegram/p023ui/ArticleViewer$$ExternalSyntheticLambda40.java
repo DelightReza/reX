@@ -1,0 +1,14 @@
+package org.telegram.p023ui;
+
+import org.telegram.messenger.Utilities;
+import org.telegram.p023ui.web.BrowserHistory;
+
+/* loaded from: classes5.dex */
+public final /* synthetic */ class ArticleViewer$$ExternalSyntheticLambda40 implements Utilities.Callback {
+    public final /* synthetic */ ArticleViewer f$0;
+
+    @Override // org.telegram.messenger.Utilities.Callback
+    public final void run(Object obj) {
+        this.f$0.openHistoryEntry((BrowserHistory.Entry) obj);
+    }
+}

@@ -1,0 +1,319 @@
+package org.telegram.p023ui.Cells;
+
+import android.R;
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.text.Editable;
+import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.ActionMode;
+import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
+import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.C2369R;
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MediaDataController;
+import org.telegram.messenger.MessageObject;
+import org.telegram.messenger.UserConfig;
+import org.telegram.p023ui.ActionBar.Theme;
+import org.telegram.p023ui.Components.AnimatedColor;
+import org.telegram.p023ui.Components.AnimatedTextView;
+import org.telegram.p023ui.Components.CubicBezierInterpolator;
+import org.telegram.p023ui.Components.EditTextCaption;
+import org.telegram.p023ui.Components.LayoutHelper;
+import org.telegram.p023ui.Components.TextStyleSpan;
+import org.telegram.p023ui.Components.TypefaceSpan;
+import org.telegram.tgnet.TLRPC;
+
+/* loaded from: classes5.dex */
+public class EditTextCell extends FrameLayout {
+    public boolean autofocused;
+    public final EditTextCaption editText;
+    private boolean focused;
+    private boolean ignoreEditText;
+    AnimatedTextView.AnimatedTextDrawable limit;
+    AnimatedColor limitColor;
+    private int limitCount;
+    private int maxLength;
+    private boolean needDivider;
+    private boolean showLimitWhenEmpty;
+    private boolean showLimitWhenFocused;
+    private int showLimitWhenNear;
+
+    protected void onFocusChanged(boolean z) {
+    }
+
+    protected void onTextChanged(CharSequence charSequence) {
+    }
+
+    public void setShowLimitWhenEmpty(boolean z) {
+        this.showLimitWhenEmpty = z;
+        if (z) {
+            updateLimitText();
+        }
+    }
+
+    public void setShowLimitWhenNear(int i) {
+        this.showLimitWhenNear = i;
+        updateLimitText();
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public void updateLimitText() {
+        int i;
+        if (this.editText == null) {
+            return;
+        }
+        this.limitCount = this.maxLength - getText().length();
+        AnimatedTextView.AnimatedTextDrawable animatedTextDrawable = this.limit;
+        String str = "";
+        if ((!TextUtils.isEmpty(getText()) || this.showLimitWhenEmpty) && ((!this.showLimitWhenFocused || (this.focused && !this.autofocused)) && ((i = this.showLimitWhenNear) == -1 || this.limitCount <= i))) {
+            str = "" + this.limitCount;
+        }
+        animatedTextDrawable.setText(str);
+    }
+
+    public void whenHitEnter(final Runnable runnable) {
+        this.editText.setImeOptions(6);
+        this.editText.setOnEditorActionListener(new TextView.OnEditorActionListener() { // from class: org.telegram.ui.Cells.EditTextCell.1
+            @Override // android.widget.TextView.OnEditorActionListener
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if (i != 6) {
+                    return false;
+                }
+                runnable.run();
+                return true;
+            }
+        });
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public /* synthetic */ void lambda$hideKeyboardOnEnter$0() {
+        AndroidUtilities.hideKeyboard(this.editText);
+    }
+
+    public void hideKeyboardOnEnter() {
+        whenHitEnter(new Runnable() { // from class: org.telegram.ui.Cells.EditTextCell$$ExternalSyntheticLambda0
+            @Override // java.lang.Runnable
+            public final void run() {
+                this.f$0.lambda$hideKeyboardOnEnter$0();
+            }
+        });
+    }
+
+    public void setShowLimitOnFocus(boolean z) {
+        this.showLimitWhenFocused = z;
+    }
+
+    public EditTextCell(Context context, String str, final boolean z, final boolean z2, final int i, final Theme.ResourcesProvider resourcesProvider) {
+        super(context);
+        this.showLimitWhenNear = -1;
+        this.limitColor = new AnimatedColor(this);
+        AnimatedTextView.AnimatedTextDrawable animatedTextDrawable = new AnimatedTextView.AnimatedTextDrawable(false, true, true);
+        this.limit = animatedTextDrawable;
+        animatedTextDrawable.setAnimationProperties(0.2f, 0L, 160L, CubicBezierInterpolator.EASE_OUT_QUINT);
+        this.limit.setTextSize(AndroidUtilities.m1146dp(15.33f));
+        this.limit.setGravity(5);
+        this.maxLength = i;
+        EditTextCaption editTextCaption = new EditTextCaption(context, resourcesProvider) { // from class: org.telegram.ui.Cells.EditTextCell.2
+            @Override // android.widget.TextView, android.view.View
+            protected boolean verifyDrawable(Drawable drawable) {
+                return drawable == EditTextCell.this.limit || super.verifyDrawable(drawable);
+            }
+
+            @Override // org.telegram.p023ui.Components.EditTextEffects, android.widget.TextView
+            protected void onTextChanged(CharSequence charSequence, int i2, int i3, int i4) {
+                super.onTextChanged(charSequence, i2, i3, i4);
+                AnimatedTextView.AnimatedTextDrawable animatedTextDrawable2 = EditTextCell.this.limit;
+                if (animatedTextDrawable2 == null || i <= 0) {
+                    return;
+                }
+                animatedTextDrawable2.cancelAnimation();
+                EditTextCell.this.updateLimitText();
+            }
+
+            @Override // org.telegram.p023ui.Components.EditTextBoldCursor, android.view.View
+            protected void dispatchDraw(Canvas canvas) {
+                super.dispatchDraw(canvas);
+                EditTextCell editTextCell = EditTextCell.this;
+                editTextCell.limit.setTextColor(editTextCell.limitColor.set(Theme.getColor(editTextCell.limitCount <= 0 ? Theme.key_text_RedRegular : Theme.key_dialogSearchHint, resourcesProvider)));
+                EditTextCell.this.limit.setBounds(getScrollX(), 0, ((getScrollX() + getWidth()) - getPaddingRight()) + AndroidUtilities.m1146dp(42.0f), getHeight());
+                EditTextCell.this.limit.draw(canvas);
+            }
+
+            @Override // org.telegram.p023ui.Components.EditTextCaption, org.telegram.p023ui.Components.EditTextBoldCursor, org.telegram.p023ui.Components.EditTextEffects, android.widget.TextView, android.view.View
+            protected void onDraw(Canvas canvas) throws IllegalAccessException, IllegalArgumentException {
+                canvas.save();
+                canvas.clipRect(getScrollX() + getPaddingLeft(), 0, (getScrollX() + getWidth()) - getPaddingRight(), getHeight());
+                super.onDraw(canvas);
+                canvas.restore();
+            }
+
+            @Override // org.telegram.p023ui.Components.EditTextBoldCursor
+            protected void extendActionMode(ActionMode actionMode, Menu menu) {
+                if (z2 && menu.findItem(C2369R.id.menu_bold) == null) {
+                    if (Build.VERSION.SDK_INT >= 23) {
+                        menu.removeItem(R.id.shareText);
+                    }
+                    SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(LocaleController.getString(C2369R.string.Bold));
+                    spannableStringBuilder.setSpan(new TypefaceSpan(AndroidUtilities.bold()), 0, spannableStringBuilder.length(), 33);
+                    menu.add(C2369R.id.menu_groupbolditalic, C2369R.id.menu_bold, 6, spannableStringBuilder);
+                    SpannableStringBuilder spannableStringBuilder2 = new SpannableStringBuilder(LocaleController.getString(C2369R.string.Italic));
+                    spannableStringBuilder2.setSpan(new TypefaceSpan(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM_ITALIC)), 0, spannableStringBuilder2.length(), 33);
+                    menu.add(C2369R.id.menu_groupbolditalic, C2369R.id.menu_italic, 7, spannableStringBuilder2);
+                    SpannableStringBuilder spannableStringBuilder3 = new SpannableStringBuilder(LocaleController.getString(C2369R.string.Strike));
+                    TextStyleSpan.TextStyleRun textStyleRun = new TextStyleSpan.TextStyleRun();
+                    textStyleRun.flags |= 8;
+                    spannableStringBuilder3.setSpan(new TextStyleSpan(textStyleRun), 0, spannableStringBuilder3.length(), 33);
+                    menu.add(C2369R.id.menu_groupbolditalic, C2369R.id.menu_strike, 8, spannableStringBuilder3);
+                    menu.add(C2369R.id.menu_groupbolditalic, C2369R.id.menu_regular, 9, LocaleController.getString(C2369R.string.Regular));
+                }
+            }
+        };
+        this.editText = editTextCaption;
+        this.limit.setCallback(editTextCaption);
+        editTextCaption.setTextSize(1, 17.0f);
+        editTextCaption.setHintTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteHintText, resourcesProvider));
+        int i2 = Theme.key_windowBackgroundWhiteBlackText;
+        editTextCaption.setTextColor(Theme.getColor(i2, resourcesProvider));
+        editTextCaption.setBackground(null);
+        if (z) {
+            editTextCaption.setMaxLines(5);
+            editTextCaption.setSingleLine(false);
+        } else {
+            editTextCaption.setMaxLines(1);
+            editTextCaption.setSingleLine(true);
+        }
+        editTextCaption.setPadding(AndroidUtilities.m1146dp(21.0f), AndroidUtilities.m1146dp(15.0f), AndroidUtilities.m1146dp((i > 0 ? 42 : 0) + 21), AndroidUtilities.m1146dp(15.0f));
+        editTextCaption.setGravity((LocaleController.isRTL ? 5 : 3) | 48);
+        editTextCaption.setInputType((z ? 131072 : 0) | 573441);
+        editTextCaption.setRawInputType(573441);
+        editTextCaption.setHint(str);
+        editTextCaption.setCursorColor(Theme.getColor(i2, resourcesProvider));
+        editTextCaption.setCursorSize(AndroidUtilities.m1146dp(19.0f));
+        editTextCaption.setCursorWidth(1.5f);
+        editTextCaption.addTextChangedListener(new TextWatcher() { // from class: org.telegram.ui.Cells.EditTextCell.3
+            @Override // android.text.TextWatcher
+            public void onTextChanged(CharSequence charSequence, int i3, int i4, int i5) {
+            }
+
+            @Override // android.text.TextWatcher
+            public void beforeTextChanged(CharSequence charSequence, int i3, int i4, int i5) {
+                if (EditTextCell.this.ignoreEditText) {
+                    return;
+                }
+                EditTextCell.this.autofocused = false;
+            }
+
+            @Override // android.text.TextWatcher
+            public void afterTextChanged(Editable editable) {
+                if (!EditTextCell.this.ignoreEditText) {
+                    if (i > 0 && editable != null && editable.length() > i) {
+                        EditTextCell.this.ignoreEditText = true;
+                        EditTextCell.this.editText.setText(editable.subSequence(0, i));
+                        EditTextCaption editTextCaption2 = EditTextCell.this.editText;
+                        editTextCaption2.setSelection(editTextCaption2.length());
+                        EditTextCell.this.ignoreEditText = false;
+                    }
+                    EditTextCell.this.onTextChanged(editable);
+                }
+                if (!z) {
+                    return;
+                }
+                while (true) {
+                    int iIndexOf = editable.toString().indexOf("\n");
+                    if (iIndexOf < 0) {
+                        return;
+                    } else {
+                        editable.delete(iIndexOf, iIndexOf + 1);
+                    }
+                }
+            }
+        });
+        editTextCaption.setOnFocusChangeListener(new View.OnFocusChangeListener() { // from class: org.telegram.ui.Cells.EditTextCell.4
+            @Override // android.view.View.OnFocusChangeListener
+            public void onFocusChange(View view, boolean z3) {
+                EditTextCell.this.focused = z3;
+                if (EditTextCell.this.showLimitWhenFocused) {
+                    EditTextCell.this.updateLimitText();
+                }
+                EditTextCell.this.onFocusChanged(z3);
+            }
+        });
+        addView(editTextCaption, LayoutHelper.createFrame(-1, -1, 48));
+        updateLimitText();
+    }
+
+    public ImageView setLeftDrawable(Drawable drawable) {
+        ImageView imageView = new ImageView(getContext());
+        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        imageView.setImageDrawable(drawable);
+        addView(imageView, LayoutHelper.createFrame(24, 24.0f, 19, 18.0f, 0.0f, 0.0f, 0.0f));
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) this.editText.getLayoutParams();
+        layoutParams.leftMargin = AndroidUtilities.m1146dp(24.0f);
+        this.editText.setLayoutParams(layoutParams);
+        return imageView;
+    }
+
+    public void setText(CharSequence charSequence) {
+        this.ignoreEditText = true;
+        this.editText.setText(charSequence);
+        EditTextCaption editTextCaption = this.editText;
+        editTextCaption.setSelection(editTextCaption.getText().length());
+        this.ignoreEditText = false;
+    }
+
+    public void setText(TLRPC.TL_textWithEntities tL_textWithEntities) {
+        this.ignoreEditText = true;
+        this.editText.setText(MessageObject.formatTextWithEntities(tL_textWithEntities, false));
+        EditTextCaption editTextCaption = this.editText;
+        editTextCaption.setSelection(editTextCaption.getText().length());
+        this.ignoreEditText = false;
+    }
+
+    public CharSequence getText() {
+        return this.editText.getText();
+    }
+
+    public TLRPC.TL_textWithEntities getTextWithEntities() {
+        TLRPC.TL_textWithEntities tL_textWithEntities = new TLRPC.TL_textWithEntities();
+        CharSequence[] charSequenceArr = {getText()};
+        tL_textWithEntities.entities = MediaDataController.getInstance(UserConfig.selectedAccount).getEntities(charSequenceArr, true);
+        tL_textWithEntities.text = charSequenceArr[0].toString();
+        return tL_textWithEntities;
+    }
+
+    public boolean validate() {
+        return this.maxLength < 0 || this.editText.getText().length() <= this.maxLength;
+    }
+
+    public void setDivider(boolean z) {
+        this.needDivider = z;
+        setWillNotDraw(!z);
+    }
+
+    @Override // android.view.View
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if (this.needDivider) {
+            canvas.drawLine(LocaleController.isRTL ? 0.0f : AndroidUtilities.m1146dp(22.0f), getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? AndroidUtilities.m1146dp(22.0f) : 0), getMeasuredHeight() - 1, Theme.dividerPaint);
+        }
+    }
+
+    public void setMultiline(boolean z) {
+        if (z) {
+            this.editText.setMaxLines(5);
+            this.editText.setSingleLine(false);
+        } else {
+            this.editText.setMaxLines(1);
+            this.editText.setSingleLine(true);
+        }
+    }
+}
