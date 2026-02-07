@@ -418,7 +418,7 @@ public class SettingsNotificationController extends RecyclerViewController<Setti
       case TdlibNotificationManager.Status.INTERNAL_ERROR:
         return R.string.ShareNotificationError;
       case TdlibNotificationManager.Status.PUSH_SERVICE_ERROR:
-        return R.string.FirebaseErrorResolve;
+        return R.string.EnableKeepAliveService;
       case TdlibNotificationManager.Status.MISSING_PERMISSION:
       case TdlibNotificationManager.Status.ACCOUNT_NOT_SELECTED:
       case TdlibNotificationManager.Status.BLOCKED_ALL:
@@ -453,7 +453,7 @@ public class SettingsNotificationController extends RecyclerViewController<Setti
         guideRes = R.string.NotificationsGuideFirebaseUnavailable;
         break;
       case TdlibNotificationManager.Status.PUSH_SERVICE_ERROR:
-        return Lang.getMarkdownString(this, R.string.NotificationsGuideFirebaseError, Lang.boldCreator(), tdlib.context().getTokenError());
+        return Lang.getMarkdownString(this, R.string.NotificationsGuideFirebaseError, Lang.boldCreator());
       case TdlibNotificationManager.Status.INTERNAL_ERROR: {
         @StringRes int
           specificChatRes = R.string.NotificationsGuideErrorChat,
