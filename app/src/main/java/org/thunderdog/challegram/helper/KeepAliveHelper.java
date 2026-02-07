@@ -30,6 +30,7 @@ import org.thunderdog.challegram.service.TGXKeepAliveService;
 public class KeepAliveHelper {
   private static final String PREF_NAME = "tgx_keepalive";
   private static final String KEY_USE_NATIVE_KEEPALIVE = "use_native_keepalive";
+  private static final String KEY_PROMPT_SHOWN = "keepalive_prompt_shown";
 
   /**
    * Checks if the keep-alive service is enabled.
@@ -40,6 +41,40 @@ public class KeepAliveHelper {
   public static boolean isKeepAliveEnabled(Context context) {
     SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     return prefs.getBoolean(KEY_USE_NATIVE_KEEPALIVE, false);
+  }
+
+  /**
+   * Checks if the one-time prompt has been shown to the user.
+   * 
+   * @param context The application context
+   * @return true if prompt was already shown, false otherwise
+   */
+  public static boolean wasPromptShown(Context context) {
+    SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+    return prefs.getBoolean(KEY_PROMPT_SHOWN, false);
+  }
+
+  /**
+   * Marks the one-time prompt as shown.
+   * 
+   * @param context The application context
+   */
+  public static void markPromptAsShown(Context context) {
+    SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+    prefs.edit().putBoolean(KEY_PROMPT_SHOWN, true).apply();
+  }
+
+  /**
+   * Checks if the one-time prompt should be shown.
+   * Returns true if:
+   * - The prompt hasn't been shown before
+   * - The service is not already enabled
+   * 
+   * @param context The application context
+   * @return true if prompt should be shown, false otherwise
+   */
+  public static boolean shouldShowPrompt(Context context) {
+    return !wasPromptShown(context) && !isKeepAliveEnabled(context);
   }
 
   /**
