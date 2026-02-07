@@ -38,12 +38,10 @@ public class BatteryOptimizationHelper {
    */
   @RequiresApi(api = Build.VERSION_CODES.M)
   public static boolean isIgnoringBatteryOptimizations(Context context) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-      if (powerManager != null) {
-        String packageName = context.getPackageName();
-        return powerManager.isIgnoringBatteryOptimizations(packageName);
-      }
+    PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+    if (powerManager != null) {
+      String packageName = context.getPackageName();
+      return powerManager.isIgnoringBatteryOptimizations(packageName);
     }
     return false;
   }
@@ -58,25 +56,23 @@ public class BatteryOptimizationHelper {
    */
   @RequiresApi(api = Build.VERSION_CODES.M)
   public static void requestIgnoreBatteryOptimizations(Context context) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      // Check if we're already whitelisted
-      if (!isIgnoringBatteryOptimizations(context)) {
+    // Check if we're already whitelisted
+    if (!isIgnoringBatteryOptimizations(context)) {
+      try {
+        Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+        intent.setData(Uri.parse("package:" + context.getPackageName()));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+      } catch (Exception e) {
+        // If the direct request fails, open the general battery optimization settings
         try {
           Intent intent = new Intent();
-          intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-          intent.setData(Uri.parse("package:" + context.getPackageName()));
+          intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
           intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
           context.startActivity(intent);
-        } catch (Exception e) {
-          // If the direct request fails, open the general battery optimization settings
-          try {
-            Intent intent = new Intent();
-            intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
-          } catch (Exception ex) {
-            // Ignore if both attempts fail
-          }
+        } catch (Exception ex) {
+          // Ignore if both attempts fail
         }
       }
     }

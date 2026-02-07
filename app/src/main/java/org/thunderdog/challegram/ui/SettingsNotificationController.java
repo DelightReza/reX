@@ -1480,8 +1480,7 @@ public class SettingsNotificationController extends RecyclerViewController<Setti
       boolean value = adapter.toggleView(v);
       Settings.instance().setNewSetting(Settings.SETTING_FLAG_FOREGROUND_SERVICE_ENABLED, value);
       context.tooltipManager().builder(v).icon(R.drawable.baseline_info_24)
-        .show(tdlib, Lang.getMarkdownString(this, value ? R.string.ForegroundSyncDescOn : R.string.ForegroundSyncDescOff))
-        .hideDelayed(true, 5, TimeUnit.SECONDS);
+        .show(tdlib, Lang.getMarkdownString(this, value ? R.string.ForegroundSyncDescOn : R.string.ForegroundSyncDescOff));
     } else if (viewId == R.id.btn_tgxKeepAlive) {
       boolean value = adapter.toggleView(v);
       org.thunderdog.challegram.helper.KeepAliveHelper.setKeepAliveEnabled(context(), value);

@@ -98,8 +98,8 @@ public class TGXKeepAliveService extends Service {
     );
 
     NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-      .setContentTitle("TelegramX Keep Alive")
-      .setContentText("Keeping app connected")
+      .setContentTitle(getString(R.string.TGXKeepAliveNotificationTitle))
+      .setContentText(getString(R.string.TGXKeepAliveNotificationText))
       .setSmallIcon(R.drawable.baseline_access_time_24)
       .setContentIntent(pendingIntent)
       .setPriority(NotificationCompat.PRIORITY_LOW) // Low priority for compatibility

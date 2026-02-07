@@ -5566,10 +5566,12 @@
   <string name="ForegroundSyncDescOn">You may periodically see **\"Checking for new messages\"** in the system tray while app is closed until all notifications are properly shown.</string>
   <string name="ForegroundSyncDescOff">You may see **\"You may have a new message\"** notification in the system tray when some notifications couldn\'t be shown.</string>
 
-  <string name="TGXKeepAliveService">TelegramX Alive Service</string>
+  <string name="TGXKeepAliveService">Telegram X Alive Service</string>
   <string name="TGXKeepAliveServiceDesc">Prevents Android from killing the app process. Shows a persistent notification in the system tray to keep the app running in the background.</string>
-  <string name="TGXKeepAliveServiceOn">TelegramX Keep Alive service is now **enabled**. You will see a persistent notification in the system tray.</string>
-  <string name="TGXKeepAliveServiceOff">TelegramX Keep Alive service is now **disabled**. The notification has been removed.</string>
+  <string name="TGXKeepAliveServiceOn">Telegram X Keep Alive service is now **enabled**. You will see a persistent notification in the system tray.</string>
+  <string name="TGXKeepAliveServiceOff">Telegram X Keep Alive service is now **disabled**. The notification has been removed.</string>
+  <string name="TGXKeepAliveNotificationTitle">Telegram X Keep Alive</string>
+  <string name="TGXKeepAliveNotificationText">Keeping app connected</string>
 
   <string name="UsernamesMy">Active Usernames</string>
   <string name="UsernamesMyHint">Drag and drop usernames to change order of their appearance on the profile screen.</string>
