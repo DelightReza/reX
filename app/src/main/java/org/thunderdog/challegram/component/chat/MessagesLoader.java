@@ -1720,9 +1720,25 @@ public class MessagesLoader implements Client.ResultHandler {
                     TdApi.File photoFile = new TdApi.File();
                     photoFile.remote = new TdApi.RemoteFile("", "", false, false, 0);
                     if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
-                      photoFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, 0, 0);
+                      // Get actual file size
+                      long fileSize = 0;
+                      try {
+                        java.io.File file = new java.io.File(deleted.getMediaPath());
+                        if (file.exists()) {
+                          fileSize = file.length();
+                        }
+                      } catch (Exception e) {
+                        android.util.Log.w("REX", "Could not get file size for: " + deleted.getMediaPath(), e);
+                      }
+                      photoFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, (int)fileSize, (int)fileSize);
+                      photoFile.id = 0;
+                      photoFile.size = (long)fileSize;
+                      photoFile.expectedSize = (long)fileSize;
                     } else {
                       photoFile.local = new TdApi.LocalFile("", false, false, false, false, 0, 0, 0);
+                      photoFile.id = 0;
+                      photoFile.size = 0;
+                      photoFile.expectedSize = 0;
                     }
                     TdApi.PhotoSize photoSize = new TdApi.PhotoSize("m", photoFile, 640, 480, new int[0]);
                     TdApi.Photo photo = new TdApi.Photo(false, null, new TdApi.PhotoSize[]{photoSize});
@@ -1732,9 +1748,25 @@ public class MessagesLoader implements Client.ResultHandler {
                     TdApi.File videoFile = new TdApi.File();
                     videoFile.remote = new TdApi.RemoteFile("", "", false, false, 0);
                     if (deleted.getMediaPath() != null && !deleted.getMediaPath().isEmpty()) {
-                      videoFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, 0, 0);
+                      // Get actual file size
+                      long fileSize = 0;
+                      try {
+                        java.io.File file = new java.io.File(deleted.getMediaPath());
+                        if (file.exists()) {
+                          fileSize = file.length();
+                        }
+                      } catch (Exception e) {
+                        android.util.Log.w("REX", "Could not get file size for: " + deleted.getMediaPath(), e);
+                      }
+                      videoFile.local = new TdApi.LocalFile(deleted.getMediaPath(), true, true, false, true, 0, (int)fileSize, (int)fileSize);
+                      videoFile.id = 0;
+                      videoFile.size = (long)fileSize;
+                      videoFile.expectedSize = (long)fileSize;
                     } else {
                       videoFile.local = new TdApi.LocalFile("", false, false, false, false, 0, 0, 0);
+                      videoFile.id = 0;
+                      videoFile.size = 0;
+                      videoFile.expectedSize = 0;
                     }
                     TdApi.Video video = new TdApi.Video(0, 640, 480, "video.mp4", "video/mp4", false, false, null, null, videoFile);
                     String caption = deleted.getText() != null ? deleted.getText().replace("[Video]", "").replace(": ", "") : "";
