@@ -765,8 +765,6 @@ public class SettingsBugController extends RecyclerViewController<SettingsBugCon
           items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.Experiment_NoEdgeToEdgeInfo));
         }
 
-        // Removed: Force alternative push service experimental setting (no longer needed in FOSS build)
-
         if (items.isEmpty()) {
           items.add(new ListItem(ListItem.TYPE_EMPTY, 0, 0, R.string.ExperimentalSettingsUnavailable));
         }

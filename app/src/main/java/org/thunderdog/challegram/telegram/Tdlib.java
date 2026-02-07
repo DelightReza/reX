@@ -5870,7 +5870,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   }
 
   public TdApi.PhoneNumberAuthenticationSettings phoneNumberAuthenticationSettings (Context context) {
-    // Firebase authentication disabled in FOSS build
+    // Firebase authentication not available in FOSS build
     TdApi.FirebaseAuthenticationSettings firebaseAuthenticationSettings = null;
     return new TdApi.PhoneNumberAuthenticationSettings(
       false, // TODO transparently request permission & enter flash call
