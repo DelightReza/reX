@@ -976,6 +976,9 @@ public class SettingsNotificationController extends RecyclerViewController<Setti
         } else if (itemId == R.id.btn_foregroundSync) {
           boolean value = Settings.instance().getNewSetting(Settings.SETTING_FLAG_FOREGROUND_SERVICE_ENABLED);
           view.getToggler().setRadioEnabled(value, isUpdate);
+        } else if (itemId == R.id.btn_tgxKeepAlive) {
+          boolean value = org.thunderdog.challegram.helper.KeepAliveHelper.isKeepAliveEnabled(context());
+          view.getToggler().setRadioEnabled(value, isUpdate);
         } else if (itemId == R.id.btn_inApp_chatSounds) {
           view.getToggler().setRadioEnabled(tdlib.notifications().areInAppChatSoundsEnabled(), isUpdate);
         } else if (itemId == R.id.btn_customChat_pinnedMessages) {
@@ -1234,6 +1237,11 @@ public class SettingsNotificationController extends RecyclerViewController<Setti
         }
 
         items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_tgxKeepAlive, 0, R.string.TGXKeepAliveService));
+        items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+        items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, Lang.getMarkdownString(this, R.string.TGXKeepAliveServiceDesc)));
+
+        items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
         items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_archiveSettings, 0, R.string.ArchiveSettings));
         items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
         items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.ArchiveSettingsDesc));
@@ -1473,6 +1481,12 @@ public class SettingsNotificationController extends RecyclerViewController<Setti
       Settings.instance().setNewSetting(Settings.SETTING_FLAG_FOREGROUND_SERVICE_ENABLED, value);
       context.tooltipManager().builder(v).icon(R.drawable.baseline_info_24)
         .show(tdlib, Lang.getMarkdownString(this, value ? R.string.ForegroundSyncDescOn : R.string.ForegroundSyncDescOff))
+        .hideDelayed(true, 5, TimeUnit.SECONDS);
+    } else if (viewId == R.id.btn_tgxKeepAlive) {
+      boolean value = adapter.toggleView(v);
+      org.thunderdog.challegram.helper.KeepAliveHelper.setKeepAliveEnabled(context(), value);
+      context.tooltipManager().builder(v).icon(R.drawable.baseline_info_24)
+        .show(tdlib, Lang.getMarkdownString(this, value ? R.string.TGXKeepAliveServiceOn : R.string.TGXKeepAliveServiceOff))
         .hideDelayed(true, 5, TimeUnit.SECONDS);
     } else if (viewId == R.id.btn_inApp_chatSounds) {
       tdlib.notifications().toggleInAppChatSoundsEnabled();
