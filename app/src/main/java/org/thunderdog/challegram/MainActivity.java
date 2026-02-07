@@ -14,6 +14,7 @@
  */
 package org.thunderdog.challegram;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -35,6 +36,7 @@ import org.drinkless.tdlib.TdApi;
 import org.thunderdog.challegram.config.Config;
 import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.data.TD;
+import org.thunderdog.challegram.helper.KeepAliveHelper;
 import org.thunderdog.challegram.helper.LiveLocationHelper;
 import org.thunderdog.challegram.loader.gif.LottieCache;
 import org.thunderdog.challegram.navigation.BackHeaderButton;
@@ -1500,6 +1502,55 @@ public class MainActivity extends BaseActivity implements GlobalAccountListener,
     tdlib.context().dateManager().checkCurrentDate();
     UI.startNotificationService();
     TemporaryNotification.hide(this);
+    
+    // Show one-time keep-alive prompt
+    showKeepAlivePromptIfNeeded();
+  }
+
+  private void showKeepAlivePromptIfNeeded() {
+    // Only show if prompt hasn't been shown and service not already enabled
+    if (!KeepAliveHelper.shouldShowPrompt(this)) {
+      return;
+    }
+
+    // Delay the prompt slightly to avoid showing immediately on app start
+    handler.postDelayed(() -> {
+      if (isDestroyed() || isFinishing()) {
+        return;
+      }
+
+      AlertDialog.Builder builder = new AlertDialog.Builder(this, Theme.dialogTheme());
+      builder.setTitle(Lang.getString(R.string.TGXKeepAlivePromptTitle));
+      builder.setMessage(Lang.getString(R.string.TGXKeepAlivePromptMessage));
+      
+      // "Enable Now" button
+      builder.setPositiveButton(Lang.getString(R.string.TGXKeepAlivePromptEnable), (dialog, which) -> {
+        KeepAliveHelper.markPromptAsShown(this);
+        KeepAliveHelper.setKeepAliveEnabled(this, true);
+        UI.showToast(Lang.getString(R.string.TGXKeepAliveServiceOn), Toast.LENGTH_LONG);
+      });
+      
+      // "Open Settings" button
+      builder.setNeutralButton(Lang.getString(R.string.TGXKeepAlivePromptSettings), (dialog, which) -> {
+        KeepAliveHelper.markPromptAsShown(this);
+        // Navigate to Settings > Notifications
+        SettingsNotificationController c = new SettingsNotificationController(this, tdlib);
+        navigation.navigateTo(c);
+      });
+      
+      // "Later" button
+      builder.setNegativeButton(Lang.getString(R.string.TGXKeepAlivePromptLater), (dialog, which) -> {
+        KeepAliveHelper.markPromptAsShown(this);
+        dialog.dismiss();
+      });
+      
+      builder.setCancelable(true);
+      builder.setOnCancelListener(dialog -> {
+        KeepAliveHelper.markPromptAsShown(this);
+      });
+      
+      showAlert(builder);
+    }, 1500); // 1.5 second delay
   }
 
   @Override

@@ -47,6 +47,7 @@ import org.thunderdog.challegram.config.Config;
 import org.thunderdog.challegram.core.BaseThread;
 import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.data.TD;
+import org.thunderdog.challegram.helper.KeepAliveHelper;
 import org.thunderdog.challegram.helper.Recorder;
 import org.thunderdog.challegram.navigation.ViewController;
 import org.thunderdog.challegram.sync.SyncAdapter;
@@ -498,6 +499,11 @@ public class TdlibNotificationManager implements UI.StateListener, Passcode.Lock
   // Properties
 
   public boolean hasLocalNotificationProblem () {
+    // If Keep-Alive service is enabled, suppress all notification problem indicators
+    // since the service provides an alternative to push notifications for FOSS builds
+    if (KeepAliveHelper.isKeepAliveEnabled(UI.getAppContext())) {
+      return false;
+    }
     return areNotificationsBlockedGlobally() || areNotificationsBlocked(scopePrivate()) ||
       areNotificationsBlocked(scopeGroup()) || areNotificationsBlocked(scopeChannel()) ||
       !hasRemotePushService() ||
@@ -588,19 +594,29 @@ public class TdlibNotificationManager implements UI.StateListener, Passcode.Lock
     }
     boolean hasPushServices = hasRemotePushService();
     if (!hasPushServices) {
-      // Sync matters only when push service (firebase, hms, ...) unavailable
-      if (isSyncDisabledGlobally())
-        return Status.DISABLED_SYNC;
-      if (isSyncDisabledForApp())
-        return Status.DISABLED_APP_SYNC;
-      return Status.PUSH_SERVICE_MISSING;
+      // Check if Keep-Alive service is enabled as alternative to push services
+      boolean hasKeepAliveService = org.thunderdog.challegram.helper.KeepAliveHelper.isKeepAliveEnabled(UI.getAppContext());
+      if (!hasKeepAliveService) {
+        // Sync matters only when push service (firebase, hms, ...) unavailable
+        if (isSyncDisabledGlobally())
+          return Status.DISABLED_SYNC;
+        if (isSyncDisabledForApp())
+          return Status.DISABLED_APP_SYNC;
+        return Status.PUSH_SERVICE_MISSING;
+      }
     }
     if (tdlib.settings().hasNotificationProblems())
       return Status.INTERNAL_ERROR;
     if (!tdlib.account().forceEnableNotifications() && Settings.instance().checkNotificationFlag(Settings.NOTIFICATION_FLAG_ONLY_SELECTED_ACCOUNTS))
       return Status.ACCOUNT_NOT_SELECTED;
-    if (tdlib.context().getTokenState() == TdlibManager.TokenState.ERROR)
-      return Status.PUSH_SERVICE_ERROR;
+    if (tdlib.context().getTokenState() == TdlibManager.TokenState.ERROR) {
+      // Suppress push service error when Keep-Alive service is enabled
+      // Keep-Alive service serves as FOSS alternative to proprietary push services
+      boolean hasKeepAliveService = org.thunderdog.challegram.helper.KeepAliveHelper.isKeepAliveEnabled(UI.getAppContext());
+      if (!hasKeepAliveService) {
+        return Status.PUSH_SERVICE_ERROR;
+      }
+    }
     return Status.NOT_BLOCKED;
   }
 
