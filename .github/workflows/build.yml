@@ -1,0 +1,86 @@
+name: Build Telegram X
+
+on:
+  pull_request:
+    branches: [ "dev" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Signed APK
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: true
+          fetch-depth: 1
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            git \
+            git-lfs \
+            wget \
+            unzip \
+            make \
+            clang \
+            gperf \
+            yasm \
+            cmake \
+            ninja-build \
+            pkg-config
+           git lfs install
+
+      - name: Setup Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
+          echo "keystore.file=$(pwd)/keystore.jks" > keystore.properties
+          echo "keystore.password=${{ secrets.KEYSTORE_PASSWORD }}" >> keystore.properties
+          echo "key.alias=${{ secrets.KEY_ALIAS }}" >> keystore.properties
+          echo "key.password=${{ secrets.KEY_PASSWORD }}" >> keystore.properties
+
+      - name: Create local.properties
+        run: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          echo "keystore.file=keystore.properties" >> local.properties
+          echo "telegram.api_id=${{ secrets.TELEGRAM_API_ID }}" >> local.properties
+          echo "telegram.api_hash=${{ secrets.TELEGRAM_API_HASH }}" >> local.properties
+          echo "app.id=org.thunderdog.challegram" >> local.properties
+          echo "app.name=Telegram X" >> local.properties
+
+      - name: Run Setup Script
+        run: |
+          chmod +x scripts/setup.sh
+          export TERM=xterm
+          yes | ./scripts/setup.sh
+
+      - name: Grant Execute Permission for Gradlew
+        run: chmod +x gradlew
+
+      - name: Build Arm64 Release APK
+        run: ./gradlew assembleLatestArm64Release --stacktrace
+
+      - name: Locate APKs
+        run: |
+          echo "Finding APK files..."
+          {
+            echo "APK_PATHS<<EOF"
+            find -name "*.apk" -type f
+            echo "EOF"
+          } >> $GITHUB_ENV
+
+      - name: Upload All APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: TelegramX-All-APKs
+          path: ${{ env.APK_PATHS }}
