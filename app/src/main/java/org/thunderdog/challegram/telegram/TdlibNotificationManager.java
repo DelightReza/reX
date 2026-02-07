@@ -603,8 +603,14 @@ public class TdlibNotificationManager implements UI.StateListener, Passcode.Lock
       return Status.INTERNAL_ERROR;
     if (!tdlib.account().forceEnableNotifications() && Settings.instance().checkNotificationFlag(Settings.NOTIFICATION_FLAG_ONLY_SELECTED_ACCOUNTS))
       return Status.ACCOUNT_NOT_SELECTED;
-    if (tdlib.context().getTokenState() == TdlibManager.TokenState.ERROR)
-      return Status.PUSH_SERVICE_ERROR;
+    if (tdlib.context().getTokenState() == TdlibManager.TokenState.ERROR) {
+      // Suppress push service error when Keep-Alive service is enabled
+      // Keep-Alive service serves as FOSS alternative to proprietary push services
+      boolean hasKeepAliveService = org.thunderdog.challegram.helper.KeepAliveHelper.isKeepAliveEnabled(UI.getAppContext());
+      if (!hasKeepAliveService) {
+        return Status.PUSH_SERVICE_ERROR;
+      }
+    }
     return Status.NOT_BLOCKED;
   }
 

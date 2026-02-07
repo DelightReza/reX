@@ -29,7 +29,9 @@ class NoOpDeviceTokenRetriever : DeviceTokenRetriever("noop") {
 
   override fun performInitialization(context: Context): Boolean {
     PushManagerBridge.log("NoOpDeviceTokenRetriever: No push notification support in FOSS build")
-    return false
+    // Return true to indicate "successful" initialization as a no-op retriever
+    // This prevents spurious error messages about initialization failures
+    return true
   }
 
   override fun fetchDeviceToken(context: Context, listener: TokenRetrieverListener) {
