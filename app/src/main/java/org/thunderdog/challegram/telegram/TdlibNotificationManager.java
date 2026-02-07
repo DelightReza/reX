@@ -501,7 +501,7 @@ public class TdlibNotificationManager implements UI.StateListener, Passcode.Lock
   public boolean hasLocalNotificationProblem () {
     // If Keep-Alive service is enabled, suppress all notification problem indicators
     // since the service provides an alternative to push notifications for FOSS builds
-    if (KeepAliveHelper.isKeepAliveEnabled(context())) {
+    if (KeepAliveHelper.isKeepAliveEnabled(UI.getAppContext())) {
       return false;
     }
     return areNotificationsBlockedGlobally() || areNotificationsBlocked(scopePrivate()) ||
