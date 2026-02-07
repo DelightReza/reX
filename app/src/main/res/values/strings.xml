@@ -5575,7 +5575,7 @@
   <string name="TGXKeepAliveNotificationText">Keeping app connected</string>
   
   <string name="TGXKeepAlivePromptTitle">Stay Connected to Telegram</string>
-  <string name="TGXKeepAlivePromptMessage">This FOSS build doesn\'t include Google Play Services for push notifications.\n\nTo ensure you receive messages reliably, consider enabling the **Telegram X Alive Service** in Settings.\n\nThis will show a low-priority notification to keep the app connected.</string>
+  <string name="TGXKeepAlivePromptMessage">To ensure you receive messages reliably, consider enabling the Telegram X Alive Service in Settings.\n\nThis will show a low-priority notification to keep the app connected.</string>
   <string name="TGXKeepAlivePromptEnable">Enable Now</string>
   <string name="TGXKeepAlivePromptLater">Later</string>
   <string name="TGXKeepAlivePromptSettings">Open Settings</string>
