@@ -471,9 +471,7 @@ gradle.projectsEvaluated {
     it.startsWith("pre") && it.endsWith("ReleaseBuild")
   }.configureEach {
     dependsOn(updateLanguages)
-    if (!config.isExperimentalBuild) {
-      dependsOn(validateApiTokens)
-    }
+    // validateApiTokens removed - Firebase has been removed for FOSS compliance
   }
 }
 
@@ -648,9 +646,4 @@ dependencies {
   implementation(libs.mp4parser.isoparser)
 }
 
-if (!config.isExperimentalBuild) {
-  apply(plugin = libs.plugins.google.services.get().pluginId)
-  if (config.isHuaweiBuild) {
-    apply(plugin = libs.huawei.agconnect.get().group)
-  }
-}
+// Google Services and Huawei plugins removed - moved to FOSS build without proprietary push services
