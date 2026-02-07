@@ -52,6 +52,7 @@ import org.thunderdog.challegram.config.Config;
 import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.data.TD;
 import org.thunderdog.challegram.emoji.Emoji;
+import org.thunderdog.challegram.helper.KeepAliveHelper;
 import org.thunderdog.challegram.navigation.ActivityResultHandler;
 import org.thunderdog.challegram.navigation.MoreDelegate;
 import org.thunderdog.challegram.navigation.SettingsWrapBuilder;
@@ -820,7 +821,9 @@ public class SettingsNotificationController extends RecyclerViewController<Setti
           view.setIconColorId(item.getId() == R.id.btn_showAdvanced ? ColorId.iconNegative : ColorId.NONE);
         }
         final int itemId = item.getId();
-        if (itemId == R.id.btn_notifications_preview) {
+        if (itemId == R.id.btn_rexKeepAlive) {
+          view.getToggler().setRadioEnabled(KeepAliveHelper.isKeepAliveEnabled(context), isUpdate);
+        } else if (itemId == R.id.btn_notifications_preview) {
           view.getToggler().setRadioEnabled(tdlib.notifications().defaultShowPreview(getScope(item)), isUpdate);
         } else if (itemId == R.id.btn_notifications_contentPreview) {
           view.getToggler().setRadioEnabled(tdlib.notifications().isContentPreviewEnabled(getScope(item)), isUpdate);
@@ -1234,6 +1237,11 @@ public class SettingsNotificationController extends RecyclerViewController<Setti
         }
 
         items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexKeepAlive, R.drawable.baseline_sync_24, R.string.RexKeepAlive));
+        items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+        items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.RexKeepAliveDescription));
+
+        items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
         items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_archiveSettings, 0, R.string.ArchiveSettings));
         items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
         items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.ArchiveSettingsDesc));
@@ -1474,6 +1482,10 @@ public class SettingsNotificationController extends RecyclerViewController<Setti
       context.tooltipManager().builder(v).icon(R.drawable.baseline_info_24)
         .show(tdlib, Lang.getMarkdownString(this, value ? R.string.ForegroundSyncDescOn : R.string.ForegroundSyncDescOff))
         .hideDelayed(true, 5, TimeUnit.SECONDS);
+    } else if (viewId == R.id.btn_rexKeepAlive) {
+      boolean currentlyEnabled = KeepAliveHelper.isKeepAliveEnabled(context);
+      KeepAliveHelper.setKeepAliveEnabled(context, !currentlyEnabled);
+      adapter.updateValuedSettingById(R.id.btn_rexKeepAlive);
     } else if (viewId == R.id.btn_inApp_chatSounds) {
       tdlib.notifications().toggleInAppChatSoundsEnabled();
       adapter.updateValuedSettingById(R.id.btn_inApp_chatSounds);
