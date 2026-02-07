@@ -588,12 +588,16 @@ public class TdlibNotificationManager implements UI.StateListener, Passcode.Lock
     }
     boolean hasPushServices = hasRemotePushService();
     if (!hasPushServices) {
-      // Sync matters only when push service (firebase, hms, ...) unavailable
-      if (isSyncDisabledGlobally())
-        return Status.DISABLED_SYNC;
-      if (isSyncDisabledForApp())
-        return Status.DISABLED_APP_SYNC;
-      return Status.PUSH_SERVICE_MISSING;
+      // Check if Keep-Alive service is enabled as alternative to push services
+      boolean hasKeepAliveService = org.thunderdog.challegram.helper.KeepAliveHelper.isKeepAliveEnabled(UI.getAppContext());
+      if (!hasKeepAliveService) {
+        // Sync matters only when push service (firebase, hms, ...) unavailable
+        if (isSyncDisabledGlobally())
+          return Status.DISABLED_SYNC;
+        if (isSyncDisabledForApp())
+          return Status.DISABLED_APP_SYNC;
+        return Status.PUSH_SERVICE_MISSING;
+      }
     }
     if (tdlib.settings().hasNotificationProblems())
       return Status.INTERNAL_ERROR;
