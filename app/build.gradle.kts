@@ -577,16 +577,6 @@ dependencies {
     libs.google.mlkit.language.id.legacy,
     libs.google.mlkit.language.id.latest
   )
-  // Firebase: https://firebase.google.com/support/release-notes/android
-  flavorImplementation(
-    libs.google.firebase.messaging.legacy,
-    libs.google.firebase.messaging.lollipop,
-    libs.google.firebase.messaging.latest
-  ) {
-    exclude(group = "com.google.firebase", module = "firebase-core")
-    exclude(group = "com.google.firebase", module = "firebase-analytics")
-    exclude(group = "com.google.firebase", module = "firebase-measurement-connector")
-  }
   // Play Integrity: https://developer.android.com/google/play/integrity/reference/com/google/android/play/core/release-notes
   flavorImplementation(
     libs.google.play.integrity.legacy,
