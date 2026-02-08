@@ -119,7 +119,7 @@ public class RexHiddenChatsController extends RecyclerViewController<Void> imple
           "Unhide \"" + chatTitle + "\"?",
           new int[] {R.id.btn_rexUnhideChat, R.id.btn_cancel},
           new String[] {"Unhide", "Cancel"},
-          new int[] {ViewController.OptionColor.RED, ViewController.OptionColor.NORMAL},
+          new int[] {OptionColor.RED, OptionColor.NORMAL},
           new int[] {R.drawable.baseline_visibility_24, R.drawable.baseline_cancel_24},
           (itemView, id) -> {
             if (id == R.id.btn_rexUnhideChat) {
