@@ -1416,4 +1416,107 @@
   <item type="id" name="btn_playback_speed_1_5" />
   <item type="id" name="btn_playback_speed_2_0" />
   <item type="id" name="btn_tgxKeepAlive" />
+
+  <!-- reX Settings -->
+  <item type="id" name="controller_rexSettings" />
+  <item type="id" name="btn_rexSettings" />
+  <item type="id" name="btn_rexGhostMode" />
+  <item type="id" name="btn_rexSpy" />
+  <item type="id" name="btn_rexPrivacySecurity" />
+  <item type="id" name="btn_rexCustomization" />
+
+  <!-- reX Ghost Mode -->
+  <item type="id" name="controller_rexGhostSettings" />
+  <item type="id" name="btn_rexGhostToggle" />
+  <item type="id" name="btn_rexGhostNoRead" />
+  <item type="id" name="btn_rexGhostNoStories" />
+  <item type="id" name="btn_rexGhostNoOnline" />
+  <item type="id" name="btn_rexGhostNoTyping" />
+  <item type="id" name="btn_rexGhostGoOffline" />
+  <item type="id" name="btn_rexGhostReadOnInteract" />
+  <item type="id" name="btn_rexGhostSchedule" />
+  <item type="id" name="btn_rexGhostSendNoSound" />
+  <item type="id" name="btn_rexGhostStoryAlert" />
+
+  <!-- reX Spy -->
+  <item type="id" name="controller_rexSpySettings" />
+  <item type="id" name="btn_rexSpySaveDeleted" />
+  <item type="id" name="btn_rexSpySaveEdits" />
+  <item type="id" name="btn_rexSpySaveBotDialogs" />
+  <item type="id" name="btn_rexSpySaveReadDate" />
+  <item type="id" name="btn_rexSpySaveLastSeen" />
+  <item type="id" name="btn_rexSpySaveAttachments" />
+  <item type="id" name="btn_rexSpyAttachmentsFolder" />
+  <item type="id" name="btn_rexSpyMaxFolderSize" />
+  <item type="id" name="btn_rexSpyExportDb" />
+  <item type="id" name="btn_rexSpyImportDb" />
+  <item type="id" name="btn_rexSpyClearDb" />
+
+  <!-- reX Privacy & Security -->
+  <item type="id" name="controller_rexPrivacySecurity" />
+  <item type="id" name="btn_rexLockArchived" />
+  <item type="id" name="btn_rexLockCalls" />
+  <item type="id" name="btn_rexLockSecret" />
+  <item type="id" name="btn_rexLockSettings" />
+  <item type="id" name="btn_rexHowItWorks" />
+  <item type="id" name="btn_rexEditLockedChats" />
+  <item type="id" name="btn_rexHideLockedChats" />
+  <item type="id" name="btn_rexLockScreenshots" />
+  <item type="id" name="btn_rexShowNotifications" />
+  <item type="id" name="btn_rexLockedAccounts" />
+  <item type="id" name="btn_rexAllowDevicePin" />
+  <item type="id" name="btn_rexAuthTimeout" />
+  <item type="id" name="btn_rexHideMyPhone" />
+  <item type="id" name="btn_rexHideOthersPhone" />
+
+  <!-- reX Customization -->
+  <item type="id" name="controller_rexCustomization" />
+  <item type="id" name="btn_rexDisableColorfulReplies" />
+  <item type="id" name="btn_rexTranslucentDeleted" />
+  <item type="id" name="btn_rexDeletedMark" />
+  <item type="id" name="btn_rexDrawerOptions" />
+  <item type="id" name="btn_rexBypassRestrictions" />
+
+  <!-- reX Message Menu -->
+  <item type="id" name="btn_rexMarkAsRead" />
+  <item type="id" name="btn_rexBurnMessage" />
+  <item type="id" name="btn_rexForwardRestricted" />
+  <item type="id" name="btn_rexSaveRestricted" />
+  <item type="id" name="btn_messageRexForceRead" />
+  <item type="id" name="btn_messageRexForwardRestricted" />
+  <item type="id" name="btn_messageRexSaveViewOnce" />
+  <item type="id" name="btn_messageRexBurn" />
+  <item type="id" name="btn_messageRexViewEditHistory" />
+  <item type="id" name="btn_rexChatMenu" />
+  <item type="id" name="btn_rexViewDeleted" />
+  <item type="id" name="btn_rexReadExclusion" />
+  <item type="id" name="btn_rexTypeExclusion" />
+  <item type="id" name="btn_rexClearDeleted" />
+
+  <!-- reX Deleted/Edit History Controllers -->
+  <item type="id" name="controller_rexDeletedMessages" />
+  <item type="id" name="controller_rexEditHistory" />
+
+  <!-- reX Auth Timeout radio options -->
+  <item type="id" name="btn_rexAuthTimeoutAlways" />
+  <item type="id" name="btn_rexAuthTimeout10s" />
+  <item type="id" name="btn_rexAuthTimeout30s" />
+  <item type="id" name="btn_rexAuthTimeout1m" />
+  <item type="id" name="btn_rexAuthTimeout2m" />
+  <item type="id" name="btn_rexAuthTimeout5m" />
+
+  <!-- reX Folder Size radio options -->
+  <item type="id" name="btn_rexFolderSize300" />
+  <item type="id" name="btn_rexFolderSize1g" />
+  <item type="id" name="btn_rexFolderSize2g" />
+  <item type="id" name="btn_rexFolderSize5g" />
+  <item type="id" name="btn_rexFolderSize16g" />
+  <item type="id" name="btn_rexFolderSizeNone" />
+
+  <!-- reX Chat Context Menu -->
+  <item type="id" name="btn_rexHideChat" />
+  <item type="id" name="btn_rexUnhideChat" />
+
+  <!-- reX Hidden Chats Manager -->
+  <item type="id" name="controller_rexHiddenChats" />
 </resources>

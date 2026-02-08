@@ -5673,4 +5673,10 @@
   <string name="RestrictedContent">Restricted Content</string>
   <string name="SensitiveContent">Sensitive Content</string>
 
+  <!-- reX -->
+  <string name="RexDeletedMessages">Deleted Messages</string>
+  <string name="RexDeletedMessagesDescription">No deleted messages saved yet. Enable \"Save Deleted Messages\" in Spy settings.</string>
+  <string name="RexEditHistory">Edit History</string>
+  <string name="RexEditHistoryDescription">No edit history recorded for this message.</string>
+
 </resources>

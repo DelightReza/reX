@@ -58,6 +58,8 @@ import org.thunderdog.challegram.component.attach.MediaToReplacePickerManager;
 import org.thunderdog.challegram.component.chat.TdlibSingleUnreadReactionsManager;
 import org.thunderdog.challegram.component.dialogs.ChatView;
 import org.thunderdog.challegram.config.Config;
+import org.thunderdog.challegram.core.GhostInterceptor;
+import org.thunderdog.challegram.config.RexConfig;
 import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.data.AvatarPlaceholder;
 import org.thunderdog.challegram.data.ContentPreview;
@@ -433,6 +435,9 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
 
   private final Object clientLock = new Object();
   private final Object dataLock = new Object();
+  // --- REX MOD: Cache for saving deleted messages ---
+  private final java.util.concurrent.ConcurrentHashMap<Long, TdApi.Message> rexMessageCache = new java.util.concurrent.ConcurrentHashMap<>();
+  // --- END REX MOD ---
   private final HashMap<Long, TdApi.Chat> chats = new HashMap<>();
   private final HashMap<Long, TdApi.ChatActiveStories> activeStories = new HashMap<>();
   private final SparseIntArray storyListChatCount = new SparseIntArray();
@@ -1701,6 +1706,52 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   }
 
   private static <T extends TdApi.Object> void send (Client client, TdApi.Function<T> function, Client.ResultHandler handler) {
+    // --- REX GHOST MODE INTERCEPTOR ---
+    RexConfig config = RexConfig.getInstance();
+    if (config.isGhostMode()) {
+      int constructor = function.getConstructor();
+      if (config.getGhostNoRead()) {
+        if (constructor == TdApi.ViewMessages.CONSTRUCTOR) {
+          if (config.isForceReadRequest()) {
+            config.setForceReadRequest(false);
+          } else {
+            if (handler != null) handler.onResult(new TdApi.Ok());
+            return;
+          }
+        }
+      }
+      if (config.getGhostNoOnline()) {
+        if (constructor == TdApi.SetOption.CONSTRUCTOR) {
+          TdApi.SetOption opt = (TdApi.SetOption) function;
+          if ("online".equals(opt.name)) return;
+        }
+      }
+      if (config.getGhostNoTyping()) {
+        if (constructor == TdApi.SendChatAction.CONSTRUCTOR) return;
+      }
+      if (config.getGhostNoStories()) {
+        if (constructor == TdApi.OpenStory.CONSTRUCTOR) return;
+        if (constructor == TdApi.SetStoryReaction.CONSTRUCTOR) return;
+      }
+    }
+    // --- REX READ ON INTERACT ---
+    if (config.getReadOnInteract()) {
+      int constructor = function.getConstructor();
+      if (constructor == TdApi.SendMessage.CONSTRUCTOR) {
+        TdApi.SendMessage msg = (TdApi.SendMessage) function;
+        config.setForceReadRequest(true);
+        client.send(new TdApi.ViewMessages(msg.chatId, new long[0], new TdApi.MessageSourceOther(), true), result -> {
+          config.setForceReadRequest(false);
+        });
+      } else if (constructor == TdApi.AddMessageReaction.CONSTRUCTOR) {
+        TdApi.AddMessageReaction reaction = (TdApi.AddMessageReaction) function;
+        config.setForceReadRequest(true);
+        client.send(new TdApi.ViewMessages(reaction.chatId, new long[0], new TdApi.MessageSourceOther(), true), result -> {
+          config.setForceReadRequest(false);
+        });
+      }
+    }
+    // --- END REX INTERCEPTOR ---
     client.send(function, handler);
   }
 
@@ -7370,6 +7421,18 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   }
 
   private void updateNewMessage (TdApi.UpdateNewMessage update, boolean isUpdate) {
+    // --- REX MOD: Cache message for deletion tracking ---
+    if (RexConfig.getInstance().getSaveDeletedMessages()) {
+      rexMessageCache.put(update.message.id, update.message);
+      if (rexMessageCache.size() > 1000) {
+        java.util.Iterator<Long> iterator = rexMessageCache.keySet().iterator();
+        for (int i = 0; i < 100 && iterator.hasNext(); i++) {
+          iterator.next();
+          iterator.remove();
+        }
+      }
+    }
+    // --- END REX MOD ---
     if (update.message.sendingState instanceof TdApi.MessageSendingStatePending && update.message.content.getConstructor() != TdApi.MessageChatSetMessageAutoDeleteTime.CONSTRUCTOR) {
       addRemoveSendingMessage(update.message.chatId, update.message.id, true);
       if (isUpdate)
@@ -7543,10 +7606,110 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
 
     Arrays.sort(update.messageIds);
 
+    // --- REX MOD: Save deleted messages ---
+    if (RexConfig.getInstance().getSaveDeletedMessages()) {
+      try {
+        for (long messageId : update.messageIds) {
+          TdApi.Message msg = rexMessageCache.remove(messageId);
+          if (msg != null) {
+            saveMessageToDatabase(msg);
+            org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.markAsGhost(messageId);
+          } else {
+            final long finalMessageId = messageId;
+            final long chatId = update.chatId;
+            getMessage(chatId, finalMessageId, message -> {
+              if (message != null) {
+                saveMessageToDatabase(message);
+                org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.markAsGhost(finalMessageId);
+              }
+            });
+          }
+        }
+      } catch (Exception e) {
+        android.util.Log.e("REX", "Error saving deleted messages", e);
+      }
+    }
+    // --- END REX MOD ---
+
     listeners.updateMessagesDeleted(update);
 
     context.global().notifyUpdateMessagesDeleted(this, update);
   }
+
+  // --- REX MOD: Helper method to save message to database ---
+  private void saveMessageToDatabase(TdApi.Message msg) {
+    try {
+      org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(UI.getAppContext());
+      String text = null;
+      String mediaPath = null;
+      int contentType = 0;
+      if (msg.content != null) {
+        contentType = msg.content.getConstructor();
+        if (msg.content.getConstructor() == TdApi.MessageText.CONSTRUCTOR) {
+          text = ((TdApi.MessageText) msg.content).text.text;
+        } else if (msg.content.getConstructor() == TdApi.MessagePhoto.CONSTRUCTOR) {
+          TdApi.MessagePhoto photo = (TdApi.MessagePhoto) msg.content;
+          text = "[Photo]" + (photo.caption != null && !photo.caption.text.isEmpty() ? ": " + photo.caption.text : "");
+          if (RexConfig.getInstance().getSaveAttachments() && photo.photo.sizes.length > 0) {
+            TdApi.PhotoSize largestSize = photo.photo.sizes[photo.photo.sizes.length - 1];
+            if (largestSize.photo.local.isDownloadingCompleted) {
+              mediaPath = largestSize.photo.local.path;
+            }
+          }
+        } else if (msg.content.getConstructor() == TdApi.MessageVideo.CONSTRUCTOR) {
+          TdApi.MessageVideo video = (TdApi.MessageVideo) msg.content;
+          text = "[Video]" + (video.caption != null && !video.caption.text.isEmpty() ? ": " + video.caption.text : "");
+          if (RexConfig.getInstance().getSaveAttachments() && video.video.video.local.isDownloadingCompleted) {
+            mediaPath = video.video.video.local.path;
+          }
+        } else if (msg.content.getConstructor() == TdApi.MessageDocument.CONSTRUCTOR) {
+          TdApi.MessageDocument doc = (TdApi.MessageDocument) msg.content;
+          text = "[Document: " + doc.document.fileName + "]" + (doc.caption != null && !doc.caption.text.isEmpty() ? ": " + doc.caption.text : "");
+          if (RexConfig.getInstance().getSaveAttachments() && doc.document.document.local.isDownloadingCompleted) {
+            mediaPath = doc.document.document.local.path;
+          }
+        } else if (msg.content.getConstructor() == TdApi.MessageAudio.CONSTRUCTOR) {
+          TdApi.MessageAudio audio = (TdApi.MessageAudio) msg.content;
+          text = "[Audio: " + (audio.audio.title != null && !audio.audio.title.isEmpty() ? audio.audio.title : audio.audio.fileName) + "]";
+          if (RexConfig.getInstance().getSaveAttachments() && audio.audio.audio.local.isDownloadingCompleted) {
+            mediaPath = audio.audio.audio.local.path;
+          }
+        } else if (msg.content.getConstructor() == TdApi.MessageVoiceNote.CONSTRUCTOR) {
+          TdApi.MessageVoiceNote voice = (TdApi.MessageVoiceNote) msg.content;
+          text = "[Voice Message]";
+          if (RexConfig.getInstance().getSaveAttachments() && voice.voiceNote.voice.local.isDownloadingCompleted) {
+            mediaPath = voice.voiceNote.voice.local.path;
+          }
+        } else if (msg.content.getConstructor() == TdApi.MessageSticker.CONSTRUCTOR) {
+          TdApi.MessageSticker sticker = (TdApi.MessageSticker) msg.content;
+          text = "[Sticker: " + sticker.sticker.emoji + "]";
+        } else if (msg.content.getConstructor() == TdApi.MessageAnimation.CONSTRUCTOR) {
+          TdApi.MessageAnimation anim = (TdApi.MessageAnimation) msg.content;
+          text = "[GIF]" + (anim.caption != null && !anim.caption.text.isEmpty() ? ": " + anim.caption.text : "");
+        } else {
+          text = "[" + msg.content.getClass().getSimpleName() + "]";
+        }
+      }
+      long senderId = 0;
+      if (msg.senderId != null) {
+        if (msg.senderId.getConstructor() == TdApi.MessageSenderUser.CONSTRUCTOR) {
+          senderId = ((TdApi.MessageSenderUser) msg.senderId).userId;
+        } else if (msg.senderId.getConstructor() == TdApi.MessageSenderChat.CONSTRUCTOR) {
+          senderId = ((TdApi.MessageSenderChat) msg.senderId).chatId;
+        }
+      }
+      org.thunderdog.challegram.rex.db.SavedMessage savedMsg = new org.thunderdog.challegram.rex.db.SavedMessage(
+        0, msg.chatId, msg.id, senderId, text, msg.date, false, contentType, mediaPath
+      );
+      db.rexDao().insertMessage(savedMsg);
+      java.util.List<Long> msgIds = new java.util.ArrayList<>();
+      msgIds.add(msg.id);
+      db.rexDao().markAsDeleted(msg.chatId, msgIds);
+    } catch (Exception e) {
+      android.util.Log.e("REX", "Failed to save message to database", e);
+    }
+  }
+  // --- END REX MOD ---
 
   // Updates: SAVED MESSAGES
 

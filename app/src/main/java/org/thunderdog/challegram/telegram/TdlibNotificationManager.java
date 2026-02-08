@@ -2197,6 +2197,10 @@ public class TdlibNotificationManager implements UI.StateListener, Passcode.Lock
 
   @TdlibThread
   void onUpdateNotificationGroup (TdApi.UpdateNotificationGroup update) {
+    // reX: Block notifications for hidden chats
+    if (org.thunderdog.challegram.security.RexSecurityManager.getInstance().shouldHideChat(update.chatId)) {
+      return;
+    }
     sendLockedMessage(Message.obtain(queue.getHandler(), ON_UPDATE_NOTIFICATION_GROUP, new Object[] {this, update}), null);
   }
 

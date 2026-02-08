@@ -29,6 +29,7 @@ import org.drinkless.tdlib.TdApi;
 import org.thunderdog.challegram.R;
 import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.data.TGChat;
+import org.thunderdog.challegram.security.RexSecurityManager;
 import org.thunderdog.challegram.telegram.Tdlib;
 import org.thunderdog.challegram.ui.ChatsController;
 import org.thunderdog.challegram.v.ChatsRecyclerView;
@@ -359,6 +360,18 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsViewHolder> {
     return -1;
   }
 
+  // reX: Remove a specific hidden chat from the displayed list
+  public void removeHiddenChatById (long chatId) {
+    int chatIndex = indexOfChat(chatId);
+    if (chatIndex != -1) {
+      int position = getItemPositionByChatIndex(chatIndex);
+      removeChat(chatIndex);
+      notifyItemRemoved(position);
+      notifyItemChanged(getInfoItemPosition());
+      context.checkListState();
+    }
+  }
+
   public void addMore (TGChat[] data) {
     if (data.length == 0)
       return;
@@ -376,6 +389,10 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsViewHolder> {
     TGChat firstAddedItem = null;
     for (TGChat chat : data) {
       Long id = chat.getChatId();
+      // reX: Skip hidden chats
+      if (RexSecurityManager.getInstance().shouldHideChat(id)) {
+        continue;
+      }
       if (presentChatIds.add(id)) {
         firstAddedItem = chat;
         chats.add(chat);
@@ -697,6 +714,10 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsViewHolder> {
   }
 
   public int addChat (TdApi.Chat chat, int atIndex, Tdlib.ChatChange changeInfo) {
+    // reX: Skip hidden chats
+    if (RexSecurityManager.getInstance().shouldHideChat(chat.id)) {
+      return 0;
+    }
     TGChat newChat = new TGChat(context.getParentOrSelf(), context.chatList(), chat, false);
     int index = hasArchive ? atIndex + 1 : atIndex;
     newChat.makeMeasures();

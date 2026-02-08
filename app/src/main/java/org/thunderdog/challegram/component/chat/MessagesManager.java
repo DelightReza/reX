@@ -88,6 +88,10 @@ import me.vkryl.core.ColorUtils;
 import me.vkryl.core.StringUtils;
 import me.vkryl.core.lambda.FutureBool;
 import me.vkryl.core.lambda.RunnableData;
+import org.thunderdog.challegram.config.RexConfig;
+import org.thunderdog.challegram.rex.RexGhostManager;
+import org.thunderdog.challegram.rex.db.EditHistory;
+import org.thunderdog.challegram.rex.db.RexDatabase;
 import tgx.td.ChatId;
 import tgx.td.MessageId;
 import tgx.td.Td;
@@ -2238,6 +2242,30 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
             break;
           }
           case TGMessage.REMOVE_COMBINATION: {
+            // --- REX MOD: Keep deleted messages as ghosts ---
+            if (RexConfig.getInstance().getSaveDeletedMessages()) {
+              RexGhostManager.INSTANCE.markAsGhost(messageId);
+              try {
+                long itemChatId = item.getChatId();
+                java.util.List<Long> msgIdList = java.util.Collections.singletonList(messageId);
+                RexDatabase.get(controller.context()).rexDao().markAsDeleted(itemChatId, msgIdList);
+              } catch (Exception e) { android.util.Log.e("REX", "Failed to mark message as deleted", e); }
+              if (controller.unselectMessage(messageId, item)) {
+                selectedCount--;
+                unselectedSomeMessages = true;
+              }
+              adapter.notifyItemChanged(index);
+              item.requestLayout();
+              if (!item.isOutgoing() && messageId > lastReadInboxMessageId) {
+                removedUnreadCount++;
+              }
+              if (++removedCount == messageIds.length) {
+                break main;
+              } else {
+                continue main;
+              }
+            }
+            // --- END REX MOD ---
             if (controller.unselectMessage(messageId, item)) {
               selectedCount--;
               unselectedSomeMessages = true;
@@ -2252,6 +2280,30 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
             }
           }
           case TGMessage.REMOVE_COMPLETELY: {
+            // --- REX MOD: Keep deleted messages as ghosts ---
+            if (RexConfig.getInstance().getSaveDeletedMessages()) {
+              RexGhostManager.INSTANCE.markAsGhost(messageId);
+              try {
+                long itemChatId = item.getChatId();
+                java.util.List<Long> msgIdList = java.util.Collections.singletonList(messageId);
+                RexDatabase.get(controller.context()).rexDao().markAsDeleted(itemChatId, msgIdList);
+              } catch (Exception e) { android.util.Log.e("REX", "Failed to mark message as deleted", e); }
+              if (controller.unselectMessage(messageId, item)) {
+                selectedCount--;
+                unselectedSomeMessages = true;
+              }
+              adapter.notifyItemChanged(index);
+              item.requestLayout();
+              if (!item.isOutgoing() && messageId > lastReadInboxMessageId) {
+                removedUnreadCount++;
+              }
+              if (++removedCount == messageIds.length) {
+                break main;
+              } else {
+                continue main;
+              }
+            }
+            // --- END REX MOD ---
             TGMessage removed = adapter.removeItem(index);
             if (controller.unselectMessage(messageId, removed)) {
               selectedCount--;
@@ -3459,6 +3511,25 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
     }
     tdlib.ui().post(() -> {
       if (loader.getChatId() == chatId) {
+        // --- REX MOD: Save edit history ---
+        if (RexConfig.getInstance().getSaveEditsHistory()) {
+          int index = adapter.indexOfMessageContainer(messageId);
+          if (index != -1) {
+            TGMessage tgMessage = adapter.getItem(index);
+            TdApi.Message oldMessage = tgMessage.getMessage();
+            if (oldMessage != null) {
+              TdApi.FormattedText oldText = Td.textOrCaption(oldMessage.content);
+              String oldTextStr = oldText != null ? oldText.text : "";
+              EditHistory editHistory = new EditHistory(
+                0, messageId, chatId, oldTextStr,
+                (int) (System.currentTimeMillis() / 1000)
+              );
+              RexDatabase.get(controller.context()).rexDao().insertEdit(editHistory);
+              tgMessage.invalidateCachedEditCount();
+            }
+          }
+        }
+        // --- END REX MOD ---
         updateMessageContent(chatId, messageId, newContent);
       }
     });

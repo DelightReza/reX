@@ -650,6 +650,8 @@ public class SettingsController extends ViewController<Void> implements
       items.add(new ListItem(ListItem.TYPE_SEPARATOR));
     }
     items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_languageSettings, R.drawable.baseline_language_24, R.string.Language));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexSettings, R.drawable.baseline_settings_24, "reX"));
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
 
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
@@ -1224,6 +1226,8 @@ public class SettingsController extends ViewController<Void> implements
       navigateTo(new SettingsDataController(context, tdlib));
     } else if (viewId == R.id.btn_privacySettings) {
       navigateTo(new SettingsPrivacyController(context, tdlib));
+    } else if (viewId == R.id.btn_rexSettings) {
+      navigateTo(new RexSettingsController(context, tdlib));
     } else if (viewId == R.id.btn_help) {
       supportOpen = tdlib.ui().openSupport(this);
     } else if (viewId == R.id.btn_stickerSettingsAndEmoji) {

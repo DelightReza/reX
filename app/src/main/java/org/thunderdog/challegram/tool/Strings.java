@@ -833,6 +833,13 @@ public class Strings {
     if (StringUtils.isEmpty(rawNumber))
       return rawNumber;
 
+    // reX: Phone masking support — masks all phone numbers in the UI
+    // isPhoneMasked() hides own number, isOthersPhoneMasked() hides others' numbers
+    org.thunderdog.challegram.security.RexSecurityManager sec = org.thunderdog.challegram.security.RexSecurityManager.getInstance();
+    if (sec.isPhoneMasked() || sec.isOthersPhoneMasked()) {
+      return "+** ***";
+    }
+
     final String phoneNumber = getNumber(rawNumber);
     final int length = phoneNumber.length();
 
