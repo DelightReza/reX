@@ -209,6 +209,11 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   private static final int FLAG_ERROR = 1 << 30;
   private static final int FLAG_BEING_ADDED = 1 << 31;
 
+  // reX: Flag to mark message as deleted (tracked by Spy mode)
+  private static final int FLAG_REX_DELETED = 1 << 15;
+  // reX: Flag to mark message as having edit history
+  private static final int FLAG_REX_HAS_EDIT_HISTORY = 1 << 16;
+
   protected TdApi.Message msg;
   protected final TdApi.SponsoredMessage sponsoredMessage;
   private int flags;
@@ -1946,6 +1951,12 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
     final int viewWidth = view.getMeasuredWidth();
     final int viewHeight = view.getMeasuredHeight();
 
+    // reX: Draw deleted messages at 50% opacity
+    final boolean rexDeletedAlpha = isRexDeleted() && org.thunderdog.challegram.config.RexConfig.getInstance().isTranslucentDeleted();
+    if (rexDeletedAlpha) {
+      c.saveLayerAlpha(0, 0, viewWidth, viewHeight, 128);
+    }
+
     final boolean useBubbles = useBubbles();
     final boolean useReactionBubbles = useReactionBubbles();
     final int reactionsDrawMode = getReactionsDrawMode();
@@ -2464,6 +2475,11 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
     highlightUnreadReactionsIfNeeded();
     if (isHiddenFactor > 0f) {
       drawHiddenMessage(view, c, isHiddenFactor);
+    }
+
+    // reX: Restore alpha layer for deleted messages
+    if (rexDeletedAlpha) {
+      c.restore();
     }
   }
 
@@ -4057,6 +4073,19 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
       startX += isTranslatedCounter.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN + COUNTER_ADD_MARGIN));
     }
 
+    // reX: Draw deleted icon before time when message is marked as deleted
+    if (isRexDeleted()) {
+      Drawable deletedIcon = Drawables.get(view.getResources(), R.drawable.baseline_delete_24);
+      if (deletedIcon != null) {
+        int iconSize = Screen.dp(14f);
+        Paint deletedPaint = Paints.createPaint(Paint.ANTI_ALIAS_FLAG);
+        deletedPaint.setColorFilter(new android.graphics.PorterDuffColorFilter(iconPaint.getColor() != 0 ? iconPaint.getColor() : Theme.getColor(ColorId.iconLight), android.graphics.PorterDuff.Mode.SRC_IN));
+        deletedIcon.setBounds(startX, (int) (counterY - iconSize / 2f), startX + iconSize, (int) (counterY + iconSize / 2f));
+        deletedIcon.draw(c);
+        startX += iconSize + Screen.dp(COUNTER_ICON_MARGIN);
+      }
+    }
+
     if (time != null) {
       c.drawText(time, startX, startY + Screen.dp(15.5f), Paints.colorPaint(mTimeBubble(), textColor));
       startX += pTimeWidth;
@@ -4112,6 +4141,10 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
     }
     if (translationStyleMode() == Settings.TRANSLATE_MODE_INLINE) {
       width += isTranslatedCounter.getScaledOrTargetWidth(Screen.dp(COUNTER_ICON_MARGIN + COUNTER_ADD_MARGIN), isTarget);
+    }
+    // reX: Add width for deleted icon
+    if (isRexDeleted()) {
+      width += Screen.dp(14f) + Screen.dp(COUNTER_ICON_MARGIN);
     }
     boolean isSending = isSending();
     if (getViewCountMode() == VIEW_COUNT_MAIN) {
@@ -5148,6 +5181,10 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   }
 
   public boolean canBeForwarded () {
+    // reX: Bypass forward restriction in protected chats
+    if (org.thunderdog.challegram.config.RexConfig.getInstance().isBypassRestrictionsEnabled()) {
+      return (msg.content.getConstructor() != TdApi.MessageLocation.CONSTRUCTOR || ((TdApi.MessageLocation) msg.content).expiresIn == 0) && !isEventLog();
+    }
     TdApi.MessageProperties properties = lastMessageProperties();
     return properties.canBeForwarded && (msg.content.getConstructor() != TdApi.MessageLocation.CONSTRUCTOR || ((TdApi.MessageLocation) msg.content).expiresIn == 0) && !isEventLog();
   }
@@ -5157,7 +5194,39 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   }
 
   public boolean canBeSaved () {
+    // reX: Bypass save restriction in protected chats
+    if (org.thunderdog.challegram.config.RexConfig.getInstance().isBypassRestrictionsEnabled()) {
+      return true;
+    }
     return msg.canBeSaved;
+  }
+
+  // reX: Deleted message tracking
+
+  public void setRexDeleted (boolean deleted) {
+    if (deleted) {
+      flags |= FLAG_REX_DELETED;
+    } else {
+      flags &= ~FLAG_REX_DELETED;
+    }
+  }
+
+  public boolean isRexDeleted () {
+    return (flags & FLAG_REX_DELETED) != 0;
+  }
+
+  // reX: Edit history tracking
+
+  public void setRexHasEditHistory (boolean hasHistory) {
+    if (hasHistory) {
+      flags |= FLAG_REX_HAS_EDIT_HISTORY;
+    } else {
+      flags &= ~FLAG_REX_HAS_EDIT_HISTORY;
+    }
+  }
+
+  public boolean isRexHasEditHistory () {
+    return (flags & FLAG_REX_HAS_EDIT_HISTORY) != 0;
   }
 
   public boolean isUnread () {

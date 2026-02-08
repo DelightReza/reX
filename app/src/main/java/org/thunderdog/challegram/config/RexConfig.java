@@ -51,6 +51,7 @@ public final class RexConfig {
   // Customization keys
   private static final String KEY_CUSTOM_DISABLE_COLORFUL_REPLIES = "custom_disable_colorful_replies";
   private static final String KEY_CUSTOM_TRANSLUCENT_DELETED = "custom_translucent_deleted";
+  private static final String KEY_CUSTOM_BYPASS_RESTRICTIONS = "custom_bypass_restrictions";
 
   // Ghost option constants
   public static final String GHOST_NO_READ = "NoRead";
@@ -270,5 +271,15 @@ public final class RexConfig {
 
   public void setTranslucentDeleted (boolean enabled) {
     prefs.edit().putBoolean(KEY_CUSTOM_TRANSLUCENT_DELETED, enabled).apply();
+  }
+
+  // --- Restriction Bypass ---
+
+  public boolean isBypassRestrictionsEnabled () {
+    return prefs.getBoolean(KEY_CUSTOM_BYPASS_RESTRICTIONS, false);
+  }
+
+  public void setBypassRestrictionsEnabled (boolean enabled) {
+    prefs.edit().putBoolean(KEY_CUSTOM_BYPASS_RESTRICTIONS, enabled).apply();
   }
 }

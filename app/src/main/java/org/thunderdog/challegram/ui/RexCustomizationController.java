@@ -54,6 +54,8 @@ public class RexCustomizationController extends RecyclerViewController<Void> imp
           v.getToggler().setRadioEnabled(config.isDisableColorfulReplies(), isUpdate);
         } else if (itemId == R.id.btn_rexTranslucentDeleted) {
           v.getToggler().setRadioEnabled(config.isTranslucentDeleted(), isUpdate);
+        } else if (itemId == R.id.btn_rexBypassRestrictions) {
+          v.getToggler().setRadioEnabled(config.isBypassRestrictionsEnabled(), isUpdate);
         }
       }
     };
@@ -70,6 +72,13 @@ public class RexCustomizationController extends RecyclerViewController<Void> imp
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
     items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexDeletedMark, R.drawable.baseline_delete_24, "Deleted Mark"));
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+
+    // Restricted Content
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Restricted Content"));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexBypassRestrictions, 0, "Bypass Forward/Save Restrictions"));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Allow forwarding, copying, and saving content from restricted channels and chats."));
 
     // Drawer Options
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
@@ -94,6 +103,9 @@ public class RexCustomizationController extends RecyclerViewController<Void> imp
       adapter.updateValuedSettingById(R.id.btn_rexTranslucentDeleted);
     } else if (viewId == R.id.btn_rexDeletedMark) {
       UI.showToast("Deleted mark icon selector — coming soon", android.widget.Toast.LENGTH_SHORT);
+    } else if (viewId == R.id.btn_rexBypassRestrictions) {
+      config.setBypassRestrictionsEnabled(!config.isBypassRestrictionsEnabled());
+      adapter.updateValuedSettingById(R.id.btn_rexBypassRestrictions);
     } else if (viewId == R.id.btn_rexDrawerOptions) {
       UI.showToast("Drawer options — coming soon", android.widget.Toast.LENGTH_SHORT);
     }

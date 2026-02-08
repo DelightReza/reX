@@ -5155,11 +5155,13 @@ public class MessagesController extends ViewController<MessagesController.Argume
     }
     if (selectedMessageIds.size() == 1) {
       MessageWithProperties m = getSingleSelectedMessage();
-      return m.message.canBeSaved && TD.canCopyText(m.message);
+      boolean canSave = m.message.canBeSaved || org.thunderdog.challegram.config.RexConfig.getInstance().isBypassRestrictionsEnabled();
+      return canSave && TD.canCopyText(m.message);
     }
+    boolean bypassRestrictions = org.thunderdog.challegram.config.RexConfig.getInstance().isBypassRestrictionsEnabled();
     for (int i = 0; i < selectedMessageIds.size(); i++) {
       TdApi.Message message = selectedMessageIds.valueAt(i).getMessage(selectedMessageIds.keyAt(i));
-      if (!message.canBeSaved) {
+      if (!message.canBeSaved && !bypassRestrictions) {
         return false;
       }
     }
@@ -5279,12 +5281,13 @@ public class MessagesController extends ViewController<MessagesController.Argume
       return c != null && c.canShareMessages();
     }
     if (selectedMessageIds != null) {
+      boolean bypassRestrictions = org.thunderdog.challegram.config.RexConfig.getInstance().isBypassRestrictionsEnabled();
       final int size = selectedMessageIds.size();
       for (int i = 0; i < size; i++) {
         long messageId = selectedMessageIds.keyAt(i);
         TGMessage m = selectedMessageIds.valueAt(i);
         TdApi.Message msg = m.getMessage(messageId);
-        if (msg == null || !m.lastMessageProperties(messageId).canBeForwarded) {
+        if (msg == null || (!m.lastMessageProperties(messageId).canBeForwarded && !bypassRestrictions)) {
           return false;
         }
       }
@@ -5890,6 +5893,38 @@ public class MessagesController extends ViewController<MessagesController.Argume
         }
         return true;
       }
+
+      // reX: Message menu handlers
+      if (id == R.id.btn_rexMarkAsRead) {
+        // Mark message as read (sends ViewMessages to TDLib directly, bypassing Ghost interceptor)
+        TdApi.Message message = selectedMessage.getMessage();
+        tdlib.client().send(new TdApi.ViewMessages(message.chatId, new long[]{message.id}, null, true), tdlib.okHandler());
+        UI.showToast("Message marked as read", Toast.LENGTH_SHORT);
+        return true;
+      } else if (id == R.id.btn_rexBurnMessage) {
+        // Burn: Opens message content to trigger self-destruct timer for sender
+        TdApi.Message message = selectedMessage.getMessage();
+        tdlib.client().send(new TdApi.OpenMessageContent(message.chatId, message.id), tdlib.okHandler());
+        UI.showToast("Media opened — self-destruct triggered for sender", Toast.LENGTH_SHORT);
+        return true;
+      } else if (id == R.id.btn_rexForwardRestricted) {
+        // Forward from restricted chat: use shareMessages which copies content
+        cancelSheduledKeyboardOpeningAndHideAllKeyboards();
+        shareMessages(selectedMessage.getAllMessages(), false);
+        return true;
+      } else if (id == R.id.btn_rexSaveRestricted) {
+        // Save media from restricted chat
+        cancelSheduledKeyboardOpeningAndHideAllKeyboards();
+        TdApi.File file = TD.getFile(selectedMessage);
+        if (file != null && !file.local.isDownloadingActive && !file.local.isDownloadingCompleted) {
+          tdlib.files().downloadFile(file);
+          UI.showToast("Downloading media...", Toast.LENGTH_SHORT);
+        } else if (file != null && file.local.isDownloadingCompleted) {
+          UI.showToast("Already downloaded: " + file.local.path, Toast.LENGTH_SHORT);
+        }
+        return true;
+      }
+
       return true;
     };
   }

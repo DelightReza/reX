@@ -1475,4 +1475,15 @@
   <item type="id" name="btn_rexTranslucentDeleted" />
   <item type="id" name="btn_rexDeletedMark" />
   <item type="id" name="btn_rexDrawerOptions" />
+  <item type="id" name="btn_rexBypassRestrictions" />
+
+  <!-- reX Message Menu -->
+  <item type="id" name="btn_rexMarkAsRead" />
+  <item type="id" name="btn_rexBurnMessage" />
+  <item type="id" name="btn_rexForwardRestricted" />
+  <item type="id" name="btn_rexSaveRestricted" />
+
+  <!-- reX Deleted/Edit History Controllers -->
+  <item type="id" name="controller_rexDeletedMessages" />
+  <item type="id" name="controller_rexEditHistory" />
 </resources>
