@@ -5899,7 +5899,7 @@ public class MessagesController extends ViewController<MessagesController.Argume
         // Mark message as read (sends ViewMessages to TDLib directly, bypassing Ghost interceptor)
         TdApi.Message message = selectedMessage.getMessage();
         tdlib.client().send(new TdApi.ViewMessages(message.chatId, new long[]{message.id}, null, true), tdlib.okHandler());
-        UI.showToast("Message marked as read", Toast.LENGTH_SHORT);
+        UI.showToast("Read receipt sent", Toast.LENGTH_SHORT);
         return true;
       } else if (id == R.id.btn_rexBurnMessage) {
         // Burn: Opens message content to trigger self-destruct timer for sender

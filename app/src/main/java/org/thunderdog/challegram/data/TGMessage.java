@@ -5225,7 +5225,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
     }
   }
 
-  public boolean isRexHasEditHistory () {
+  public boolean hasRexEditHistory () {
     return (flags & FLAG_REX_HAS_EDIT_HISTORY) != 0;
   }
 
