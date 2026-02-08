@@ -765,15 +765,6 @@ public class SettingsBugController extends RecyclerViewController<SettingsBugCon
           items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.Experiment_NoEdgeToEdgeInfo));
         }
 
-        if (TelegramXExtension.INSTANCE.isNotEmpty()) {
-          if (!items.isEmpty()) {
-            items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-          }
-          items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_experiment, 0, R.string.Experiment_ForceAltPushService).setLongValue(Settings.EXPERIMENT_FLAG_FORCE_ALTERNATIVE_PUSH_SERVICE));
-          items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-          items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.Experiment_ForceAltPushServiceInfo));
-        }
-
         if (items.isEmpty()) {
           items.add(new ListItem(ListItem.TYPE_EMPTY, 0, 0, R.string.ExperimentalSettingsUnavailable));
         }

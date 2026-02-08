@@ -3495,19 +3495,16 @@
   <string name="NotificationsGuidePermission">Notifications from Telegram are blocked in your system settings.\n\nTo enable notifications:\n• Go to system settings – Applications – Telegram X.\n• Tap Notifications – Allow notifications.</string>
   <string name="NotificationsGuideSyncGlobalOff">You have data sync turned off in system settings. Notifications may not arrive when app is closed.\n\nData sync may be implicitly turned off by the battery optimization mode on your device.</string>
   <string name="NotificationsGuideSyncAppOff">You have data sync turned off for Telegram X. Notifications may not arrive when app is closed.\n\nData sync may be implicitly turned off by the battery optimization mode on your device.</string>
-  <string name="NotificationsGuideFirebaseUnavailable">Google Play Services are unavailable. Please check you have them installed and up-to-date.\n\nNotifications may arrive with big delays or not arrive at all without them.</string>
-  <string name="NotificationsGuideFirebaseError">**Firebase Services** have failed to function properly due to error: %1$s\n\nNotifications may arrive with big delays or not arrive at all without them.\n\nPlease make sure:\n• Google Play Services are installed and up-to-date: https://support.google.com/googleplay/answer/9037938?hl=en\n• Telegram X is up-to-date\n• Firebase services are enabled\n• They are not blocked by your Internet service or DNS provider\n• If you have firewall or ad blocking software, Firebase domains are whitelisted\n• You can see 404 message in a browser on this page: https://firebaseinstallations.googleapis.com/\n• System date and time is correct\n• Problem doesn\'t go away after restarting your device\n• All system updates are installed\n• You are using the **official** version of Telegram X: @tgx_log\n\nIf the steps above do not help, try again with VPN that you trust, as it might be caused by Internet censorship applied by authorities in your region.</string>
+  <string name="NotificationsGuideFirebaseUnavailable">To ensure reliable message delivery, enable the Telegram X Alive Service below.\n\nThis service keeps the app connected by preventing Android from killing the app process.</string>
+  <string name="NotificationsGuideFirebaseError">To ensure reliable message delivery, enable the Telegram X Alive Service below.\n\nThis service keeps the app connected by preventing Android from killing the app process.</string>
   <string name="NotificationsGuideError">**Telegram X** was unable to display some notifications for this account due to an unknown system error.\n\nPlease make sure:\n• All system updates are installed\n• Telegram X is up-to-date\n• There are no notification restrictions in system settings.\n\nIf the steps above do not help, you might want to share the detailed error report to @tgandroidtests, or look up for troubleshooting tips for your device.</string>
   <string name="NotificationsGuideErrorChat">**Telegram X** was unable to display some notifications from %1$s due to an unknown system error.\n\nPlease make sure:\n• All system updates are installed\n• Telegram X is up-to-date\n• There are no notification restrictions in system settings.\n\nIf the steps above do not help, you might want to share the detailed error report to @tgandroidtests, or look up for troubleshooting tips for your device.</string>
   <string name="NotificationsGuideCategoryLimit">**Telegram X** was unable to display some notifications for this account due to notification categories system limit.\n\nPlease make sure:\n• All system updates are installed\n• Telegram X is up-to-date\n• There are no notification restrictions in system settings.\n\nIf the steps above do not help, you might want to ask @tgandroidtests for troubleshooting tips for your device, or re-install Telegram X, which should help resolving this error, but requires logging in to your account again.</string>
   <string name="NotificationsGuideCategoryLimitErrorChat">**Telegram X** was unable to display some notifications from %1$s due to notification categories system limit.\n\nPlease make sure:\n• All system updates are installed\n• Telegram X is up-to-date\n• There are no notification restrictions in system settings.\n\nIf the steps above do not help, you might want to ask @tgandroidtests for troubleshooting tips for your device, or re-install Telegram X, which should help resolving this error, but requires logging in to your account again.</string>
   <string name="TurnSyncOnApp">Turn on data sync</string>
   <string name="TurnSyncOnSystem">Turn on data sync</string>
-  <string name="InstallGooglePlayServices">Get Google Play Services</string>
+  <string name="EnableKeepAliveService">Enable Keep-Alive Service</string>
   <string name="ShareNotificationError">Share Error Report</string>
-  <string name="FirebaseErrorResolve">Tap to resolve issue</string>
-  <string name="FirebaseErrorResolveTryAgain">Try again</string>
-  <string name="FirebaseErrorResolveShareError">Share error details</string>
 
   <string name="LanguageSame">You are already using this language pack (**%1$s**). You can change your language at any time in Settings.</string>
   <string name="LanguageAlert">You are about to apply a language pack (**%1$s**) that is %2$d%% complete.\n\nThis will translate the entire interface. You can suggest corrections via the [translation platform](%3$s).\n\nYou can change your language back at any time in Settings.</string>
@@ -5338,9 +5335,6 @@
   <string name="Experiment_NoEdgeToEdge">Disable Edge to Edge</string>
   <string name="Experiment_NoEdgeToEdgeInfo">Use this setting to compare behavior without edge-to-edge mode on Android 11–14.</string>
 
-  <string name="Experiment_ForceAltPushService">Force alternative Push Services</string>
-  <string name="Experiment_ForceAltPushServiceInfo">Prefer alternative push services provider, even if Google Play Services are installed and available. Restart application manually to apply changes.</string>
-
   <string name="PeerId">Peer ID</string>
   <string name="UserId">User ID</string>
   <string name="SecretChatId">Secret Chat ID</string>
@@ -5565,6 +5559,19 @@
   <string name="ForegroundSyncDesc">Allow app to show **\"Checking for new messages\"** in the system tray to fetch missing data required to display a notification about a new message.</string>
   <string name="ForegroundSyncDescOn">You may periodically see **\"Checking for new messages\"** in the system tray while app is closed until all notifications are properly shown.</string>
   <string name="ForegroundSyncDescOff">You may see **\"You may have a new message\"** notification in the system tray when some notifications couldn\'t be shown.</string>
+
+  <string name="TGXKeepAliveService">Telegram X Alive Service</string>
+  <string name="TGXKeepAliveServiceDesc">Keeps the app connected to Telegram servers by preventing Android from killing the app process. Shows a low-priority persistent notification in the system tray.\n\n**Note:** This service helps ensure you receive messages reliably without push notifications.</string>
+  <string name="TGXKeepAliveServiceOn">Telegram X Keep Alive service is now **enabled**. You will see a persistent notification in the system tray.</string>
+  <string name="TGXKeepAliveServiceOff">Telegram X Keep Alive service is now **disabled**. The notification has been removed.</string>
+  <string name="TGXKeepAliveNotificationTitle">Telegram X Keep Alive</string>
+  <string name="TGXKeepAliveNotificationText">Keeping app connected</string>
+  
+  <string name="TGXKeepAlivePromptTitle">Stay Connected to Telegram</string>
+  <string name="TGXKeepAlivePromptMessage">To ensure you receive messages reliably, consider enabling the Telegram X Alive Service in Settings.\n\nThis will show a low-priority notification to keep the app connected.</string>
+  <string name="TGXKeepAlivePromptEnable">Enable Now</string>
+  <string name="TGXKeepAlivePromptLater">Later</string>
+  <string name="TGXKeepAlivePromptSettings">Open Settings</string>
 
   <string name="UsernamesMy">Active Usernames</string>
   <string name="UsernamesMyHint">Drag and drop usernames to change order of their appearance on the profile screen.</string>

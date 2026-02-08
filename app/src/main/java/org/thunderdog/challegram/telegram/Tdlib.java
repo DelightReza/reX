@@ -43,7 +43,8 @@ import com.google.android.play.core.integrity.IntegrityTokenRequest;
 import com.google.android.play.core.integrity.IntegrityTokenResponse;
 import com.google.android.recaptcha.RecaptchaAction;
 import com.google.android.recaptcha.RecaptchaTasksClient;
-import com.google.firebase.FirebaseOptions;
+// Firebase removed for FOSS compliance
+// import com.google.firebase.FirebaseOptions;
 
 import org.drinkless.tdlib.Client;
 import org.drinkless.tdlib.TdApi;
@@ -5869,16 +5870,8 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   }
 
   public TdApi.PhoneNumberAuthenticationSettings phoneNumberAuthenticationSettings (Context context) {
+    // Firebase authentication not available in FOSS build
     TdApi.FirebaseAuthenticationSettings firebaseAuthenticationSettings = null;
-    String safetyNetApiKey = safetyNetApiKey();
-    if (StringUtils.isEmpty(safetyNetApiKey)) {
-      TDLib.Tag.safetyNet("Ignoring Firebase authentication, because SafetyNet API_KEY is unset");
-    } else if (Config.REQUIRE_FIREBASE_SERVICES_FOR_SAFETYNET && !U.isGooglePlayServicesAvailable(context)) {
-      TDLib.Tag.safetyNet("Ignoring Firebase authentication, because Firebase services are unavailable");
-    } else {
-      TDLib.Tag.safetyNet("Enabling Firebase authentication for the next request");
-      firebaseAuthenticationSettings = new TdApi.FirebaseAuthenticationSettingsAndroid();
-    }
     return new TdApi.PhoneNumberAuthenticationSettings(
       false, // TODO transparently request permission & enter flash call
       true,
@@ -9043,40 +9036,9 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
       onError.runWithData(new ApplicationVerificationException("PLAYINTEGRITY_FAILED_SDK_TOO_LOW_" + Build.VERSION.SDK_INT));
       return;
     }
-    long projectId = 0;
-    try {
-      FirebaseOptions options = FirebaseOptions.fromResource(UI.getAppContext());
-      String projectIdRaw = options != null ? options.getGcmSenderId() : "";
-      if (!StringUtils.isEmpty(projectIdRaw)) {
-        projectId = Long.parseLong(projectIdRaw);
-      } else {
-        throw new IllegalStateException();
-      }
-    } catch (Exception e) {
-      onError.runWithData(new ApplicationVerificationException("PLAYINTEGRITY_FAILED_EXCEPTION_NOPROJECT"));
-      return;
-    }
-    try {
-      IntegrityTokenRequest request = IntegrityTokenRequest.builder()
-        .setNonce(nonce)
-        .setCloudProjectNumber(projectId)
-        .build();
-      IntegrityManager integrityManager = IntegrityManagerFactory.create(UI.getAppContext());
-      Task<IntegrityTokenResponse> integrityTokenResponse = integrityManager.requestIntegrityToken(request);
-      integrityTokenResponse
-        .addOnSuccessListener(r -> {
-          final String token = r.token();
-          if (token != null) {
-            TDLib.Tag.playIntegrity("success verificationId=%d: %s", verificationId, token);
-            callback.onApplicationVerificationResult(token);
-          } else {
-            onError.runWithData(new ApplicationVerificationException("PLAYINTEGRITY_FAILED_EXCEPTION_NULL"));
-          }
-        })
-        .addOnFailureListener(onError::runWithData);
-    } catch (Exception e) {
-      onError.runWithData(e);
-    }
+    // Play Integrity API unavailable in FOSS build (requires proprietary services)
+    onError.runWithData(new ApplicationVerificationException("PLAYINTEGRITY_UNAVAILABLE_NO_FIREBASE"));
+    return;
   }
 
   public void requestRecaptcha (long verificationId, String action, String recaptchaKeyId, ApplicationVerificationCallback callback) {

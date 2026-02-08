@@ -52,6 +52,7 @@ import org.thunderdog.challegram.config.Config;
 import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.data.TD;
 import org.thunderdog.challegram.emoji.Emoji;
+import org.thunderdog.challegram.helper.KeepAliveHelper;
 import org.thunderdog.challegram.navigation.ActivityResultHandler;
 import org.thunderdog.challegram.navigation.MoreDelegate;
 import org.thunderdog.challegram.navigation.SettingsWrapBuilder;
@@ -414,11 +415,11 @@ public class SettingsNotificationController extends RecyclerViewController<Setti
       case TdlibNotificationManager.Status.DISABLED_APP_SYNC:
         return R.string.TurnSyncOnApp;
       case TdlibNotificationManager.Status.PUSH_SERVICE_MISSING:
-        return R.string.InstallGooglePlayServices;
+        return R.string.EnableKeepAliveService;
       case TdlibNotificationManager.Status.INTERNAL_ERROR:
         return R.string.ShareNotificationError;
       case TdlibNotificationManager.Status.PUSH_SERVICE_ERROR:
-        return R.string.FirebaseErrorResolve;
+        return R.string.EnableKeepAliveService;
       case TdlibNotificationManager.Status.MISSING_PERMISSION:
       case TdlibNotificationManager.Status.ACCOUNT_NOT_SELECTED:
       case TdlibNotificationManager.Status.BLOCKED_ALL:
@@ -453,7 +454,7 @@ public class SettingsNotificationController extends RecyclerViewController<Setti
         guideRes = R.string.NotificationsGuideFirebaseUnavailable;
         break;
       case TdlibNotificationManager.Status.PUSH_SERVICE_ERROR:
-        return Lang.getMarkdownString(this, R.string.NotificationsGuideFirebaseError, Lang.boldCreator(), tdlib.context().getTokenError());
+        return Lang.getMarkdownString(this, R.string.NotificationsGuideFirebaseError, Lang.boldCreator());
       case TdlibNotificationManager.Status.INTERNAL_ERROR: {
         @StringRes int
           specificChatRes = R.string.NotificationsGuideErrorChat,
@@ -976,6 +977,9 @@ public class SettingsNotificationController extends RecyclerViewController<Setti
         } else if (itemId == R.id.btn_foregroundSync) {
           boolean value = Settings.instance().getNewSetting(Settings.SETTING_FLAG_FOREGROUND_SERVICE_ENABLED);
           view.getToggler().setRadioEnabled(value, isUpdate);
+        } else if (itemId == R.id.btn_tgxKeepAlive) {
+          boolean value = org.thunderdog.challegram.helper.KeepAliveHelper.isKeepAliveEnabled(context());
+          view.getToggler().setRadioEnabled(value, isUpdate);
         } else if (itemId == R.id.btn_inApp_chatSounds) {
           view.getToggler().setRadioEnabled(tdlib.notifications().areInAppChatSoundsEnabled(), isUpdate);
         } else if (itemId == R.id.btn_customChat_pinnedMessages) {
@@ -1234,6 +1238,11 @@ public class SettingsNotificationController extends RecyclerViewController<Setti
         }
 
         items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+        items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_tgxKeepAlive, 0, R.string.TGXKeepAliveService));
+        items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+        items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, Lang.getMarkdownString(this, R.string.TGXKeepAliveServiceDesc)));
+
+        items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
         items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_archiveSettings, 0, R.string.ArchiveSettings));
         items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
         items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, R.string.ArchiveSettingsDesc));
@@ -1472,7 +1481,12 @@ public class SettingsNotificationController extends RecyclerViewController<Setti
       boolean value = adapter.toggleView(v);
       Settings.instance().setNewSetting(Settings.SETTING_FLAG_FOREGROUND_SERVICE_ENABLED, value);
       context.tooltipManager().builder(v).icon(R.drawable.baseline_info_24)
-        .show(tdlib, Lang.getMarkdownString(this, value ? R.string.ForegroundSyncDescOn : R.string.ForegroundSyncDescOff))
+        .show(tdlib, Lang.getMarkdownString(this, value ? R.string.ForegroundSyncDescOn : R.string.ForegroundSyncDescOff));
+    } else if (viewId == R.id.btn_tgxKeepAlive) {
+      boolean value = adapter.toggleView(v);
+      org.thunderdog.challegram.helper.KeepAliveHelper.setKeepAliveEnabled(context(), value);
+      context.tooltipManager().builder(v).icon(R.drawable.baseline_info_24)
+        .show(tdlib, Lang.getMarkdownString(this, value ? R.string.TGXKeepAliveServiceOn : R.string.TGXKeepAliveServiceOff))
         .hideDelayed(true, 5, TimeUnit.SECONDS);
     } else if (viewId == R.id.btn_inApp_chatSounds) {
       tdlib.notifications().toggleInAppChatSoundsEnabled();
@@ -1508,22 +1522,10 @@ public class SettingsNotificationController extends RecyclerViewController<Setti
           }
           break;
         }
-        case TdlibNotificationManager.Status.PUSH_SERVICE_ERROR: {
-          showOptions(new Options.Builder()
-            .item(new OptionItem(R.id.btn_retry, Lang.getString(R.string.FirebaseErrorResolveTryAgain), OptionColor.BLUE, R.drawable.baseline_sync_problem_24))
-            .item(new OptionItem(R.id.btn_share, Lang.getString(R.string.FirebaseErrorResolveShareError), OptionColor.NORMAL, R.drawable.baseline_forward_24))
-            .build(), (optionView, optionId) -> {
-            if (optionId == R.id.btn_retry) {
-              tdlib.context().checkDeviceToken(0, null);
-            } else if (optionId == R.id.btn_share) {
-              shareTokenError();
-            }
-            return true;
-          });
-          break;
-        }
+        case TdlibNotificationManager.Status.PUSH_SERVICE_ERROR:
         case TdlibNotificationManager.Status.PUSH_SERVICE_MISSING: {
-          Intents.openLink("https://play.google.com/store/apps/details?id=com.google.android.gms");
+          // Enable Keep-Alive service for FOSS builds (no proprietary push services)
+          KeepAliveHelper.setKeepAliveEnabled(context(), true);
           break;
         }
         default: {
