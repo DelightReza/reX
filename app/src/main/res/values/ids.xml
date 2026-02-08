@@ -1486,4 +1486,20 @@
   <!-- reX Deleted/Edit History Controllers -->
   <item type="id" name="controller_rexDeletedMessages" />
   <item type="id" name="controller_rexEditHistory" />
+
+  <!-- reX Auth Timeout radio options -->
+  <item type="id" name="btn_rexAuthTimeoutAlways" />
+  <item type="id" name="btn_rexAuthTimeout10s" />
+  <item type="id" name="btn_rexAuthTimeout30s" />
+  <item type="id" name="btn_rexAuthTimeout1m" />
+  <item type="id" name="btn_rexAuthTimeout2m" />
+  <item type="id" name="btn_rexAuthTimeout5m" />
+
+  <!-- reX Folder Size radio options -->
+  <item type="id" name="btn_rexFolderSize300" />
+  <item type="id" name="btn_rexFolderSize1g" />
+  <item type="id" name="btn_rexFolderSize2g" />
+  <item type="id" name="btn_rexFolderSize5g" />
+  <item type="id" name="btn_rexFolderSize16g" />
+  <item type="id" name="btn_rexFolderSizeNone" />
 </resources>

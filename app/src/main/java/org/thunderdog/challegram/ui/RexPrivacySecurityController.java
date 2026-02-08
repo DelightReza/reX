@@ -190,20 +190,28 @@ public class RexPrivacySecurityController extends RecyclerViewController<Void> i
   }
 
   private void showAuthTimeoutSelector () {
-    final String[] options = {"Always", "10 seconds", "30 seconds", "1 minute", "2 minutes", "5 minutes"};
-    final int[] values = {0, 10, 30, 60, 120, 300};
-    SettingsWrapBuilder b = new SettingsWrapBuilder(R.id.btn_rexAuthTimeout)
-      .setRawItems(options)
+    int current = RexSecurityManager.getInstance().getAuthTimeout();
+    showSettings(new SettingsWrapBuilder(R.id.btn_rexAuthTimeout)
+      .setRawItems(new ListItem[] {
+        new ListItem(ListItem.TYPE_RADIO_OPTION, R.id.btn_rexAuthTimeoutAlways, 0, "Always", R.id.btn_rexAuthTimeout, current == 0),
+        new ListItem(ListItem.TYPE_RADIO_OPTION, R.id.btn_rexAuthTimeout10s, 0, "10 seconds", R.id.btn_rexAuthTimeout, current == 10),
+        new ListItem(ListItem.TYPE_RADIO_OPTION, R.id.btn_rexAuthTimeout30s, 0, "30 seconds", R.id.btn_rexAuthTimeout, current == 30),
+        new ListItem(ListItem.TYPE_RADIO_OPTION, R.id.btn_rexAuthTimeout1m, 0, "1 minute", R.id.btn_rexAuthTimeout, current == 60),
+        new ListItem(ListItem.TYPE_RADIO_OPTION, R.id.btn_rexAuthTimeout2m, 0, "2 minutes", R.id.btn_rexAuthTimeout, current == 120),
+        new ListItem(ListItem.TYPE_RADIO_OPTION, R.id.btn_rexAuthTimeout5m, 0, "5 minutes", R.id.btn_rexAuthTimeout, current == 300),
+      })
       .setIntDelegate((id, result) -> {
-        int index = result.get(R.id.btn_rexAuthTimeout);
-        if (index >= 0 && index < values.length) {
-          RexSecurityManager.getInstance().setAuthTimeout(values[index]);
-          adapter.updateValuedSettingById(R.id.btn_rexAuthTimeout);
-        }
-      });
-    b.setSaveStr("OK");
-    b.setAllowResize(false);
-    showSettings(b);
+        int selected = result.get(R.id.btn_rexAuthTimeout);
+        int timeout = 0;
+        if (selected == R.id.btn_rexAuthTimeout10s) timeout = 10;
+        else if (selected == R.id.btn_rexAuthTimeout30s) timeout = 30;
+        else if (selected == R.id.btn_rexAuthTimeout1m) timeout = 60;
+        else if (selected == R.id.btn_rexAuthTimeout2m) timeout = 120;
+        else if (selected == R.id.btn_rexAuthTimeout5m) timeout = 300;
+        RexSecurityManager.getInstance().setAuthTimeout(timeout);
+        adapter.updateValuedSettingById(R.id.btn_rexAuthTimeout);
+      })
+      .setAllowResize(false));
   }
 
   private static String getAuthTimeoutLabel (int seconds) {

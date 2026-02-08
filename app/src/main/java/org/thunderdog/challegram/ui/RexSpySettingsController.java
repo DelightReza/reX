@@ -158,19 +158,27 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
   }
 
   private void showMaxFolderSizeSelector () {
-    final String[] options = {"300 MB", "1 GB", "2 GB", "5 GB", "16 GB", "No limit"};
-    final int[] values = {300, 1024, 2048, 5120, 16384, 0};
-    SettingsWrapBuilder b = new SettingsWrapBuilder(R.id.btn_rexSpyMaxFolderSize)
-      .setRawItems(options)
+    int current = RexConfig.getInstance().getMaxFolderSizeMb();
+    showSettings(new SettingsWrapBuilder(R.id.btn_rexSpyMaxFolderSize)
+      .setRawItems(new ListItem[] {
+        new ListItem(ListItem.TYPE_RADIO_OPTION, R.id.btn_rexFolderSize300, 0, "300 MB", R.id.btn_rexSpyMaxFolderSize, current == 300),
+        new ListItem(ListItem.TYPE_RADIO_OPTION, R.id.btn_rexFolderSize1g, 0, "1 GB", R.id.btn_rexSpyMaxFolderSize, current == 1024),
+        new ListItem(ListItem.TYPE_RADIO_OPTION, R.id.btn_rexFolderSize2g, 0, "2 GB", R.id.btn_rexSpyMaxFolderSize, current == 2048),
+        new ListItem(ListItem.TYPE_RADIO_OPTION, R.id.btn_rexFolderSize5g, 0, "5 GB", R.id.btn_rexSpyMaxFolderSize, current == 5120),
+        new ListItem(ListItem.TYPE_RADIO_OPTION, R.id.btn_rexFolderSize16g, 0, "16 GB", R.id.btn_rexSpyMaxFolderSize, current == 16384),
+        new ListItem(ListItem.TYPE_RADIO_OPTION, R.id.btn_rexFolderSizeNone, 0, "No limit", R.id.btn_rexSpyMaxFolderSize, current == 0),
+      })
       .setIntDelegate((id, result) -> {
-        int index = result.get(R.id.btn_rexSpyMaxFolderSize);
-        if (index >= 0 && index < values.length) {
-          RexConfig.getInstance().setMaxFolderSizeMb(values[index]);
-          adapter.updateValuedSettingById(R.id.btn_rexSpyMaxFolderSize);
-        }
-      });
-    b.setSaveStr("OK");
-    b.setAllowResize(false);
-    showSettings(b);
+        int selected = result.get(R.id.btn_rexSpyMaxFolderSize);
+        int size = 0;
+        if (selected == R.id.btn_rexFolderSize300) size = 300;
+        else if (selected == R.id.btn_rexFolderSize1g) size = 1024;
+        else if (selected == R.id.btn_rexFolderSize2g) size = 2048;
+        else if (selected == R.id.btn_rexFolderSize5g) size = 5120;
+        else if (selected == R.id.btn_rexFolderSize16g) size = 16384;
+        RexConfig.getInstance().setMaxFolderSizeMb(size);
+        adapter.updateValuedSettingById(R.id.btn_rexSpyMaxFolderSize);
+      })
+      .setAllowResize(false));
   }
 }

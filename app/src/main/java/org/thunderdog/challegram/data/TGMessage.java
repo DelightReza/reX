@@ -4078,8 +4078,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
       Drawable deletedIcon = Drawables.get(view.getResources(), R.drawable.baseline_delete_24);
       if (deletedIcon != null) {
         int iconSize = Screen.dp(14f);
-        Paint deletedPaint = Paints.createPaint(Paint.ANTI_ALIAS_FLAG);
-        deletedPaint.setColorFilter(new android.graphics.PorterDuffColorFilter(iconPaint.getColor() != 0 ? iconPaint.getColor() : Theme.getColor(ColorId.iconLight), android.graphics.PorterDuff.Mode.SRC_IN));
+        deletedIcon.setColorFilter(new android.graphics.PorterDuffColorFilter(textColor, android.graphics.PorterDuff.Mode.SRC_IN));
         deletedIcon.setBounds(startX, (int) (counterY - iconSize / 2f), startX + iconSize, (int) (counterY + iconSize / 2f));
         deletedIcon.draw(c);
         startX += iconSize + Screen.dp(COUNTER_ICON_MARGIN);
