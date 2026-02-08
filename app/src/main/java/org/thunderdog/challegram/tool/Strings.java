@@ -833,6 +833,11 @@ public class Strings {
     if (StringUtils.isEmpty(rawNumber))
       return rawNumber;
 
+    // reX: Phone masking support
+    if (org.thunderdog.challegram.security.RexSecurityManager.getInstance().isPhoneMasked()) {
+      return "+** ***";
+    }
+
     final String phoneNumber = getNumber(rawNumber);
     final int length = phoneNumber.length();
 

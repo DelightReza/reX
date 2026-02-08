@@ -1416,4 +1416,12 @@
   <item type="id" name="btn_playback_speed_1_5" />
   <item type="id" name="btn_playback_speed_2_0" />
   <item type="id" name="btn_tgxKeepAlive" />
+
+  <!-- reX Privacy & Security -->
+  <item type="id" name="controller_rexPrivacySecurity" />
+  <item type="id" name="btn_rexPrivacySecurity" />
+  <item type="id" name="btn_rexEditLockedChats" />
+  <item type="id" name="btn_rexLockScreenshots" />
+  <item type="id" name="btn_rexAuthTimeout" />
+  <item type="id" name="btn_rexHideMyPhone" />
 </resources>
