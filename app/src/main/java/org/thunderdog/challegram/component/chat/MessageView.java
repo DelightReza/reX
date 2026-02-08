@@ -63,6 +63,8 @@ import org.thunderdog.challegram.ui.EditRightsController;
 import org.thunderdog.challegram.ui.HashtagChatController;
 import org.thunderdog.challegram.ui.MessagesController;
 import org.thunderdog.challegram.unsorted.Settings;
+import org.thunderdog.challegram.rex.RexGhostManager;
+import org.thunderdog.challegram.config.RexConfig;
 import org.thunderdog.challegram.util.DrawableProvider;
 import org.thunderdog.challegram.util.StringList;
 import org.thunderdog.challegram.util.text.Text;
@@ -338,6 +340,15 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
         invalidateOutline();
       }
     }
+    
+    // --- REX MOD: Apply ghost effect ---
+    if (message != null && RexGhostManager.INSTANCE.isGhost(message.getId())) {
+      setAlpha(0.5f);
+      invalidate();
+    } else {
+      setAlpha(1.0f);
+    }
+    // --- END REX MOD ---
   }
 
   public void invalidatePreviewReceiver (long chatId, long messageId) {
@@ -818,6 +829,64 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
         icons.append(R.drawable.baseline_forward_24);
       }
     }
+
+    // --- REX MOD: Feature Menu Items ---
+
+    // 1. Force Read Message (when Ghost Mode is active)
+    if (!isMore && RexConfig.getInstance().isGhostMode() && !msg.isOutgoing() && isSent) {
+      ids.append(R.id.btn_messageRexForceRead);
+      strings.append(R.string.RexForceReadMessage);
+      icons.append(R.drawable.deproko_baseline_check_double_24);
+    }
+
+    // 2. Forward Restricted Content
+    if (!isMore && isSent && RexConfig.getInstance().isSaveRestricted()) {
+      TdApi.Message message = msg.getNewestMessage();
+      boolean isRestricted = !msg.canBeForwarded();
+      boolean isViewOnce = message.selfDestructType != null;
+      if (isRestricted || isViewOnce) {
+        ids.append(R.id.btn_messageRexForwardRestricted);
+        strings.append(R.string.RexForwardRestricted);
+        icons.append(R.drawable.baseline_forward_24);
+      }
+    }
+
+    // 3. Save View-Once Message
+    if (!isMore && isSent && RexConfig.getInstance().getSaveDeletedMessages()) {
+      TdApi.Message message = msg.getNewestMessage();
+      if (message.selfDestructType != null) {
+        ids.append(R.id.btn_messageRexSaveViewOnce);
+        strings.append(R.string.RexSaveViewOnce);
+        icons.append(R.drawable.baseline_file_download_24);
+      }
+    }
+
+    // 4. Burn Message (for self-destructing messages)
+    if (!isMore && isSent && RexConfig.getInstance().getSaveDeletedMessages()) {
+      TdApi.Message message = msg.getNewestMessage();
+      if (message.selfDestructType != null) {
+        ids.append(R.id.btn_messageRexBurn);
+        strings.append(R.string.RexBurnMessage);
+        icons.append(R.drawable.baseline_whatshot_24);
+      }
+    }
+
+    // 5. View Edit History
+    if (!isMore && isSent && RexConfig.getInstance().getSaveEditsHistory()) {
+      TdApi.Message message = msg.getNewestMessage();
+      int editCount = msg.getCachedEditCount();
+      if (editCount == -1) {
+        android.content.Context ctx = m.context();
+        org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(ctx);
+        editCount = db.rexDao().hasEdits(message.id);
+      }
+      if (editCount > 0) {
+        ids.append(R.id.btn_messageRexViewEditHistory);
+        strings.append(R.string.RexViewEditHistory);
+        icons.append(R.drawable.baseline_edit_24);
+      }
+    }
+    // --- END REX MOD ---
 
     int moreOptions = 0;
 

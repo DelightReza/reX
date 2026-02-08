@@ -1482,6 +1482,16 @@
   <item type="id" name="btn_rexBurnMessage" />
   <item type="id" name="btn_rexForwardRestricted" />
   <item type="id" name="btn_rexSaveRestricted" />
+  <item type="id" name="btn_messageRexForceRead" />
+  <item type="id" name="btn_messageRexForwardRestricted" />
+  <item type="id" name="btn_messageRexSaveViewOnce" />
+  <item type="id" name="btn_messageRexBurn" />
+  <item type="id" name="btn_messageRexViewEditHistory" />
+  <item type="id" name="btn_rexChatMenu" />
+  <item type="id" name="btn_rexViewDeleted" />
+  <item type="id" name="btn_rexReadExclusion" />
+  <item type="id" name="btn_rexTypeExclusion" />
+  <item type="id" name="btn_rexClearDeleted" />
 
   <!-- reX Deleted/Edit History Controllers -->
   <item type="id" name="controller_rexDeletedMessages" />

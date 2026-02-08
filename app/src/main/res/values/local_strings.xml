@@ -11,4 +11,17 @@
 
   <string name="EmulatorDetectorReport_title">False-positive emulator detection warning on %1$s \`%2$s\`</string>
   <string name="EmulatorDetectorReport_text">Hello. I use **Telegram X** on a real device, but it says I am running on an emulator.\n\n**My real device details:**\n\nName: %1$s \`%2$s\`\nProduct: \`%3$s\`\nDevice: \`%4$s\`\nHardware: \`%5$s\`\n\n**The app version I am using:**\n\n%6$s\n\n**Emulator detection result:** `%7$s`\n\nPlease take a look if this warning can be resolved for my device.\nThank you!</string>
+
+  <!-- reX Feature Strings -->
+  <string name="RexForceReadMessage">Read Message</string>
+  <string name="RexForwardRestricted">Forward Restricted</string>
+  <string name="RexSaveViewOnce">Save View Once</string>
+  <string name="RexBurnMessage">Burn</string>
+  <string name="RexViewEditHistory">View Edit History</string>
+  <string name="RexChatMenu">reX</string>
+  <string name="RexViewDeleted">View Deleted</string>
+  <string name="RexReadExclusion">Read Exclusion</string>
+  <string name="RexTypeExclusion">Type Exclusion</string>
+  <string name="RexClearDeleted">Clear Deleted</string>
+  <string name="RexTodoNotImplemented">This feature is not yet implemented</string>
 </resources>

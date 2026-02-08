@@ -247,6 +247,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   // counters
 
   private final Counter viewCounter, replyCounter, shareCounter, isPinned, isEdited, isRestricted, isUnsupported;
+  private final Counter isDeletedCounter; // REX MOD: Counter for deleted messages
   private Counter shrinkedReactionsCounter, reactionsCounter;
   private final ReactionsCounterDrawable reactionsCounterDrawable;
   private final Counter isChannelHeaderCounter;
@@ -261,6 +262,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   private final RectF isTranslatedCounterLastDrawRect = new RectF();
   private final RectF isRestrictedCounterLastDrawRect = new RectF();
   private final RectF isEditedCounterLastDrawRect = new RectF();
+  private final RectF isDeletedCounterLastDrawRect = new RectF(); // REX MOD
 
 
   // forward values
@@ -306,6 +308,9 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   protected final RectF bubblePathRect, bubbleClipPathRect;
 
   private boolean needSponsorSmallPadding;
+  // --- REX MOD: Cache edit count for performance ---
+  private int cachedEditCount = -1;
+  // --- END REX MOD ---
 
   protected final MessagesManager manager;
   protected final Tdlib tdlib;
@@ -448,6 +453,16 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
       .drawable(R.drawable.baseline_edit_12, 12f, 0f, Gravity.CENTER_HORIZONTAL)
       .build();
     this.isEdited.showHide(true, false);
+    // REX MOD: Initialize deleted counter
+    this.isDeletedCounter = new Counter.Builder()
+      .noBackground()
+      .allBold(false)
+      .callback(this)
+      .drawable(R.drawable.baseline_delete_12, 12f, 0f, Gravity.CENTER_HORIZONTAL)
+      .colorSet(() -> Theme.getColor(ColorId.messageNegativeLine))
+      .build();
+    this.isDeletedCounter.showHide(true, false);
+    // END REX MOD
     this.isRestricted = new Counter.Builder()
       .noBackground()
       .allBold(false)
@@ -2176,6 +2191,13 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
         }
       }
 
+      // REX MOD: Draw deleted icon for ghost messages
+      if (org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.isGhost(getId())) {
+        isDeletedCounter.draw(c, right, top, Gravity.RIGHT, 1f, view, ColorId.messageNegativeLine, isDeletedCounterLastDrawRect);
+        right -= isDeletedCounter.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN));
+      }
+      // END REX MOD
+
       if (shouldShowMessageRestrictedWarning()) {
         if (isRestrictedByTelegram()) {
           isRestricted.draw(c, right, top, Gravity.RIGHT, 1f, view, ColorId.NONE, isRestrictedCounterLastDrawRect);
@@ -2528,6 +2550,25 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
       c.translate(translation, 0);
     }
     drawOverlay(view, c, pContentX, pContentY, pContentMaxWidth);
+    
+    // --- REX MOD: Draw ghost message overlay ---
+    if (org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.isGhost(getId())) {
+      drawGhostOverlay(c, pContentX, pContentY, pContentMaxWidth);
+    }
+    // --- END REX MOD ---
+    
+    // --- REX MOD: Draw edit history indicator ---
+    if (org.thunderdog.challegram.config.RexConfig.getInstance().getSaveEditsHistory()) {
+      if (cachedEditCount == -1) {
+        android.content.Context ctx = view.getContext();
+        org.thunderdog.challegram.rex.db.RexDatabase db = org.thunderdog.challegram.rex.db.RexDatabase.get(ctx);
+        cachedEditCount = db.rexDao().hasEdits(getId());
+      }
+      if (cachedEditCount > 0) {
+        drawEditIndicator(c, pContentX, pContentY, pContentMaxWidth, cachedEditCount);
+      }
+    }
+    // --- END REX MOD ---
     if (savedTranslation) {
       Views.restore(c, restoreToCount);
       drawTranslate(view, c);
@@ -5227,6 +5268,58 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   public boolean hasRexEditHistory () {
     return (flags & FLAG_REX_HAS_EDIT_HISTORY) != 0;
   }
+
+  // --- REX MOD: Ghost message overlay methods ---
+  private static android.text.TextPaint rexDeletedTextPaint;
+  private static android.graphics.Paint rexDeletedBgPaint;
+  private static android.text.TextPaint rexEditedTextPaint;
+
+  private void drawGhostOverlay (Canvas c, int startX, int startY, int maxWidth) {
+    if (rexDeletedTextPaint == null) {
+      rexDeletedTextPaint = new android.text.TextPaint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+      rexDeletedTextPaint.setColor(android.graphics.Color.RED);
+      rexDeletedTextPaint.setTextSize(Screen.dp(11f));
+      rexDeletedTextPaint.setTypeface(Fonts.getRobotoMedium());
+    }
+    if (rexDeletedBgPaint == null) {
+      rexDeletedBgPaint = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+      rexDeletedBgPaint.setColor(android.graphics.Color.argb(180, 255, 230, 230));
+    }
+    String deletedText = "[DELETED]";
+    float textWidth = rexDeletedTextPaint.measureText(deletedText);
+    float badgeX = startX + maxWidth - textWidth - Screen.dp(12f);
+    float badgeY = startY + Screen.dp(14f);
+    c.drawRoundRect(badgeX - Screen.dp(4f), badgeY - Screen.dp(11f),
+                    badgeX + textWidth + Screen.dp(4f), badgeY + Screen.dp(3f),
+                    Screen.dp(4f), Screen.dp(4f), rexDeletedBgPaint);
+    c.drawText(deletedText, badgeX, badgeY, rexDeletedTextPaint);
+  }
+
+  private void drawEditIndicator (Canvas c, int startX, int startY, int maxWidth, int editCount) {
+    if (rexEditedTextPaint == null) {
+      rexEditedTextPaint = new android.text.TextPaint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+      rexEditedTextPaint.setColor(Theme.getColor(ColorId.textLight));
+      rexEditedTextPaint.setTextSize(Screen.dp(10f));
+      rexEditedTextPaint.setTypeface(Fonts.getRobotoRegular());
+    }
+    String editText = "✎ Edited";
+    if (editCount > 1) {
+      editText += " (" + editCount + "x)";
+    }
+    float textWidth = rexEditedTextPaint.measureText(editText);
+    float indicatorX = startX + maxWidth - textWidth - Screen.dp(12f);
+    float indicatorY = startY + Screen.dp(28f);
+    c.drawText(editText, indicatorX, indicatorY, rexEditedTextPaint);
+  }
+
+  public final int getCachedEditCount () {
+    return cachedEditCount;
+  }
+
+  public final void invalidateCachedEditCount () {
+    cachedEditCount = -1;
+  }
+  // --- END REX MOD ---
 
   public boolean isUnread () {
     return (flags & MESSAGE_FLAG_READ) == 0 || (msg.sendingState != null);

@@ -282,4 +282,21 @@ public final class RexConfig {
   public void setBypassRestrictionsEnabled (boolean enabled) {
     prefs.edit().putBoolean(KEY_CUSTOM_BYPASS_RESTRICTIONS, enabled).apply();
   }
+
+  // --- Kotlin-compatible method aliases (used by main branch integrations) ---
+  public boolean isGhostMode () { return isGhostEnabled(); }
+  public boolean getGhostNoRead () { return isGhostOptionRawEnabled(GHOST_NO_READ); }
+  public boolean getGhostNoOnline () { return isGhostOptionRawEnabled(GHOST_NO_ONLINE); }
+  public boolean getGhostNoTyping () { return isGhostOptionRawEnabled(GHOST_NO_TYPING); }
+  public boolean getGhostNoStories () { return isGhostOptionRawEnabled(GHOST_NO_STORIES); }
+  public boolean getReadOnInteract () { return isReadOnInteract(); }
+  public boolean getSaveDeletedMessages () { return isSaveDeletedEnabled(); }
+  public boolean getSaveEditsHistory () { return isSaveEditsEnabled(); }
+  public boolean getSaveAttachments () { return isSaveAttachmentsEnabled(); }
+  public boolean isSaveRestricted () { return isBypassRestrictionsEnabled(); }
+
+  // Force read request state (thread-safe volatile for use by Ghost interceptor)
+  private volatile boolean forceReadRequest = false;
+  public boolean isForceReadRequest () { return forceReadRequest; }
+  public void setForceReadRequest (boolean value) { forceReadRequest = value; }
 }

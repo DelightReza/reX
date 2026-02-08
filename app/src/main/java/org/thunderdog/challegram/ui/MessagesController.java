@@ -2282,6 +2282,19 @@ public class MessagesController extends ViewController<MessagesController.Argume
       if (chat != null) {
         tdlib.ui().toggleMute(this, chat.id, false, null);
       }
+    // --- REX MOD ---
+    } else if (id == R.id.btn_rexChatMenu) {
+      showRexChatMenu();
+    } else if (id == R.id.btn_rexViewDeleted) {
+      RexDeletedMessagesController controller = new RexDeletedMessagesController(context, tdlib);
+      navigateTo(controller);
+    } else if (id == R.id.btn_rexReadExclusion) {
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
+    } else if (id == R.id.btn_rexTypeExclusion) {
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
+    } else if (id == R.id.btn_rexClearDeleted) {
+      UI.showToast(R.string.RexTodoNotImplemented, Toast.LENGTH_SHORT);
+    // --- END REX ---
     }
   }
 
@@ -2632,6 +2645,12 @@ public class MessagesController extends ViewController<MessagesController.Argume
     this.openKeyboard = args.openKeyboard;
     this.foundMessageId = args.foundMessageId;
     this.fillDraft = args.fillDraft;
+    
+    // --- REX MOD: Load ghost messages for this chat ---
+    if (args.chat != null && org.thunderdog.challegram.config.RexConfig.getInstance().getSaveDeletedMessages()) {
+      org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.loadGhostMessagesForChat(context(), args.chat.id);
+    }
+    // --- END REX MOD ---
 
     if (contentView != null) {
       updateView();
@@ -4524,8 +4543,32 @@ public class MessagesController extends ViewController<MessagesController.Argume
       }
     }
 
+    // --- REX MOD: Add reX submenu ---
+    if (org.thunderdog.challegram.config.RexConfig.getInstance().getSaveDeletedMessages()) {
+      ids.append(R.id.btn_rexChatMenu);
+      strings.append(R.string.RexChatMenu);
+    }
+    // --- END REX ---
+
     showMore(ids.get(), strings.get(), 0);
   }
+
+  // --- REX MOD: reX chat submenu ---
+  private void showRexChatMenu() {
+    if (chat == null) return;
+    IntList ids = new IntList(4);
+    StringList strings = new StringList(4);
+    ids.append(R.id.btn_rexViewDeleted);
+    strings.append(R.string.RexViewDeleted);
+    ids.append(R.id.btn_rexReadExclusion);
+    strings.append(R.string.RexReadExclusion);
+    ids.append(R.id.btn_rexTypeExclusion);
+    strings.append(R.string.RexTypeExclusion);
+    ids.append(R.id.btn_rexClearDeleted);
+    strings.append(R.string.RexClearDeleted);
+    showMore(ids.get(), strings.get(), 0);
+  }
+  // --- END REX ---
 
   // Clear history
 
@@ -5894,36 +5937,66 @@ public class MessagesController extends ViewController<MessagesController.Argume
         return true;
       }
 
-      // reX: Message menu handlers
-      if (id == R.id.btn_rexMarkAsRead) {
-        // Mark message as read (sends ViewMessages to TDLib directly, bypassing Ghost interceptor)
-        TdApi.Message message = selectedMessage.getMessage();
-        tdlib.client().send(new TdApi.ViewMessages(message.chatId, new long[]{message.id}, null, true), tdlib.okHandler());
-        UI.showToast("Read receipt sent", Toast.LENGTH_SHORT);
-        return true;
-      } else if (id == R.id.btn_rexBurnMessage) {
-        // Burn: Opens message content to trigger self-destruct timer for sender
-        TdApi.Message message = selectedMessage.getMessage();
-        tdlib.client().send(new TdApi.OpenMessageContent(message.chatId, message.id), tdlib.okHandler());
-        UI.showToast("Media opened — self-destruct triggered for sender", Toast.LENGTH_SHORT);
-        return true;
-      } else if (id == R.id.btn_rexForwardRestricted) {
-        // Forward from restricted chat: use shareMessages which copies content
+      // --- REX MOD: Message menu handlers ---
+      if (id == R.id.btn_messageRexForceRead) {
         cancelSheduledKeyboardOpeningAndHideAllKeyboards();
-        shareMessages(selectedMessage.getAllMessages(), false);
+        TdApi.Message message = selectedMessage.getNewestMessage();
+        org.thunderdog.challegram.config.RexConfig.getInstance().setForceReadRequest(true);
+        tdlib.client().send(new TdApi.ViewMessages(message.chatId, new long[]{message.id}, new TdApi.MessageSourceChatHistory(), true), result -> {
+          org.thunderdog.challegram.config.RexConfig.getInstance().setForceReadRequest(false);
+        });
+        UI.showToast("Message marked as read", Toast.LENGTH_SHORT);
         return true;
-      } else if (id == R.id.btn_rexSaveRestricted) {
-        // Save media from restricted chat
+      } else if (id == R.id.btn_messageRexForwardRestricted) {
         cancelSheduledKeyboardOpeningAndHideAllKeyboards();
-        TdApi.File file = TD.getFile(selectedMessage);
-        if (file != null && !file.local.isDownloadingActive && !file.local.isDownloadingCompleted) {
-          tdlib.files().downloadFile(file);
-          UI.showToast("Downloading media...", Toast.LENGTH_SHORT);
-        } else if (file != null && file.local.isDownloadingCompleted) {
-          UI.showToast("Already downloaded: " + file.local.path, Toast.LENGTH_SHORT);
+        TdApi.Message message = selectedMessage.getNewestMessage();
+        if (!org.thunderdog.challegram.rex.RexCloneSender.INSTANCE.canClone(message)) {
+          UI.showToast("Download the file first before forwarding", Toast.LENGTH_SHORT);
+          return true;
         }
+        final ShareController c = new ShareController(context, tdlib);
+        c.setArguments(new ShareController.Args(message).setAfter(() -> {
+          UI.showToast("Forwarded restricted content", Toast.LENGTH_SHORT);
+        }));
+        c.show();
+        return true;
+      } else if (id == R.id.btn_messageRexSaveViewOnce) {
+        cancelSheduledKeyboardOpeningAndHideAllKeyboards();
+        TdApi.Message message = selectedMessage.getNewestMessage();
+        TdApi.FormattedText formattedText = Td.textOrCaption(message.content);
+        String text = formattedText != null ? formattedText.text : "";
+        long senderId = Td.getSenderId(message.senderId);
+        org.thunderdog.challegram.rex.db.SavedMessage savedMsg = new org.thunderdog.challegram.rex.db.SavedMessage(
+          0, message.chatId, message.id, senderId, text, message.date, false, message.content.getConstructor(), null
+        );
+        org.thunderdog.challegram.rex.db.RexDatabase.get(context()).rexDao().insertMessage(savedMsg);
+        UI.showToast("View-once message saved", Toast.LENGTH_SHORT);
+        return true;
+      } else if (id == R.id.btn_messageRexBurn) {
+        cancelSheduledKeyboardOpeningAndHideAllKeyboards();
+        TdApi.Message message = selectedMessage.getNewestMessage();
+        TdApi.FormattedText formattedText = Td.textOrCaption(message.content);
+        String text = formattedText != null ? formattedText.text : "";
+        long senderId = Td.getSenderId(message.senderId);
+        org.thunderdog.challegram.rex.db.SavedMessage savedMsg = new org.thunderdog.challegram.rex.db.SavedMessage(
+          0, message.chatId, message.id, senderId, text, message.date, false, message.content.getConstructor(), null
+        );
+        org.thunderdog.challegram.rex.db.RexDatabase.get(context()).rexDao().insertMessage(savedMsg);
+        org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.addGhostMessage(message.id);
+        if (message.selfDestructType != null) {
+          tdlib.client().send(new TdApi.ViewMessages(message.chatId, new long[]{message.id}, new TdApi.MessageSourceChatHistory(), true), tdlib.okHandler());
+        }
+        UI.showToast("Message burned (hidden locally)", Toast.LENGTH_SHORT);
+        return true;
+      } else if (id == R.id.btn_messageRexViewEditHistory) {
+        cancelSheduledKeyboardOpeningAndHideAllKeyboards();
+        TdApi.Message message = selectedMessage.getNewestMessage();
+        org.thunderdog.challegram.ui.RexEditHistoryController editHistoryController =
+          new org.thunderdog.challegram.ui.RexEditHistoryController(context(), tdlib, message.id);
+        navigateTo(editHistoryController);
         return true;
       }
+      // --- END REX MOD ---
 
       return true;
     };
