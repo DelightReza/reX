@@ -24,7 +24,6 @@ import androidx.fragment.app.FragmentActivity;
 
 import org.thunderdog.challegram.tool.UI;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -64,7 +63,8 @@ public final class RexSecurityManager {
 
   @NonNull
   public Set<String> getHiddenChatIds () {
-    return prefs.getStringSet(KEY_HIDDEN_CHAT_IDS, Collections.emptySet());
+    Set<String> set = prefs.getStringSet(KEY_HIDDEN_CHAT_IDS, null);
+    return set != null ? new HashSet<>(set) : new HashSet<>();
   }
 
   public void setHiddenChatIds (@NonNull Set<String> ids) {
@@ -91,7 +91,8 @@ public final class RexSecurityManager {
 
   @NonNull
   public Set<String> getLockedChatIds () {
-    return prefs.getStringSet(KEY_LOCKED_CHAT_IDS, Collections.emptySet());
+    Set<String> set = prefs.getStringSet(KEY_LOCKED_CHAT_IDS, null);
+    return set != null ? new HashSet<>(set) : new HashSet<>();
   }
 
   public void setLockedChatIds (@NonNull Set<String> ids) {
@@ -118,7 +119,8 @@ public final class RexSecurityManager {
 
   @NonNull
   public Set<String> getHiddenAccountIds () {
-    return prefs.getStringSet(KEY_HIDDEN_ACCOUNT_IDS, Collections.emptySet());
+    Set<String> set = prefs.getStringSet(KEY_HIDDEN_ACCOUNT_IDS, null);
+    return set != null ? new HashSet<>(set) : new HashSet<>();
   }
 
   public void setHiddenAccountIds (@NonNull Set<String> ids) {

@@ -19,7 +19,6 @@ import androidx.annotation.NonNull;
 
 import org.thunderdog.challegram.tool.UI;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,20 +33,16 @@ public final class RexConfig {
   private static final String KEY_GHOST_OPTIONS = "ghost_options";
   private static final String KEY_LOCKED_GHOST_OPTIONS = "locked_ghost_options";
 
-  // Spy Mode keys
-  private static final String KEY_SPY_ENABLED = "spy_enabled";
-  private static final String KEY_SPY_OPTIONS = "spy_options";
+  // Spy Mode keys (each function has its own independent toggle)
+  private static final String KEY_SPY_SAVE_DELETED = "spy_save_deleted";
+  private static final String KEY_SPY_SAVE_EDITS = "spy_save_edits";
+  private static final String KEY_SPY_SAVE_ATTACHMENTS = "spy_save_attachments";
 
   // Ghost option constants
   public static final String GHOST_NO_READ = "NoRead";
   public static final String GHOST_NO_STORIES = "NoStories";
   public static final String GHOST_NO_ONLINE = "NoOnline";
   public static final String GHOST_NO_TYPING = "NoTyping";
-
-  // Spy option constants
-  public static final String SPY_SAVE_DELETED = "SaveDeleted";
-  public static final String SPY_SAVE_EDITS = "SaveEdits";
-  public static final String SPY_SAVE_ATTACHMENTS = "SaveAttachments";
 
   private final SharedPreferences prefs;
 
@@ -79,7 +74,8 @@ public final class RexConfig {
 
   @NonNull
   public Set<String> getGhostOptions () {
-    return prefs.getStringSet(KEY_GHOST_OPTIONS, Collections.emptySet());
+    Set<String> set = prefs.getStringSet(KEY_GHOST_OPTIONS, null);
+    return set != null ? new HashSet<>(set) : new HashSet<>();
   }
 
   public void setGhostOptions (@NonNull Set<String> options) {
@@ -102,7 +98,8 @@ public final class RexConfig {
 
   @NonNull
   public Set<String> getLockedGhostOptions () {
-    return prefs.getStringSet(KEY_LOCKED_GHOST_OPTIONS, Collections.emptySet());
+    Set<String> set = prefs.getStringSet(KEY_LOCKED_GHOST_OPTIONS, null);
+    return set != null ? new HashSet<>(set) : new HashSet<>();
   }
 
   public void setLockedGhostOptions (@NonNull Set<String> locked) {
@@ -123,36 +120,29 @@ public final class RexConfig {
     setLockedGhostOptions(locked);
   }
 
-  // --- Spy Mode ---
+  // --- Spy Mode (independent toggles per function) ---
 
-  public boolean isSpyEnabled () {
-    return prefs.getBoolean(KEY_SPY_ENABLED, false);
+  public boolean isSaveDeletedEnabled () {
+    return prefs.getBoolean(KEY_SPY_SAVE_DELETED, false);
   }
 
-  public void setSpyEnabled (boolean enabled) {
-    prefs.edit().putBoolean(KEY_SPY_ENABLED, enabled).apply();
+  public void setSaveDeletedEnabled (boolean enabled) {
+    prefs.edit().putBoolean(KEY_SPY_SAVE_DELETED, enabled).apply();
   }
 
-  @NonNull
-  public Set<String> getSpyOptions () {
-    return prefs.getStringSet(KEY_SPY_OPTIONS, Collections.emptySet());
+  public boolean isSaveEditsEnabled () {
+    return prefs.getBoolean(KEY_SPY_SAVE_EDITS, false);
   }
 
-  public void setSpyOptions (@NonNull Set<String> options) {
-    prefs.edit().putStringSet(KEY_SPY_OPTIONS, options).apply();
+  public void setSaveEditsEnabled (boolean enabled) {
+    prefs.edit().putBoolean(KEY_SPY_SAVE_EDITS, enabled).apply();
   }
 
-  public boolean isSpyOptionEnabled (@NonNull String option) {
-    return isSpyEnabled() && getSpyOptions().contains(option);
+  public boolean isSaveAttachmentsEnabled () {
+    return prefs.getBoolean(KEY_SPY_SAVE_ATTACHMENTS, false);
   }
 
-  public void toggleSpyOption (@NonNull String option, boolean enabled) {
-    Set<String> options = new HashSet<>(getSpyOptions());
-    if (enabled) {
-      options.add(option);
-    } else {
-      options.remove(option);
-    }
-    setSpyOptions(options);
+  public void setSaveAttachmentsEnabled (boolean enabled) {
+    prefs.edit().putBoolean(KEY_SPY_SAVE_ATTACHMENTS, enabled).apply();
   }
 }
