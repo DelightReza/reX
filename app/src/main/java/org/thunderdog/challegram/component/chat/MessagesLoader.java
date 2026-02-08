@@ -1560,7 +1560,7 @@ public class MessagesLoader implements Client.ResultHandler {
                   );
                 }
                 try {
-                  TGMessage tgMsg = TGMessage.valueOf(manager, (TdApi.Message) msg, this.chat, this.messageThread, (Object) null);
+                  TGMessage tgMsg = TGMessage.valueOf(manager, (TdApi.Message) msg, this.chat, this.messageThread, (TdApi.ChatAdministrator) null);
                   org.thunderdog.challegram.rex.RexGhostManager.INSTANCE.markAsGhost(msg.id);
                   items.add(tgMsg);
                 } catch (Exception ex) { /* skip */ }
