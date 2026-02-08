@@ -5561,9 +5561,9 @@
   <string name="ForegroundSyncDescOff">You may see **\"You may have a new message\"** notification in the system tray when some notifications couldn\'t be shown.</string>
 
   <string name="TGXKeepAliveService">Telegram X Alive Service</string>
-  <string name="TGXKeepAliveServiceDesc">Keeps the app connected to Telegram servers by preventing Android from killing the app process. Shows a low-priority persistent notification in the system tray.\n\nThis service helps ensure you receive messages reliably without push notifications.</string>
-  <string name="TGXKeepAliveServiceOn">Telegram X Keep Alive service is now enabled. You will see a persistent notification in the system tray.</string>
-  <string name="TGXKeepAliveServiceOff">Telegram X Keep Alive service is now disabled. The notification has been removed.</string>
+  <string name="TGXKeepAliveServiceDesc">Keeps the app connected to Telegram servers by preventing Android from killing the app process. Shows a low-priority persistent notification in the system tray.\n\n**Note:** This service helps ensure you receive messages reliably without push notifications.</string>
+  <string name="TGXKeepAliveServiceOn">Telegram X Keep Alive service is now **enabled**. You will see a persistent notification in the system tray.</string>
+  <string name="TGXKeepAliveServiceOff">Telegram X Keep Alive service is now **disabled**. The notification has been removed.</string>
   <string name="TGXKeepAliveNotificationTitle">Telegram X Keep Alive</string>
   <string name="TGXKeepAliveNotificationText">Keeping app connected</string>
   
