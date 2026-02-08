@@ -1417,11 +1417,62 @@
   <item type="id" name="btn_playback_speed_2_0" />
   <item type="id" name="btn_tgxKeepAlive" />
 
+  <!-- reX Settings -->
+  <item type="id" name="controller_rexSettings" />
+  <item type="id" name="btn_rexSettings" />
+  <item type="id" name="btn_rexGhostMode" />
+  <item type="id" name="btn_rexSpy" />
+  <item type="id" name="btn_rexPrivacySecurity" />
+  <item type="id" name="btn_rexCustomization" />
+
+  <!-- reX Ghost Mode -->
+  <item type="id" name="controller_rexGhostSettings" />
+  <item type="id" name="btn_rexGhostToggle" />
+  <item type="id" name="btn_rexGhostNoRead" />
+  <item type="id" name="btn_rexGhostNoStories" />
+  <item type="id" name="btn_rexGhostNoOnline" />
+  <item type="id" name="btn_rexGhostNoTyping" />
+  <item type="id" name="btn_rexGhostGoOffline" />
+  <item type="id" name="btn_rexGhostReadOnInteract" />
+  <item type="id" name="btn_rexGhostSchedule" />
+  <item type="id" name="btn_rexGhostSendNoSound" />
+  <item type="id" name="btn_rexGhostStoryAlert" />
+
+  <!-- reX Spy -->
+  <item type="id" name="controller_rexSpySettings" />
+  <item type="id" name="btn_rexSpySaveDeleted" />
+  <item type="id" name="btn_rexSpySaveEdits" />
+  <item type="id" name="btn_rexSpySaveBotDialogs" />
+  <item type="id" name="btn_rexSpySaveReadDate" />
+  <item type="id" name="btn_rexSpySaveLastSeen" />
+  <item type="id" name="btn_rexSpySaveAttachments" />
+  <item type="id" name="btn_rexSpyAttachmentsFolder" />
+  <item type="id" name="btn_rexSpyMaxFolderSize" />
+  <item type="id" name="btn_rexSpyExportDb" />
+  <item type="id" name="btn_rexSpyImportDb" />
+  <item type="id" name="btn_rexSpyClearDb" />
+
   <!-- reX Privacy & Security -->
   <item type="id" name="controller_rexPrivacySecurity" />
-  <item type="id" name="btn_rexPrivacySecurity" />
+  <item type="id" name="btn_rexLockArchived" />
+  <item type="id" name="btn_rexLockCalls" />
+  <item type="id" name="btn_rexLockSecret" />
+  <item type="id" name="btn_rexLockSettings" />
+  <item type="id" name="btn_rexHowItWorks" />
   <item type="id" name="btn_rexEditLockedChats" />
+  <item type="id" name="btn_rexHideLockedChats" />
   <item type="id" name="btn_rexLockScreenshots" />
+  <item type="id" name="btn_rexShowNotifications" />
+  <item type="id" name="btn_rexLockedAccounts" />
+  <item type="id" name="btn_rexAllowDevicePin" />
   <item type="id" name="btn_rexAuthTimeout" />
   <item type="id" name="btn_rexHideMyPhone" />
+  <item type="id" name="btn_rexHideOthersPhone" />
+
+  <!-- reX Customization -->
+  <item type="id" name="controller_rexCustomization" />
+  <item type="id" name="btn_rexDisableColorfulReplies" />
+  <item type="id" name="btn_rexTranslucentDeleted" />
+  <item type="id" name="btn_rexDeletedMark" />
+  <item type="id" name="btn_rexDrawerOptions" />
 </resources>

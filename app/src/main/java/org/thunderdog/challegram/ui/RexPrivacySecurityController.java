@@ -37,7 +37,7 @@ public class RexPrivacySecurityController extends RecyclerViewController<Void> i
 
   @Override
   public CharSequence getName () {
-    return "reX Privacy & Security";
+    return "Privacy and Security";
   }
 
   @Override
@@ -52,42 +52,90 @@ public class RexPrivacySecurityController extends RecyclerViewController<Void> i
       public void setValuedSetting (ListItem item, SettingView v, boolean isUpdate) {
         final int itemId = item.getId();
         RexSecurityManager sec = RexSecurityManager.getInstance();
-        if (itemId == R.id.btn_rexLockScreenshots) {
+        if (itemId == R.id.btn_rexLockArchived) {
+          v.getToggler().setRadioEnabled(sec.isLockArchived(), isUpdate);
+        } else if (itemId == R.id.btn_rexLockCalls) {
+          v.getToggler().setRadioEnabled(sec.isLockCalls(), isUpdate);
+        } else if (itemId == R.id.btn_rexLockSecret) {
+          v.getToggler().setRadioEnabled(sec.isLockSecret(), isUpdate);
+        } else if (itemId == R.id.btn_rexLockSettings) {
+          v.getToggler().setRadioEnabled(sec.isLockSettings(), isUpdate);
+        } else if (itemId == R.id.btn_rexHideLockedChats) {
+          v.getToggler().setRadioEnabled(sec.isHideLockedChats(), isUpdate);
+        } else if (itemId == R.id.btn_rexLockScreenshots) {
           v.getToggler().setRadioEnabled(sec.isLockScreenshots(), isUpdate);
-        } else if (itemId == R.id.btn_rexHideMyPhone) {
-          v.getToggler().setRadioEnabled(sec.isPhoneMasked(), isUpdate);
+        } else if (itemId == R.id.btn_rexShowNotifications) {
+          v.getToggler().setRadioEnabled(sec.isShowNotificationsLocked(), isUpdate);
+        } else if (itemId == R.id.btn_rexAllowDevicePin) {
+          v.getToggler().setRadioEnabled(sec.isAllowDevicePin(), isUpdate);
         } else if (itemId == R.id.btn_rexAuthTimeout) {
           v.setData(getAuthTimeoutLabel(sec.getAuthTimeout()));
+        } else if (itemId == R.id.btn_rexHideMyPhone) {
+          v.getToggler().setRadioEnabled(sec.isPhoneMasked(), isUpdate);
+        } else if (itemId == R.id.btn_rexHideOthersPhone) {
+          v.getToggler().setRadioEnabled(sec.isOthersPhoneMasked(), isUpdate);
+        } else if (itemId == R.id.btn_rexLockedAccounts) {
+          int count = sec.getHiddenAccountIds().size();
+          v.setData("Locked accounts " + count + "/2");
         }
       }
     };
 
     final List<ListItem> items = new ArrayList<>();
-    RexSecurityManager sec = RexSecurityManager.getInstance();
 
-    // Category 1: Locked Chats
+    // Locked actions
     items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET_SMALL));
-    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Locked Chats"));
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Locked actions"));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexEditLockedChats, R.drawable.baseline_lock_24, "Edit Locked Chats List"));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexLockArchived, 0, "Lock archived chats"));
     items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
-    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexLockScreenshots, 0, "Lock Screenshots"));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexLockCalls, 0, "Lock calls history"));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexLockSecret, 0, "Lock secret chats"));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexLockSettings, 0, "Lock settings"));
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Locked chats require biometric authentication to open. Lock screenshots applies FLAG_SECURE to prevent screen capture."));
 
-    // Category 2: Biometric
+    // Locked chats
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Locked chats"));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexHowItWorks, R.drawable.baseline_help_24, "How does it work?"));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    items.add(new ListItem(ListItem.TYPE_SETTING, R.id.btn_rexEditLockedChats, R.drawable.baseline_edit_24, "Edit list"));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexHideLockedChats, 0, "Hide locked chats"));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexLockScreenshots, 0, "Lock screenshots"));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexShowNotifications, 0, "Show notifications"));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Hide locked chats from the list."));
+
+    // Actions
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Actions"));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    items.add(new ListItem(ListItem.TYPE_VALUED_SETTING_COMPACT, R.id.btn_rexLockedAccounts, 0, "Locked accounts"));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+
+    // Biometric
     items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Biometric"));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexAllowDevicePin, 0, "Allow using device PIN"));
+    items.add(new ListItem(ListItem.TYPE_SEPARATOR_FULL));
     items.add(new ListItem(ListItem.TYPE_VALUED_SETTING_COMPACT, R.id.btn_rexAuthTimeout, R.drawable.baseline_schedule_24, "Ask for authentication every..."));
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Controls how long the session remains unlocked after successful biometric verification."));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Biometric authentication will only be required once every selected interval."));
 
-    // Category 3: Phone Numbers
-    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Phone Numbers"));
+    // Phone numbers
+    items.add(new ListItem(ListItem.TYPE_HEADER, 0, 0, "Phone numbers"));
     items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
-    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexHideMyPhone, 0, "Hide phone numbers"));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexHideMyPhone, 0, "Hide phone number"));
     items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
-    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "When enabled, all phone numbers will be masked as +** *** throughout the app."));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Hide your phone number in the app interfaces."));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_TOP));
+    items.add(new ListItem(ListItem.TYPE_RADIO_SETTING, R.id.btn_rexHideOthersPhone, 0, "Hide other people's phone number"));
+    items.add(new ListItem(ListItem.TYPE_SHADOW_BOTTOM));
+    items.add(new ListItem(ListItem.TYPE_DESCRIPTION, 0, 0, "Hide other people's phone number from their profile."));
 
     adapter.setItems(items, false);
     recyclerView.setAdapter(adapter);
@@ -98,33 +146,52 @@ public class RexPrivacySecurityController extends RecyclerViewController<Void> i
     final int viewId = v.getId();
     RexSecurityManager sec = RexSecurityManager.getInstance();
 
-    if (viewId == R.id.btn_rexLockScreenshots) {
+    if (viewId == R.id.btn_rexLockArchived) {
+      sec.setLockArchived(!sec.isLockArchived());
+      adapter.updateValuedSettingById(R.id.btn_rexLockArchived);
+    } else if (viewId == R.id.btn_rexLockCalls) {
+      sec.setLockCalls(!sec.isLockCalls());
+      adapter.updateValuedSettingById(R.id.btn_rexLockCalls);
+    } else if (viewId == R.id.btn_rexLockSecret) {
+      sec.setLockSecret(!sec.isLockSecret());
+      adapter.updateValuedSettingById(R.id.btn_rexLockSecret);
+    } else if (viewId == R.id.btn_rexLockSettings) {
+      sec.setLockSettings(!sec.isLockSettings());
+      adapter.updateValuedSettingById(R.id.btn_rexLockSettings);
+    } else if (viewId == R.id.btn_rexHideLockedChats) {
+      sec.setHideLockedChats(!sec.isHideLockedChats());
+      adapter.updateValuedSettingById(R.id.btn_rexHideLockedChats);
+    } else if (viewId == R.id.btn_rexLockScreenshots) {
       boolean newValue = !sec.isLockScreenshots();
       sec.setLockScreenshots(newValue);
       adapter.updateValuedSettingById(R.id.btn_rexLockScreenshots);
       applyScreenshotLock(newValue);
-    } else if (viewId == R.id.btn_rexHideMyPhone) {
-      boolean newValue = !sec.isPhoneMasked();
-      sec.setPhoneMasked(newValue);
-      adapter.updateValuedSettingById(R.id.btn_rexHideMyPhone);
+    } else if (viewId == R.id.btn_rexShowNotifications) {
+      sec.setShowNotificationsLocked(!sec.isShowNotificationsLocked());
+      adapter.updateValuedSettingById(R.id.btn_rexShowNotifications);
+    } else if (viewId == R.id.btn_rexAllowDevicePin) {
+      sec.setAllowDevicePin(!sec.isAllowDevicePin());
+      adapter.updateValuedSettingById(R.id.btn_rexAllowDevicePin);
     } else if (viewId == R.id.btn_rexAuthTimeout) {
       showAuthTimeoutSelector();
+    } else if (viewId == R.id.btn_rexHideMyPhone) {
+      sec.setPhoneMasked(!sec.isPhoneMasked());
+      adapter.updateValuedSettingById(R.id.btn_rexHideMyPhone);
+    } else if (viewId == R.id.btn_rexHideOthersPhone) {
+      sec.setOthersPhoneMasked(!sec.isOthersPhoneMasked());
+      adapter.updateValuedSettingById(R.id.btn_rexHideOthersPhone);
+    } else if (viewId == R.id.btn_rexHowItWorks) {
+      UI.showToast("Locked chats require biometric authentication to open. Hidden chats are invisible until you authenticate.", android.widget.Toast.LENGTH_LONG);
     } else if (viewId == R.id.btn_rexEditLockedChats) {
-      UI.showToast("Locked chats can be managed via long-press on any chat in the chat list.", android.widget.Toast.LENGTH_LONG);
+      UI.showToast("Long-press any chat in the chat list to lock/unlock it.", android.widget.Toast.LENGTH_LONG);
+    } else if (viewId == R.id.btn_rexLockedAccounts) {
+      UI.showToast("Account locking — coming soon", android.widget.Toast.LENGTH_SHORT);
     }
   }
 
   private void showAuthTimeoutSelector () {
-    final String[] options = {"Always", "1 minute", "5 minutes"};
-    final int[] values = {0, 60, 300};
-    int currentTimeout = RexSecurityManager.getInstance().getAuthTimeout();
-    int currentIndex = 0;
-    for (int i = 0; i < values.length; i++) {
-      if (values[i] == currentTimeout) {
-        currentIndex = i;
-        break;
-      }
-    }
+    final String[] options = {"Always", "10 seconds", "30 seconds", "1 minute", "2 minutes", "5 minutes"};
+    final int[] values = {0, 10, 30, 60, 120, 300};
     SettingsWrapBuilder b = new SettingsWrapBuilder(R.id.btn_rexAuthTimeout)
       .setRawItems(options)
       .setIntDelegate((id, result) -> {
@@ -141,7 +208,10 @@ public class RexPrivacySecurityController extends RecyclerViewController<Void> i
 
   private static String getAuthTimeoutLabel (int seconds) {
     if (seconds <= 0) return "Always";
+    if (seconds == 10) return "10 seconds";
+    if (seconds == 30) return "30 seconds";
     if (seconds == 60) return "1 minute";
+    if (seconds == 120) return "2 minutes";
     if (seconds == 300) return "5 minutes";
     return seconds + "s";
   }

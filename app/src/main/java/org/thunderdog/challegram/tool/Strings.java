@@ -834,7 +834,8 @@ public class Strings {
       return rawNumber;
 
     // reX: Phone masking support
-    if (org.thunderdog.challegram.security.RexSecurityManager.getInstance().isPhoneMasked()) {
+    org.thunderdog.challegram.security.RexSecurityManager sec = org.thunderdog.challegram.security.RexSecurityManager.getInstance();
+    if (sec.isPhoneMasked() || sec.isOthersPhoneMasked()) {
       return "+** ***";
     }
 

@@ -32,11 +32,25 @@ public final class RexConfig {
   private static final String KEY_GHOST_ENABLED = "ghost_enabled";
   private static final String KEY_GHOST_OPTIONS = "ghost_options";
   private static final String KEY_LOCKED_GHOST_OPTIONS = "locked_ghost_options";
+  private static final String KEY_GHOST_GO_OFFLINE = "ghost_go_offline";
+  private static final String KEY_GHOST_READ_ON_INTERACT = "ghost_read_on_interact";
+  private static final String KEY_GHOST_SCHEDULE_MESSAGES = "ghost_schedule_messages";
+  private static final String KEY_GHOST_SEND_WITHOUT_SOUND = "ghost_send_without_sound";
+  private static final String KEY_GHOST_STORY_ALERT = "ghost_story_alert";
 
   // Spy Mode keys (each function has its own independent toggle)
   private static final String KEY_SPY_SAVE_DELETED = "spy_save_deleted";
   private static final String KEY_SPY_SAVE_EDITS = "spy_save_edits";
+  private static final String KEY_SPY_SAVE_BOT_DIALOGS = "spy_save_bot_dialogs";
+  private static final String KEY_SPY_SAVE_READ_DATE = "spy_save_read_date";
+  private static final String KEY_SPY_SAVE_LAST_SEEN = "spy_save_last_seen";
   private static final String KEY_SPY_SAVE_ATTACHMENTS = "spy_save_attachments";
+  private static final String KEY_SPY_ATTACHMENTS_FOLDER = "spy_attachments_folder";
+  private static final String KEY_SPY_MAX_FOLDER_SIZE = "spy_max_folder_size";
+
+  // Customization keys
+  private static final String KEY_CUSTOM_DISABLE_COLORFUL_REPLIES = "custom_disable_colorful_replies";
+  private static final String KEY_CUSTOM_TRANSLUCENT_DELETED = "custom_translucent_deleted";
 
   // Ghost option constants
   public static final String GHOST_NO_READ = "NoRead";
@@ -86,6 +100,10 @@ public final class RexConfig {
     return isGhostEnabled() && getGhostOptions().contains(option);
   }
 
+  public boolean isGhostOptionRawEnabled (@NonNull String option) {
+    return getGhostOptions().contains(option);
+  }
+
   public void toggleGhostOption (@NonNull String option, boolean enabled) {
     Set<String> options = new HashSet<>(getGhostOptions());
     if (enabled) {
@@ -120,6 +138,52 @@ public final class RexConfig {
     setLockedGhostOptions(locked);
   }
 
+  public int getEnabledGhostOptionCount () {
+    return getGhostOptions().size();
+  }
+
+  // Ghost additional toggles
+
+  public boolean isGoOfflineAuto () {
+    return prefs.getBoolean(KEY_GHOST_GO_OFFLINE, false);
+  }
+
+  public void setGoOfflineAuto (boolean enabled) {
+    prefs.edit().putBoolean(KEY_GHOST_GO_OFFLINE, enabled).apply();
+  }
+
+  public boolean isReadOnInteract () {
+    return prefs.getBoolean(KEY_GHOST_READ_ON_INTERACT, false);
+  }
+
+  public void setReadOnInteract (boolean enabled) {
+    prefs.edit().putBoolean(KEY_GHOST_READ_ON_INTERACT, enabled).apply();
+  }
+
+  public boolean isScheduleMessages () {
+    return prefs.getBoolean(KEY_GHOST_SCHEDULE_MESSAGES, false);
+  }
+
+  public void setScheduleMessages (boolean enabled) {
+    prefs.edit().putBoolean(KEY_GHOST_SCHEDULE_MESSAGES, enabled).apply();
+  }
+
+  public boolean isSendWithoutSound () {
+    return prefs.getBoolean(KEY_GHOST_SEND_WITHOUT_SOUND, false);
+  }
+
+  public void setSendWithoutSound (boolean enabled) {
+    prefs.edit().putBoolean(KEY_GHOST_SEND_WITHOUT_SOUND, enabled).apply();
+  }
+
+  public boolean isStoryGhostAlert () {
+    return prefs.getBoolean(KEY_GHOST_STORY_ALERT, false);
+  }
+
+  public void setStoryGhostAlert (boolean enabled) {
+    prefs.edit().putBoolean(KEY_GHOST_STORY_ALERT, enabled).apply();
+  }
+
   // --- Spy Mode (independent toggles per function) ---
 
   public boolean isSaveDeletedEnabled () {
@@ -138,11 +202,70 @@ public final class RexConfig {
     prefs.edit().putBoolean(KEY_SPY_SAVE_EDITS, enabled).apply();
   }
 
+  public boolean isSaveBotDialogsEnabled () {
+    return prefs.getBoolean(KEY_SPY_SAVE_BOT_DIALOGS, false);
+  }
+
+  public void setSaveBotDialogsEnabled (boolean enabled) {
+    prefs.edit().putBoolean(KEY_SPY_SAVE_BOT_DIALOGS, enabled).apply();
+  }
+
+  public boolean isSaveReadDateEnabled () {
+    return prefs.getBoolean(KEY_SPY_SAVE_READ_DATE, false);
+  }
+
+  public void setSaveReadDateEnabled (boolean enabled) {
+    prefs.edit().putBoolean(KEY_SPY_SAVE_READ_DATE, enabled).apply();
+  }
+
+  public boolean isSaveLastSeenEnabled () {
+    return prefs.getBoolean(KEY_SPY_SAVE_LAST_SEEN, false);
+  }
+
+  public void setSaveLastSeenEnabled (boolean enabled) {
+    prefs.edit().putBoolean(KEY_SPY_SAVE_LAST_SEEN, enabled).apply();
+  }
+
   public boolean isSaveAttachmentsEnabled () {
     return prefs.getBoolean(KEY_SPY_SAVE_ATTACHMENTS, false);
   }
 
   public void setSaveAttachmentsEnabled (boolean enabled) {
     prefs.edit().putBoolean(KEY_SPY_SAVE_ATTACHMENTS, enabled).apply();
+  }
+
+  @NonNull
+  public String getAttachmentsFolder () {
+    return prefs.getString(KEY_SPY_ATTACHMENTS_FOLDER, "Saved Attachments");
+  }
+
+  public void setAttachmentsFolder (@NonNull String folder) {
+    prefs.edit().putString(KEY_SPY_ATTACHMENTS_FOLDER, folder).apply();
+  }
+
+  public int getMaxFolderSizeMb () {
+    return prefs.getInt(KEY_SPY_MAX_FOLDER_SIZE, 300);
+  }
+
+  public void setMaxFolderSizeMb (int sizeMb) {
+    prefs.edit().putInt(KEY_SPY_MAX_FOLDER_SIZE, sizeMb).apply();
+  }
+
+  // --- Customization ---
+
+  public boolean isDisableColorfulReplies () {
+    return prefs.getBoolean(KEY_CUSTOM_DISABLE_COLORFUL_REPLIES, false);
+  }
+
+  public void setDisableColorfulReplies (boolean enabled) {
+    prefs.edit().putBoolean(KEY_CUSTOM_DISABLE_COLORFUL_REPLIES, enabled).apply();
+  }
+
+  public boolean isTranslucentDeleted () {
+    return prefs.getBoolean(KEY_CUSTOM_TRANSLUCENT_DELETED, false);
+  }
+
+  public void setTranslucentDeleted (boolean enabled) {
+    prefs.edit().putBoolean(KEY_CUSTOM_TRANSLUCENT_DELETED, enabled).apply();
   }
 }

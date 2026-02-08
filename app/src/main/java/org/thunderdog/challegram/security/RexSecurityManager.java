@@ -37,9 +37,17 @@ public final class RexSecurityManager {
   private static final String KEY_LOCKED_CHAT_IDS = "locked_chat_ids";
   private static final String KEY_HIDDEN_ACCOUNT_IDS = "hidden_account_ids";
   private static final String KEY_PHONE_MASKED = "phone_masked";
+  private static final String KEY_PHONE_OTHERS_MASKED = "phone_others_masked";
   private static final String KEY_AUTH_TIMEOUT = "auth_timeout";
   private static final String KEY_LAST_AUTH_TIME = "last_auth_time";
   private static final String KEY_LOCK_SCREENSHOTS = "lock_screenshots";
+  private static final String KEY_LOCK_ARCHIVED = "lock_archived";
+  private static final String KEY_LOCK_CALLS = "lock_calls";
+  private static final String KEY_LOCK_SECRET = "lock_secret";
+  private static final String KEY_LOCK_SETTINGS = "lock_settings";
+  private static final String KEY_HIDE_LOCKED_CHATS = "hide_locked_chats";
+  private static final String KEY_SHOW_NOTIFICATIONS = "show_notifications_locked";
+  private static final String KEY_ALLOW_DEVICE_PIN = "allow_device_pin";
 
   private final SharedPreferences prefs;
 
@@ -160,6 +168,78 @@ public final class RexSecurityManager {
 
   public void setLockScreenshots (boolean lock) {
     prefs.edit().putBoolean(KEY_LOCK_SCREENSHOTS, lock).apply();
+  }
+
+  // --- Lock Actions ---
+
+  public boolean isLockArchived () {
+    return prefs.getBoolean(KEY_LOCK_ARCHIVED, false);
+  }
+
+  public void setLockArchived (boolean lock) {
+    prefs.edit().putBoolean(KEY_LOCK_ARCHIVED, lock).apply();
+  }
+
+  public boolean isLockCalls () {
+    return prefs.getBoolean(KEY_LOCK_CALLS, false);
+  }
+
+  public void setLockCalls (boolean lock) {
+    prefs.edit().putBoolean(KEY_LOCK_CALLS, lock).apply();
+  }
+
+  public boolean isLockSecret () {
+    return prefs.getBoolean(KEY_LOCK_SECRET, false);
+  }
+
+  public void setLockSecret (boolean lock) {
+    prefs.edit().putBoolean(KEY_LOCK_SECRET, lock).apply();
+  }
+
+  public boolean isLockSettings () {
+    return prefs.getBoolean(KEY_LOCK_SETTINGS, false);
+  }
+
+  public void setLockSettings (boolean lock) {
+    prefs.edit().putBoolean(KEY_LOCK_SETTINGS, lock).apply();
+  }
+
+  // --- Locked Chats Display ---
+
+  public boolean isHideLockedChats () {
+    return prefs.getBoolean(KEY_HIDE_LOCKED_CHATS, false);
+  }
+
+  public void setHideLockedChats (boolean hide) {
+    prefs.edit().putBoolean(KEY_HIDE_LOCKED_CHATS, hide).apply();
+  }
+
+  public boolean isShowNotificationsLocked () {
+    return prefs.getBoolean(KEY_SHOW_NOTIFICATIONS, true);
+  }
+
+  public void setShowNotificationsLocked (boolean show) {
+    prefs.edit().putBoolean(KEY_SHOW_NOTIFICATIONS, show).apply();
+  }
+
+  // --- Biometric Options ---
+
+  public boolean isAllowDevicePin () {
+    return prefs.getBoolean(KEY_ALLOW_DEVICE_PIN, false);
+  }
+
+  public void setAllowDevicePin (boolean allow) {
+    prefs.edit().putBoolean(KEY_ALLOW_DEVICE_PIN, allow).apply();
+  }
+
+  // --- Phone Masking (Others) ---
+
+  public boolean isOthersPhoneMasked () {
+    return prefs.getBoolean(KEY_PHONE_OTHERS_MASKED, false);
+  }
+
+  public void setOthersPhoneMasked (boolean masked) {
+    prefs.edit().putBoolean(KEY_PHONE_OTHERS_MASKED, masked).apply();
   }
 
   // --- Auth Timeout ---
