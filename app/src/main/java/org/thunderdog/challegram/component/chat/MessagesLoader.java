@@ -1532,8 +1532,6 @@ public class MessagesLoader implements Client.ResultHandler {
       scrollItemIndex = items.size() - i;
     }
 
-    int totalCount = items.size();
-
       // --- REX MOD: Load ghost messages from database and merge them ---
       if (org.thunderdog.challegram.config.RexConfig.getInstance().getSaveDeletedMessages()) {
         try {
@@ -1575,7 +1573,7 @@ public class MessagesLoader implements Client.ResultHandler {
       }
       // --- END REX MOD ---
 
-    totalCount = items.size();
+    int totalCount = items.size();
 
     if (scrollItemIndex != -1) {
       scrollItemIndex = items.size() - scrollItemIndex;

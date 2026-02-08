@@ -2249,7 +2249,7 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
                 long itemChatId = item.getChatId();
                 java.util.List<Long> msgIdList = java.util.Collections.singletonList(messageId);
                 RexDatabase.get(controller.context()).rexDao().markAsDeleted(itemChatId, msgIdList);
-              } catch (Exception e) { /* Silently fail */ }
+              } catch (Exception e) { android.util.Log.e("REX", "Failed to mark message as deleted", e); }
               if (controller.unselectMessage(messageId, item)) {
                 selectedCount--;
                 unselectedSomeMessages = true;
@@ -2287,7 +2287,7 @@ public class MessagesManager implements Client.ResultHandler, MessagesSearchMana
                 long itemChatId = item.getChatId();
                 java.util.List<Long> msgIdList = java.util.Collections.singletonList(messageId);
                 RexDatabase.get(controller.context()).rexDao().markAsDeleted(itemChatId, msgIdList);
-              } catch (Exception e) { /* Silently fail */ }
+              } catch (Exception e) { android.util.Log.e("REX", "Failed to mark message as deleted", e); }
               if (controller.unselectMessage(messageId, item)) {
                 selectedCount--;
                 unselectedSomeMessages = true;
