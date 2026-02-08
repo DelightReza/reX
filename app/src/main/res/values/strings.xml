@@ -3505,9 +3505,6 @@
   <string name="TurnSyncOnSystem">Turn on data sync</string>
   <string name="EnableKeepAliveService">Enable Keep-Alive Service</string>
   <string name="ShareNotificationError">Share Error Report</string>
-  <string name="FirebaseErrorResolve">Tap to resolve issue</string>
-  <string name="FirebaseErrorResolveTryAgain">Try again</string>
-  <string name="FirebaseErrorResolveShareError">Share error details</string>
 
   <string name="LanguageSame">You are already using this language pack (**%1$s**). You can change your language at any time in Settings.</string>
   <string name="LanguageAlert">You are about to apply a language pack (**%1$s**) that is %2$d%% complete.\n\nThis will translate the entire interface. You can suggest corrections via the [translation platform](%3$s).\n\nYou can change your language back at any time in Settings.</string>
@@ -5564,9 +5561,9 @@
   <string name="ForegroundSyncDescOff">You may see **\"You may have a new message\"** notification in the system tray when some notifications couldn\'t be shown.</string>
 
   <string name="TGXKeepAliveService">Telegram X Alive Service</string>
-  <string name="TGXKeepAliveServiceDesc">**Recommended for FOSS builds without Google Play Services.**\n\nKeeps the app connected to Telegram servers by preventing Android from killing the app process. Shows a low-priority persistent notification in the system tray.\n\n**Note:** Since Firebase push notifications have been removed for FOSS compliance, enabling this service helps ensure you receive messages reliably.</string>
-  <string name="TGXKeepAliveServiceOn">Telegram X Keep Alive service is now **enabled**. You will see a persistent notification in the system tray.</string>
-  <string name="TGXKeepAliveServiceOff">Telegram X Keep Alive service is now **disabled**. The notification has been removed.</string>
+  <string name="TGXKeepAliveServiceDesc">Keeps the app connected to Telegram servers by preventing Android from killing the app process. Shows a low-priority persistent notification in the system tray.\n\nThis service helps ensure you receive messages reliably without push notifications.</string>
+  <string name="TGXKeepAliveServiceOn">Telegram X Keep Alive service is now enabled. You will see a persistent notification in the system tray.</string>
+  <string name="TGXKeepAliveServiceOff">Telegram X Keep Alive service is now disabled. The notification has been removed.</string>
   <string name="TGXKeepAliveNotificationTitle">Telegram X Keep Alive</string>
   <string name="TGXKeepAliveNotificationText">Keeping app connected</string>
   
