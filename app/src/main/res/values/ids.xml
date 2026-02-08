@@ -1502,4 +1502,10 @@
   <item type="id" name="btn_rexFolderSize5g" />
   <item type="id" name="btn_rexFolderSize16g" />
   <item type="id" name="btn_rexFolderSizeNone" />
+
+  <!-- reX Chat Context Menu -->
+  <item type="id" name="btn_rexHideChat" />
+  <item type="id" name="btn_rexUnhideChat" />
+  <item type="id" name="btn_rexLockChat" />
+  <item type="id" name="btn_rexUnlockChat" />
 </resources>
