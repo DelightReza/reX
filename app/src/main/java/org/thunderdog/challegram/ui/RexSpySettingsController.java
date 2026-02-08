@@ -147,7 +147,7 @@ public class RexSpySettingsController extends RecyclerViewController<Void> imple
     } else if (viewId == R.id.btn_rexSpyMaxFolderSize) {
       showMaxFolderSizeSelector();
     } else if (viewId == R.id.btn_rexSpyAttachmentsFolder) {
-      UI.showToast("Saved Attachments", android.widget.Toast.LENGTH_SHORT);
+      UI.showToast("Attachments folder: " + config.getAttachmentsFolder(), android.widget.Toast.LENGTH_SHORT);
     } else if (viewId == R.id.btn_rexSpyExportDb) {
       UI.showToast("Export database — coming soon", android.widget.Toast.LENGTH_SHORT);
     } else if (viewId == R.id.btn_rexSpyImportDb) {

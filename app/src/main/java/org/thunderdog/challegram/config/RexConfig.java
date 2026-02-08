@@ -57,6 +57,9 @@ public final class RexConfig {
   public static final String GHOST_NO_STORIES = "NoStories";
   public static final String GHOST_NO_ONLINE = "NoOnline";
   public static final String GHOST_NO_TYPING = "NoTyping";
+  public static final String GHOST_GO_OFFLINE = "GoOffline";
+
+  public static final String[] ALL_GHOST_OPTIONS = {GHOST_NO_READ, GHOST_NO_STORIES, GHOST_NO_ONLINE, GHOST_NO_TYPING};
 
   private final SharedPreferences prefs;
 

@@ -137,9 +137,8 @@ public class RexGhostSettingsController extends RecyclerViewController<Void> imp
       config.setGhostEnabled(newEnabled);
       if (newEnabled) {
         // Enable all non-locked options
-        String[] allOptions = {RexConfig.GHOST_NO_READ, RexConfig.GHOST_NO_STORIES, RexConfig.GHOST_NO_ONLINE, RexConfig.GHOST_NO_TYPING};
         Set<String> locked = config.getLockedGhostOptions();
-        for (String option : allOptions) {
+        for (String option : RexConfig.ALL_GHOST_OPTIONS) {
           if (!locked.contains(option)) {
             config.toggleGhostOption(option, true);
           }
@@ -147,14 +146,13 @@ public class RexGhostSettingsController extends RecyclerViewController<Void> imp
         config.setGoOfflineAuto(true);
       } else {
         // Disable all non-locked options
-        String[] allOptions = {RexConfig.GHOST_NO_READ, RexConfig.GHOST_NO_STORIES, RexConfig.GHOST_NO_ONLINE, RexConfig.GHOST_NO_TYPING};
         Set<String> locked = config.getLockedGhostOptions();
-        for (String option : allOptions) {
+        for (String option : RexConfig.ALL_GHOST_OPTIONS) {
           if (!locked.contains(option)) {
             config.toggleGhostOption(option, false);
           }
         }
-        if (!locked.contains("GoOffline")) {
+        if (!locked.contains(RexConfig.GHOST_GO_OFFLINE)) {
           config.setGoOfflineAuto(false);
         }
       }
