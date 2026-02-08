@@ -181,9 +181,10 @@ public class RexPrivacySecurityController extends RecyclerViewController<Void> i
       sec.setOthersPhoneMasked(!sec.isOthersPhoneMasked());
       adapter.updateValuedSettingById(R.id.btn_rexHideOthersPhone);
     } else if (viewId == R.id.btn_rexHowItWorks) {
-      UI.showToast("Locked chats require biometric authentication to open. Hidden chats are invisible until you authenticate.", android.widget.Toast.LENGTH_LONG);
+      UI.showToast("Hidden chats are invisible until you long-press the search icon and authenticate. Long-press any chat to hide it.", android.widget.Toast.LENGTH_LONG);
     } else if (viewId == R.id.btn_rexEditLockedChats) {
-      UI.showToast("Long-press any chat in the chat list to lock/unlock it.", android.widget.Toast.LENGTH_LONG);
+      RexHiddenChatsController c = new RexHiddenChatsController(context, tdlib);
+      navigateTo(c);
     } else if (viewId == R.id.btn_rexLockedAccounts) {
       UI.showToast("Account locking — coming soon", android.widget.Toast.LENGTH_SHORT);
     }

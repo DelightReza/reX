@@ -95,6 +95,14 @@ public final class RexSecurityManager {
     return getHiddenChatIds().contains(String.valueOf(chatId)) && !isSessionUnlocked();
   }
 
+  public boolean isChatHidden (long chatId) {
+    return getHiddenChatIds().contains(String.valueOf(chatId));
+  }
+
+  public int getHiddenChatCount () {
+    return getHiddenChatIds().size();
+  }
+
   // --- Locked Chats ---
 
   @NonNull
@@ -137,6 +145,22 @@ public final class RexSecurityManager {
 
   public boolean isAccountHidden (int accountId) {
     return getHiddenAccountIds().contains(String.valueOf(accountId));
+  }
+
+  public void addHiddenAccount (int accountId) {
+    Set<String> ids = new HashSet<>(getHiddenAccountIds());
+    ids.add(String.valueOf(accountId));
+    setHiddenAccountIds(ids);
+  }
+
+  public void removeHiddenAccount (int accountId) {
+    Set<String> ids = new HashSet<>(getHiddenAccountIds());
+    ids.remove(String.valueOf(accountId));
+    setHiddenAccountIds(ids);
+  }
+
+  public int getHiddenAccountCount () {
+    return getHiddenAccountIds().size();
   }
 
   // --- Phone Masking ---

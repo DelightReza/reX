@@ -65,6 +65,7 @@ import org.thunderdog.challegram.tool.Paints;
 import org.thunderdog.challegram.tool.Screen;
 import org.thunderdog.challegram.tool.UI;
 import org.thunderdog.challegram.tool.Views;
+import org.thunderdog.challegram.security.RexSecurityManager;
 import org.thunderdog.challegram.ui.CallListController;
 import org.thunderdog.challegram.ui.ChatsController;
 import org.thunderdog.challegram.ui.FeatureToggles;
@@ -765,7 +766,13 @@ public class DrawerController extends ViewController<Void> implements View.OnCli
 
   private void fillAccountItems (List<ListItem> items) {
     ArrayList<TdlibAccount> accounts = TdlibManager.instance().getActiveAccounts();
+    RexSecurityManager sec = RexSecurityManager.getInstance();
+    int currentId = TdlibManager.instance().preferredAccountId();
     for (TdlibAccount account : accounts) {
+      // reX: Skip hidden accounts (never hide the current account)
+      if (sec.isAccountHidden(account.id) && account.id != currentId) {
+        continue;
+      }
       items.add(new ListItem(ListItem.TYPE_DRAWER_ITEM_WITH_AVATAR, R.id.account).setLongId(account.id).setData(account));
     }
     items.add(new ListItem(ListItem.TYPE_DRAWER_ITEM, R.id.btn_addAccount, R.drawable.baseline_add_24, R.string.AddAccount));

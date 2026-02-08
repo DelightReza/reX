@@ -61,6 +61,8 @@ import org.thunderdog.challegram.config.Config;
 import org.thunderdog.challegram.core.Background;
 import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.core.LangUtils;
+// reX
+import org.thunderdog.challegram.security.RexSecurityManager;
 import org.thunderdog.challegram.data.TD;
 import org.thunderdog.challegram.data.TGBotStart;
 import org.thunderdog.challegram.data.TGMessage;
@@ -4886,6 +4888,13 @@ public class TdlibUi extends Handler {
       icons.append(R.drawable.templarian_baseline_broom_24);
     }
 
+    // reX: Hide Chat option
+    boolean isHidden = RexSecurityManager.getInstance().isChatHidden(chatId);
+    ids.append(isHidden ? R.id.btn_rexUnhideChat : R.id.btn_rexHideChat);
+    strings.append(isHidden ? "Unhide Chat" : "Hide Chat");
+    colors.append(ViewController.OptionColor.NORMAL);
+    icons.append(R.drawable.baseline_visibility_24);
+
     colors.append(ViewController.OptionColor.RED);
     icons.append(R.drawable.baseline_delete_24);
     switch (chat.type.getConstructor()) {
@@ -5323,6 +5332,16 @@ public class TdlibUi extends Handler {
         removeChatFromChatFolder(chatFolderId, chatId);
       }
       return true;
+    } else if (actionId == R.id.btn_rexHideChat) {
+      // reX: Hide chat
+      RexSecurityManager.getInstance().addHiddenChat(chatId);
+      UI.showToast("Chat hidden", Toast.LENGTH_SHORT);
+      return true;
+    } else if (actionId == R.id.btn_rexUnhideChat) {
+      // reX: Unhide chat
+      RexSecurityManager.getInstance().removeHiddenChat(chatId);
+      UI.showToast("Chat unhidden", Toast.LENGTH_SHORT);
+      return true;
     }
     return processLeaveButton(context, chatList, chatId, actionId, after);
   }
@@ -5417,6 +5436,12 @@ public class TdlibUi extends Handler {
           strings.append(isArchived ? R.string.Unarchive : R.string.Archive);
           icons.append(isArchived ? R.drawable.baseline_unarchive_24 : R.drawable.baseline_archive_24);
         }
+
+        // reX: Hide Chat option in force touch
+        boolean isHidden = RexSecurityManager.getInstance().isChatHidden(chatId);
+        ids.append(isHidden ? R.id.btn_rexUnhideChat : R.id.btn_rexHideChat);
+        strings.append(isHidden ? "Unhide Chat" : "Hide Chat");
+        icons.append(R.drawable.baseline_visibility_24);
 
         ids.append(R.id.btn_removeChatFromListOrClearHistory);
         strings.append(R.string.Delete);

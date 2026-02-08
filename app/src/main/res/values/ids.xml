@@ -1506,6 +1506,7 @@
   <!-- reX Chat Context Menu -->
   <item type="id" name="btn_rexHideChat" />
   <item type="id" name="btn_rexUnhideChat" />
-  <item type="id" name="btn_rexLockChat" />
-  <item type="id" name="btn_rexUnlockChat" />
+
+  <!-- reX Hidden Chats Manager -->
+  <item type="id" name="controller_rexHiddenChats" />
 </resources>

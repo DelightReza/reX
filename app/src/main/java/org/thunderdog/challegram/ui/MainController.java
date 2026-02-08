@@ -106,6 +106,7 @@ import org.thunderdog.challegram.telegram.TdlibManager;
 import org.thunderdog.challegram.telegram.TdlibOptionListener;
 import org.thunderdog.challegram.telegram.TdlibSettingsManager;
 import org.thunderdog.challegram.telegram.TdlibUi;
+import org.thunderdog.challegram.security.RexSecurityManager;
 import org.thunderdog.challegram.theme.ColorId;
 import org.thunderdog.challegram.theme.PropertyId;
 import org.thunderdog.challegram.theme.Theme;
@@ -1829,7 +1830,22 @@ public class MainController extends ViewPagerController<Void> implements Menu, M
   public void fillMenuItems (int id, HeaderView header, LinearLayout menu) {
     if (id == R.id.menu_main) {
       header.addLockButton(menu);
-      header.addSearchButton(menu, this);
+      header.addSearchButton(menu, this).setOnLongClickListener(v -> {
+        // reX: Long-press search icon to reveal hidden chats
+        RexSecurityManager sec = RexSecurityManager.getInstance();
+        if (sec.getHiddenChatCount() == 0) {
+          UI.showToast("No hidden chats", Toast.LENGTH_SHORT);
+          return true;
+        }
+        android.app.Activity activity = UI.getUiContext();
+        if (activity != null) {
+          sec.authenticate(activity, () -> {
+            sec.setLastAuthTime(System.currentTimeMillis());
+            UI.showToast("Hidden chats revealed for this session", Toast.LENGTH_SHORT);
+          });
+        }
+        return true;
+      });
     } else if (id == R.id.menu_clear) {
       header.addClearButton(menu, getSearchHeaderIconColorId(), getSearchBackButtonResource());
     } else {
